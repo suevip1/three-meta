@@ -1,0 +1,36 @@
+server:
+  port: 9007
+  servlet:
+    #  全局路径配置
+    context-path: /baseServer
+
+spring:
+  application:
+    name: baseServer
+  profiles:
+    active: tx
+  redis:
+    host: 43.142.151.181
+    port: 6399
+    database: 0
+    password:
+    max-idle: 8
+    max-active: 8
+    max-wait: -1
+    min-idle: 0
+    timeout: 5000
+
+logging:
+  path: logs/
+  level:
+    org.springframework.web: debug
+    com.springboot.cloud: debug
+    java.sql.PreparedStatement: debug
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: baseServer
+    appname: baseServer
+    ip-address: 124.222.217.230
