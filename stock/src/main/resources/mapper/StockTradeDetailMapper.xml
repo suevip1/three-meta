@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.stock.mapper.StockTradeDetailMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockTradeDetail">
+    <!--@mbg.generated-->
+    <!--@Table stock_trade_detail-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="trade_type" jdbcType="VARCHAR" property="tradeType" />
+    <result column="simulate_type" jdbcType="VARCHAR" property="simulateType" />
+    <result column="trade_date" jdbcType="VARCHAR" property="tradeDate" />
+    <result column="trade_time" jdbcType="VARCHAR" property="tradeTime" />
+    <result column="delegate_num" jdbcType="VARCHAR" property="delegateNum" />
+    <result column="trade_num" jdbcType="VARCHAR" property="tradeNum" />
+    <result column="delegate_price" jdbcType="VARCHAR" property="delegatePrice" />
+    <result column="trade_price" jdbcType="VARCHAR" property="tradePrice" />
+    <result column="trade_all_amount" jdbcType="VARCHAR" property="tradeAllAmount" />
+    <result column="msg" jdbcType="VARCHAR" property="msg" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, code, `name`, trade_type, simulate_type, trade_date, trade_time, delegate_num, 
+    trade_num, delegate_price, trade_price, trade_all_amount, msg
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from stock_trade_detail
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from stock_trade_detail
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockTradeDetail">
+    <!--@mbg.generated-->
+    insert into stock_trade_detail (id, code, `name`, 
+      trade_type, simulate_type, trade_date, 
+      trade_time, delegate_num, trade_num, 
+      delegate_price, trade_price, trade_all_amount, 
+      msg)
+    values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{tradeType,jdbcType=VARCHAR}, #{simulateType,jdbcType=VARCHAR}, #{tradeDate,jdbcType=VARCHAR}, 
+      #{tradeTime,jdbcType=VARCHAR}, #{delegateNum,jdbcType=VARCHAR}, #{tradeNum,jdbcType=VARCHAR}, 
+      #{delegatePrice,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR}, #{tradeAllAmount,jdbcType=VARCHAR}, 
+      #{msg,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTradeDetail">
+    <!--@mbg.generated-->
+    insert into stock_trade_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="code != null">
+        code,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="tradeType != null">
+        trade_type,
+      </if>
+      <if test="simulateType != null">
+        simulate_type,
+      </if>
+      <if test="tradeDate != null">
+        trade_date,
+      </if>
+      <if test="tradeTime != null">
+        trade_time,
+      </if>
+      <if test="delegateNum != null">
+        delegate_num,
+      </if>
+      <if test="tradeNum != null">
+        trade_num,
+      </if>
+      <if test="delegatePrice != null">
+        delegate_price,
+      </if>
+      <if test="tradePrice != null">
+        trade_price,
+      </if>
+      <if test="tradeAllAmount != null">
+        trade_all_amount,
+      </if>
+      <if test="msg != null">
+        msg,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null">
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeType != null">
+        #{tradeType,jdbcType=VARCHAR},
+      </if>
+      <if test="simulateType != null">
+        #{simulateType,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeDate != null">
+        #{tradeDate,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeTime != null">
+        #{tradeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="delegateNum != null">
+        #{delegateNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeNum != null">
+        #{tradeNum,jdbcType=VARCHAR},
+      </if>
+      <if test="delegatePrice != null">
+        #{delegatePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePrice != null">
+        #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeAllAmount != null">
+        #{tradeAllAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="msg != null">
+        #{msg,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockTradeDetail">
+    <!--@mbg.generated-->
+    update stock_trade_detail
+    <set>
+      <if test="code != null">
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeType != null">
+        trade_type = #{tradeType,jdbcType=VARCHAR},
+      </if>
+      <if test="simulateType != null">
+        simulate_type = #{simulateType,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeDate != null">
+        trade_date = #{tradeDate,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeTime != null">
+        trade_time = #{tradeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="delegateNum != null">
+        delegate_num = #{delegateNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeNum != null">
+        trade_num = #{tradeNum,jdbcType=VARCHAR},
+      </if>
+      <if test="delegatePrice != null">
+        delegate_price = #{delegatePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePrice != null">
+        trade_price = #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeAllAmount != null">
+        trade_all_amount = #{tradeAllAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="msg != null">
+        msg = #{msg,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockTradeDetail">
+    <!--@mbg.generated-->
+    update stock_trade_detail
+    set code = #{code,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      trade_type = #{tradeType,jdbcType=VARCHAR},
+      simulate_type = #{simulateType,jdbcType=VARCHAR},
+      trade_date = #{tradeDate,jdbcType=VARCHAR},
+      trade_time = #{tradeTime,jdbcType=VARCHAR},
+      delegate_num = #{delegateNum,jdbcType=VARCHAR},
+      trade_num = #{tradeNum,jdbcType=VARCHAR},
+      delegate_price = #{delegatePrice,jdbcType=VARCHAR},
+      trade_price = #{tradePrice,jdbcType=VARCHAR},
+      trade_all_amount = #{tradeAllAmount,jdbcType=VARCHAR},
+      msg = #{msg,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -1,0 +1,37 @@
+
+server:
+  port: 9006
+  servlet:
+    #  全局路径配置
+    context-path: /stock
+spring:
+  #  rabbitmq:
+  #    host: localhost
+  #    port: 15672
+  #    username: dsfsd
+  #    password: sdfjsdfl
+  application:
+    name: stock
+  profiles:
+    active: tx
+
+mybatis:
+
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.coatardbul.stock.model.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: stock
+    appname: stock
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 5000

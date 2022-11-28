@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.stock.mapper.StockStrategyWatchMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockStrategyWatch">
+    <!--@mbg.generated-->
+    <!--@Table stock_strategy_watch-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="templated_id" jdbcType="VARCHAR" property="templatedId" />
+    <result column="begin_time" jdbcType="VARCHAR" property="beginTime" />
+    <result column="end_time" jdbcType="VARCHAR" property="endTime" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="is_open_trade" jdbcType="INTEGER" property="isOpenTrade" />
+    <result column="watch_level" jdbcType="INTEGER" property="watchLevel" />
+    <result column="strategy_sign" jdbcType="VARCHAR" property="strategySign" />
+    <result column="buy_condition" jdbcType="VARCHAR" property="buyCondition" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, templated_id, begin_time, end_time, `type`, is_open_trade, watch_level, strategy_sign, 
+    buy_condition
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from stock_strategy_watch
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from stock_strategy_watch
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockStrategyWatch">
+    <!--@mbg.generated-->
+    insert into stock_strategy_watch (id, templated_id, begin_time, 
+      end_time, `type`, is_open_trade, 
+      watch_level, strategy_sign, buy_condition
+      )
+    values (#{id,jdbcType=VARCHAR}, #{templatedId,jdbcType=VARCHAR}, #{beginTime,jdbcType=VARCHAR}, 
+      #{endTime,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{isOpenTrade,jdbcType=INTEGER}, 
+      #{watchLevel,jdbcType=INTEGER}, #{strategySign,jdbcType=VARCHAR}, #{buyCondition,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockStrategyWatch">
+    <!--@mbg.generated-->
+    insert into stock_strategy_watch
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="templatedId != null">
+        templated_id,
+      </if>
+      <if test="beginTime != null">
+        begin_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="isOpenTrade != null">
+        is_open_trade,
+      </if>
+      <if test="watchLevel != null">
+        watch_level,
+      </if>
+      <if test="strategySign != null">
+        strategy_sign,
+      </if>
+      <if test="buyCondition != null">
+        buy_condition,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="templatedId != null">
+        #{templatedId,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null">
+        #{beginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isOpenTrade != null">
+        #{isOpenTrade,jdbcType=INTEGER},
+      </if>
+      <if test="watchLevel != null">
+        #{watchLevel,jdbcType=INTEGER},
+      </if>
+      <if test="strategySign != null">
+        #{strategySign,jdbcType=VARCHAR},
+      </if>
+      <if test="buyCondition != null">
+        #{buyCondition,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockStrategyWatch">
+    <!--@mbg.generated-->
+    update stock_strategy_watch
+    <set>
+      <if test="templatedId != null">
+        templated_id = #{templatedId,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null">
+        begin_time = #{beginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isOpenTrade != null">
+        is_open_trade = #{isOpenTrade,jdbcType=INTEGER},
+      </if>
+      <if test="watchLevel != null">
+        watch_level = #{watchLevel,jdbcType=INTEGER},
+      </if>
+      <if test="strategySign != null">
+        strategy_sign = #{strategySign,jdbcType=VARCHAR},
+      </if>
+      <if test="buyCondition != null">
+        buy_condition = #{buyCondition,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockStrategyWatch">
+    <!--@mbg.generated-->
+    update stock_strategy_watch
+    set templated_id = #{templatedId,jdbcType=VARCHAR},
+      begin_time = #{beginTime,jdbcType=VARCHAR},
+      end_time = #{endTime,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=INTEGER},
+      is_open_trade = #{isOpenTrade,jdbcType=INTEGER},
+      watch_level = #{watchLevel,jdbcType=INTEGER},
+      strategy_sign = #{strategySign,jdbcType=VARCHAR},
+      buy_condition = #{buyCondition,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2022-03-05-->
+  <select id="selectAllByType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_strategy_watch
+        where `type`=#{type,jdbcType=INTEGER}
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-03-06-->
+  <select id="selectByAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from stock_strategy_watch
+    <where>
+      <if test="id != null">
+        and id=#{id,jdbcType=VARCHAR}
+      </if>
+      <if test="templatedId != null and templatedId != ''">
+        and templated_id=#{templatedId,jdbcType=VARCHAR}
+      </if>
+      <if test="endTime != null">
+        and end_time=#{endTime,jdbcType=VARCHAR}
+      </if>
+      <if test="watchLevel != null">
+        and watch_level=#{watchLevel,jdbcType=INTEGER}
+      </if>
+      <if test="type != null">
+        and `type`=#{type,jdbcType=INTEGER}
+      </if>
+    </where>
+  </select>
+</mapper>
