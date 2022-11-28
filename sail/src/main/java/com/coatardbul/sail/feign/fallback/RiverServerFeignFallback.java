@@ -2,8 +2,8 @@
 package com.coatardbul.sail.feign.fallback;
 
 
-import com.coatardbul.sail.model.feign.StockTemplateQueryDTO;
-import com.coatardbul.sail.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockTemplateQueryDTO;
 import com.coatardbul.sail.feign.RiverServerFeign;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;

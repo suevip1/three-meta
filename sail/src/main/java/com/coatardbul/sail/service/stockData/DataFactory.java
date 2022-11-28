@@ -1,6 +1,7 @@
 package com.coatardbul.sail.service.stockData;
 
-import com.coatardbul.sail.common.constans.DataSourceEnum;
+import com.coatardbul.baseCommon.constants.DataSourceEnum;
+import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.sail.service.StockCronRefreshService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

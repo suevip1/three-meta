@@ -1,4 +1,4 @@
-package com.coatardbul.sail.service.stockData;
+package com.coatardbul.baseService.service;
 
 public interface DataServiceBridge {
 

@@ -2,15 +2,15 @@ package com.coatardbul.sail.service.stockData;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.constants.UpDwonEnum;
 import com.coatardbul.baseService.entity.bo.TickInfo;
+import com.coatardbul.baseService.service.CommonService;
+import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.coatardbul.sail.common.util.DateTimeUtil;
-import com.coatardbul.sail.common.util.JsonUtil;
-import com.coatardbul.sail.model.bo.CronRefreshConfigBo;
-import com.coatardbul.sail.service.StockCronRefreshService;
-import com.coatardbul.sail.service.StockUpLimitAnalyzeService;
 import com.coatardbul.sail.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,13 +49,11 @@ public class DongFangService extends CommonService implements DataServiceBridge 
     @Resource
     XinlangService xinlangService;
 
-    @Autowired
-    StockUpLimitAnalyzeService stockUpLimitAnalyzeService;
+
     @Autowired
     StockStrategyService stockStrategyService;
 
-    @Resource
-    StockCronRefreshService stockCronRefreshService;
+ 
 
     @Override
     public void getAndRefreshStockInfo(String code) {
@@ -70,7 +67,7 @@ public class DongFangService extends CommonService implements DataServiceBridge 
         try {
             response = httpService.doGet("http://push2.eastmoney.com/api/qt/stock/get?invt=2&fltt=1&cb=jQuery351021675633936193583_"+(l-1)
                     +"&fields=f58%2Cf734%2Cf107%2Cf57%2Cf43%2Cf59%2Cf169%2Cf170%2Cf152%2Cf177%2Cf111%2Cf46%2Cf60%2Cf44%2Cf45%2Cf47%2Cf260%2Cf48%2Cf261%2Cf279%2Cf277%2Cf278%2Cf288%2Cf19%2Cf17%2Cf531%2Cf15%2Cf13%2Cf11%2Cf20%2Cf18%2Cf16%2Cf14%2Cf12%2Cf39%2Cf37%2Cf35%2Cf33%2Cf31%2Cf40%2Cf38%2Cf36%2Cf34%2Cf32%2Cf211%2Cf212%2Cf213%2Cf214%2Cf215%2Cf210%2Cf209%2Cf208%2Cf207%2Cf206%2Cf161%2Cf49%2Cf171%2Cf50%2Cf86%2Cf84%2Cf85%2Cf168%2Cf108%2Cf116%2Cf167%2Cf164%2Cf162%2Cf163%2Cf92%2Cf71%2Cf117%2Cf292%2Cf51%2Cf52%2Cf191%2Cf192%2Cf262%2Cf294%2Cf295%2Cf269%2Cf270%2Cf256%2Cf257%2Cf285%2Cf286&secid="
-                    +codeUrl+"&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_="+l, headerList, stockCronRefreshService.getProxyFlag());
+                    +codeUrl+"&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_="+l, headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
             return;
         }
@@ -87,7 +84,7 @@ public class DongFangService extends CommonService implements DataServiceBridge 
     }
 
     private Map updateStockInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         String key = RedisKeyUtils.getNowStockInfo(code);
         Boolean hasKey = redisTemplate.hasKey(key);
@@ -208,7 +205,7 @@ public class DongFangService extends CommonService implements DataServiceBridge 
         String response = null;
         try {
             response = httpService.doGet("https://push2.eastmoney.com/api/qt/stock/details/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55" +
-                    "&fltt=2&cb=jQuery3510020623351060268913_" + (l - 1) + "&pos=-5000&secid=" + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, stockCronRefreshService.getProxyFlag());
+                    "&fltt=2&cb=jQuery3510020623351060268913_" + (l - 1) + "&pos=-5000&secid=" + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
             return;
         }
@@ -236,7 +233,7 @@ public class DongFangService extends CommonService implements DataServiceBridge 
     }
 
     private  List<TickInfo>  updateStockTickInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         String key = RedisKeyUtils.getNowStockTickInfo(code);
         List<TickInfo>  stockTickDetail = getStockTickDetail(code, response);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {

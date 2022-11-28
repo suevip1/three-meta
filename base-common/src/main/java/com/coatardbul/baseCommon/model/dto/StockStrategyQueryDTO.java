@@ -1,4 +1,4 @@
-package com.coatardbul.sail.model.dto;
+package com.coatardbul.baseCommon.model.dto;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.coatardbul.sail.service;
+package com.coatardbul.baseService.service;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.coatardbul.sail.common.constans;
+package com.coatardbul.baseCommon.constants;
 
 import com.coatardbul.baseCommon.threadStrategy.DataRejectHandle;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;

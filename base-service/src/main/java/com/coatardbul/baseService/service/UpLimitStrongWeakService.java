@@ -1,12 +1,11 @@
-package com.coatardbul.sail.service;
+package com.coatardbul.baseService.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.coatardbul.sail.model.bo.LimitDetailInfoBO;
-import com.coatardbul.sail.model.bo.LimitStrongWeakBO;
-import com.coatardbul.sail.model.bo.UpLimitValPriceBO;
-import com.coatardbul.sail.common.util.DateTimeUtil;
-import com.coatardbul.sail.common.util.JsonUtil;
-
+import com.coatardbul.baseCommon.model.bo.LimitDetailInfoBO;
+import com.coatardbul.baseCommon.model.bo.LimitStrongWeakBO;
+import com.coatardbul.baseCommon.model.bo.UpLimitValPriceBO;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,8 @@
 package com.coatardbul.sail.controller;
 
-import com.coatardbul.sail.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.sail.service.base.StockStrategyService;
-import com.coatardbul.sail.common.api.CommonResult;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

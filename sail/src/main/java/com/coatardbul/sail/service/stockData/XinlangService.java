@@ -2,15 +2,17 @@ package com.coatardbul.sail.service.stockData;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.TickInfo;
+import com.coatardbul.baseService.service.CommonService;
+import com.coatardbul.baseService.service.CronRefreshService;
+import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.HttpPoolService;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.coatardbul.sail.model.bo.CronRefreshConfigBo;
 import com.coatardbul.sail.service.base.StockStrategyService;
-import com.coatardbul.sail.common.util.DateTimeUtil;
-import com.coatardbul.sail.common.util.JsonUtil;
-import com.coatardbul.sail.service.StockCronRefreshService;
-import com.coatardbul.sail.service.StockUpLimitAnalyzeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -52,8 +54,7 @@ public class XinlangService extends CommonService
     @Autowired
     StockStrategyService stockStrategyService;
 
-    @Resource
-    StockCronRefreshService stockCronRefreshService;
+
 
     @Override
     public void getAndRefreshStockInfo(String code) {
@@ -64,7 +65,7 @@ public class XinlangService extends CommonService
         //返回信息
         String response = null;
         try {
-            response = httpService.doGet("https://hq.sinajs.cn/rn=" + System.currentTimeMillis() + "&list=" + codeUrl + "," + codeUrl + "_i,bk_new_qtxy", headerList, stockCronRefreshService.getProxyFlag());
+            response = httpService.doGet("https://hq.sinajs.cn/rn=" + System.currentTimeMillis() + "&list=" + codeUrl + "," + codeUrl + "_i,bk_new_qtxy", headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
             return;
         }
@@ -87,7 +88,7 @@ public class XinlangService extends CommonService
 
     @Override
     public void refreshStockTickInfo(String code) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
 
         List<Header> headerList = new ArrayList<>();
         String codeUrl = "";
@@ -122,7 +123,7 @@ public class XinlangService extends CommonService
         //返回信息
         String response = null;
         try {
-            response = httpService.doGet("https://quotes.sina.cn/cn/api/openapi.php/CN_MinlineService.getMinlineData?symbol=" + codeUrl, headerList, stockCronRefreshService.getProxyFlag());
+            response = httpService.doGet("https://quotes.sina.cn/cn/api/openapi.php/CN_MinlineService.getMinlineData?symbol=" + codeUrl, headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
             return;
         }
@@ -138,7 +139,7 @@ public class XinlangService extends CommonService
     }
 
     private void updateStockMinuterInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         String key = "minuter_" + code;
         List stockTickDetail = getStockMinuterDetail(code, response);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {
@@ -148,7 +149,7 @@ public class XinlangService extends CommonService
 
 
     private List<TickInfo> updateStockTickInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         String key = RedisKeyUtils.getNowStockTickInfo(code);
         List<TickInfo> stockTickDetail = getStockTickDetail(code, response);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {
@@ -194,7 +195,7 @@ public class XinlangService extends CommonService
 
 
     private Map updateStockInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         String key = RedisKeyUtils.getNowStockInfo(code);
         Boolean hasKey = redisTemplate.hasKey(key);

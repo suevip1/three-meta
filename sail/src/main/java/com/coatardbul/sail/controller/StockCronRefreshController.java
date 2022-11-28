@@ -1,7 +1,7 @@
 package com.coatardbul.sail.controller;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.sail.model.dto.StockCronRefreshDTO;
-import com.coatardbul.sail.common.api.CommonResult;
 import com.coatardbul.sail.service.StockCronRefreshService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

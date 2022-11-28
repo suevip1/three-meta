@@ -1,20 +1,17 @@
-package com.coatardbul.sail.service.stockData;
+package com.coatardbul.baseService.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.BigRoot;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.constants.UpDwonEnum;
 import com.coatardbul.baseService.entity.bo.BeginFiveTickScore;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.coatardbul.sail.common.constans.StockTemplateEnum;
-import com.coatardbul.sail.common.util.DateTimeUtil;
-import com.coatardbul.sail.common.util.JsonUtil;
-import com.coatardbul.sail.model.bo.CronRefreshConfigBo;
-import com.coatardbul.sail.model.bo.StrategyBO;
-import com.coatardbul.sail.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.sail.service.StockCronRefreshService;
-import com.coatardbul.sail.service.StockUpLimitAnalyzeService;
-import com.coatardbul.sail.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -41,15 +38,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class CommonService {
     @Resource
-    StockCronRefreshService stockCronRefreshService;
+ public    CronRefreshService cronRefreshService;
     @Autowired
     RedisTemplate redisTemplate;
 
     @Autowired
     StockUpLimitAnalyzeService stockUpLimitAnalyzeService;
-    @Autowired
-    StockStrategyService stockStrategyService;
+    public StockStrategyCommonService stockStrategyCommonService;
 
+    @Autowired
+    public void setStockStrategyCommonService(StockStrategyCommonService stockStrategyCommonService) {
+        this.stockStrategyCommonService = stockStrategyCommonService;
+    }
 
     public void addCommonParam(Map stockDetailMap) {
         stockDetailMap.put("lastUpdateTime", DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD_HH_MM_SS));
@@ -71,7 +71,7 @@ public abstract class CommonService {
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyService.strategy(dto);
+            strategy = stockStrategyCommonService.strategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -103,7 +103,7 @@ public abstract class CommonService {
 
 
     public void updateStockBaseInfo(List<TickInfo> list, String code) {
-        CronRefreshConfigBo cronRefreshConfigBo = stockCronRefreshService.getCronRefreshConfigBo();
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         if (list.size() > 0) {
             //获取股票基本信息key
             String nowStockInfoKey = RedisKeyUtils.getNowStockInfo(code);
@@ -149,8 +149,8 @@ public abstract class CommonService {
         List<TickInfo> filterInfo = list.stream().filter(item -> item.getTime().compareTo("09:25:59") > 0).collect(Collectors.toList());
         List<TickInfo> beginFiveTickInfo = filterInfo.subList(0, 5);
 
-        List<TickInfo> firstMinuter = list.stream().filter(item -> item.getTime().contains("09:30:") ).collect(Collectors.toList());
-        List<TickInfo> TwoMinuter = list.stream().filter(item -> item.getTime().contains("09:30:")|| item.getTime().contains("09:31:")  ).collect(Collectors.toList());
+        List<TickInfo> firstMinuter = list.stream().filter(item -> item.getTime().contains("09:30:")).collect(Collectors.toList());
+        List<TickInfo> twoMinuter = list.stream().filter(item -> item.getTime().contains("09:30:") || item.getTime().contains("09:31:")).collect(Collectors.toList());
 
         //前5向上涨幅
         BigDecimal beginFiveTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(beginFiveTickInfo, auctionInfo, lastClosePrice);
@@ -160,20 +160,20 @@ public abstract class CommonService {
         BigDecimal beginFirstMinuterTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(firstMinuter, auctionInfo, lastClosePrice);
         newStockDetailMap.put("beginFirstMinuterTickVolPriceIncreaseRate", beginFirstMinuterTickVolPriceIncreaseRate);
         //前二分钟向上涨幅
-        BigDecimal beginTwoMinuterTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(TwoMinuter, auctionInfo, lastClosePrice);
+        BigDecimal beginTwoMinuterTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(twoMinuter, auctionInfo, lastClosePrice);
         newStockDetailMap.put("beginTwoMinuterTickVolPriceIncreaseRate", beginTwoMinuterTickVolPriceIncreaseRate);
         //前五量占比
         BigDecimal proportionStatic = getProportionStatic(beginFiveTickInfo, auctionInfo);
-        newStockDetailMap.put("beginFiveTickProportionStatic",proportionStatic);
+        newStockDetailMap.put("beginFiveTickProportionStatic", proportionStatic);
         //前五单子量的标准差，
         BigDecimal stdStatic = getStdStatic(beginFiveTickInfo);
-        newStockDetailMap.put("beginFiveTickStdStatic",stdStatic);
+        newStockDetailMap.put("beginFiveTickStdStatic", stdStatic);
         //前五总交易金额
         BigDecimal allAmountStatic = getAllAmountStatic(beginFiveTickInfo);
-        newStockDetailMap.put("beginFiveTickAllAmountStatic",allAmountStatic);
+        newStockDetailMap.put("beginFiveTickAllAmountStatic", allAmountStatic);
         //向上，向下的量比，
         BigDecimal beginFiveTickVolPrice = getBeginFiveTickVolPrice(beginFiveTickInfo, auctionInfo, lastClosePrice);
-        newStockDetailMap.put("beginFiveTickVolPrice",beginFiveTickVolPrice);
+        newStockDetailMap.put("beginFiveTickVolPrice", beginFiveTickVolPrice);
 
 
         //是否一直向上，占比
@@ -185,9 +185,9 @@ public abstract class CommonService {
         newStockDetailMap.put("beginFiveTickUpDownScore", beginFiveTickScore.getScore());
 
 
-
     }
-    private BigDecimal getProportionStatic(List<TickInfo> beginFiveTickInfo , TickInfo auctionInfo) {
+
+    private BigDecimal getProportionStatic(List<TickInfo> beginFiveTickInfo, TickInfo auctionInfo) {
         BigDecimal bigDecimal = beginFiveTickInfo.stream().map(TickInfo::getVol).collect(Collectors.toList()).stream().reduce(BigDecimal.ZERO, (x1, x2) -> {
             if (x2 == null) {
                 return x1;
@@ -197,20 +197,21 @@ public abstract class CommonService {
             }
             return x1.add(x2);
         });
-       return bigDecimal.divide( auctionInfo.getVol(),2, BigDecimal.ROUND_HALF_DOWN);
+        return bigDecimal.divide(auctionInfo.getVol(), 2, BigDecimal.ROUND_HALF_DOWN);
     }
-    private BigDecimal getAllAmountStatic(List<TickInfo> beginFiveTickInfo ) {
-        BigDecimal bigDecimal=BigDecimal.ZERO;
-        for (TickInfo tickInfo : beginFiveTickInfo){
+
+    private BigDecimal getAllAmountStatic(List<TickInfo> beginFiveTickInfo) {
+        BigDecimal bigDecimal = BigDecimal.ZERO;
+        for (TickInfo tickInfo : beginFiveTickInfo) {
             BigDecimal value = tickInfo.getVol().multiply(tickInfo.getPrice());
-            bigDecimal= bigDecimal.add(value);
+            bigDecimal = bigDecimal.add(value);
         }
-        return  bigDecimal;
+        return bigDecimal;
 
     }
 
 
-    private BigDecimal getStdStatic(List<TickInfo> beginFiveTickInfo ) {
+    private BigDecimal getStdStatic(List<TickInfo> beginFiveTickInfo) {
         BigDecimal bigDecimal = beginFiveTickInfo.stream().map(TickInfo::getVol).collect(Collectors.toList()).stream().reduce(BigDecimal.ZERO, (x1, x2) -> {
             if (x2 == null) {
                 return x1;
@@ -228,11 +229,12 @@ public abstract class CommonService {
             variance = variance.add(b.multiply(b));
         }
         //方差
-        variance = variance.divide(new BigDecimal(beginFiveTickInfo.size() ), 4, BigDecimal.ROUND_HALF_UP);
+        variance = variance.divide(new BigDecimal(beginFiveTickInfo.size()), 4, BigDecimal.ROUND_HALF_UP);
         //标准差
         BigDecimal std = BigRoot.bigRoot(variance, 2, 4, BigDecimal.ROUND_HALF_UP);
-       return std.divide(medianNum,4, BigDecimal.ROUND_HALF_UP);
+        return std.divide(medianNum, 4, BigDecimal.ROUND_HALF_UP);
     }
+
     private BigDecimal getTickVolPriceIncreaseRate(List<TickInfo> beginFiveTickInfo, TickInfo auctionInfo, BigDecimal lastClosePrice) {
         BigDecimal volCount = beginFiveTickInfo.stream().map(TickInfo::getVol).collect(Collectors.toList()).stream().reduce(BigDecimal.ZERO, (x1, x2) -> {
             if (x2 == null) {
@@ -243,10 +245,10 @@ public abstract class CommonService {
             }
             return x1.add(x2);
         });
-        BigDecimal bigDecimal=BigDecimal.ZERO;
-        for (TickInfo tickInfo : beginFiveTickInfo){
+        BigDecimal bigDecimal = BigDecimal.ZERO;
+        for (TickInfo tickInfo : beginFiveTickInfo) {
             BigDecimal value = tickInfo.getVol().multiply(tickInfo.getPrice());
-            bigDecimal= bigDecimal.add(value);
+            bigDecimal = bigDecimal.add(value);
         }
         BigDecimal avgPrice = bigDecimal.divide(volCount, 2, BigDecimal.ROUND_CEILING);
         BigDecimal avgIncreaseRate = getIncreaseRate(avgPrice, lastClosePrice);
@@ -263,11 +265,11 @@ public abstract class CommonService {
             BigDecimal auctionIncreaseRate = getIncreaseRate(auctionInfo, lastClosePrice);
             if (tickInfo.getBuySellFlag().equals(UpDwonEnum.UP.getType())) {
                 BigDecimal multiply = currIncreaseRate.subtract(auctionIncreaseRate).multiply(tickInfo.getVol()).multiply(tickInfo.getPrice());
-                allNum= allNum.add(multiply);
+                allNum = allNum.add(multiply);
             }
             if (tickInfo.getBuySellFlag().equals(UpDwonEnum.DOWN.getType())) {
                 BigDecimal multiply = currIncreaseRate.subtract(auctionIncreaseRate).multiply(tickInfo.getVol()).multiply(tickInfo.getPrice());
-                allNum=  allNum.subtract(multiply);
+                allNum = allNum.subtract(multiply);
             }
         }
         return allNum;
@@ -277,16 +279,18 @@ public abstract class CommonService {
     private BigDecimal getIncreaseRate(TickInfo currPrice, BigDecimal lastClosePrice) {
         return currPrice.getPrice().subtract(lastClosePrice).divide(lastClosePrice, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100));
     }
+
     private BigDecimal getIncreaseRate(BigDecimal currPrice, BigDecimal lastClosePrice) {
         return currPrice.subtract(lastClosePrice).divide(lastClosePrice, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100));
     }
+
     private BeginFiveTickScore getBeginFiveTickUpDownScore(List<TickInfo> beginFiveTickInfo, TickInfo auctionInfo, BigDecimal lastClosePrice) {
         BeginFiveTickScore result = new BeginFiveTickScore();
-        List<TickInfo> equalDownArr = beginFiveTickInfo.stream().filter(item -> item.getBuySellFlag().equals(UpDwonEnum.DOWN.getType())||item.getBuySellFlag().equals(UpDwonEnum.EQUAL.getType())).collect(Collectors.toList());
+        List<TickInfo> equalDownArr = beginFiveTickInfo.stream().filter(item -> item.getBuySellFlag().equals(UpDwonEnum.DOWN.getType()) || item.getBuySellFlag().equals(UpDwonEnum.EQUAL.getType())).collect(Collectors.toList());
         List<TickInfo> downArr = beginFiveTickInfo.stream().filter(item -> item.getBuySellFlag().equals(UpDwonEnum.DOWN.getType())).collect(Collectors.toList());
         List<TickInfo> upArr = beginFiveTickInfo.stream().filter(item -> item.getBuySellFlag().equals(UpDwonEnum.UP.getType())).collect(Collectors.toList());
         //砸盘量太多,第一笔朝地上打
-        if (downArr.size() >= 3||equalDownArr.size()>=4|| beginFiveTickInfo.get(0).getBuySellFlag().equals(UpDwonEnum.DOWN.getType())) {
+        if (downArr.size() >= 3 || equalDownArr.size() >= 4 || beginFiveTickInfo.get(0).getBuySellFlag().equals(UpDwonEnum.DOWN.getType())) {
             result.setFlag(true);
             return result;
         } else {
@@ -302,8 +306,8 @@ public abstract class CommonService {
                 }
                 //砸盘第二低点必须大于集合竞价
                 List<TickInfo> newSortArr = equalDownArr.stream().sorted(Comparator.comparing(TickInfo::getPrice)).collect(Collectors.toList());
-                if(newSortArr.size()>1){
-                    if(newSortArr.get(1).getPrice().compareTo(auctionInfo.getPrice())<0){
+                if (newSortArr.size() > 1) {
+                    if (newSortArr.get(1).getPrice().compareTo(auctionInfo.getPrice()) < 0) {
                         result.setFlag(true);
                         return result;
                     }
@@ -321,18 +325,18 @@ public abstract class CommonService {
                 result.setScore(new BigDecimal(100));
             } else {
                 //最后一次平和砸盘的价格大于第一次平和砸盘的价格，
-                TickInfo lastTickInfo = equalDownArr.get(equalDownArr.size()-1);
+                TickInfo lastTickInfo = equalDownArr.get(equalDownArr.size() - 1);
                 TickInfo beginTickInfo = equalDownArr.get(0);
-                if(lastTickInfo.getPrice().compareTo(beginTickInfo.getPrice())>=0){
+                if (lastTickInfo.getPrice().compareTo(beginTickInfo.getPrice()) >= 0) {
                     result.setScore(new BigDecimal(100));
-                }else {
+                } else {
                     result.setScore(new BigDecimal(50));
                 }
                 //拉升的最大量大于砸盘的最大量
-                if(upArr.size()>0&&downArr.size()>0){
+                if (upArr.size() > 0 && downArr.size() > 0) {
                     TickInfo upMaxTickInfo = upArr.stream().max(Comparator.comparing(TickInfo::getVol)).get();
                     TickInfo downMaxTickInfo = downArr.stream().max(Comparator.comparing(TickInfo::getVol)).get();
-                    if(upMaxTickInfo.getVol().compareTo(downMaxTickInfo.getVol())<0){
+                    if (upMaxTickInfo.getVol().compareTo(downMaxTickInfo.getVol()) < 0) {
                         result.setFlag(true);
                         return result;
                     }
@@ -362,8 +366,8 @@ public abstract class CommonService {
             BigDecimal vol = auctionInfoMap.getVol();
             auctionTradeAmount = price.multiply(vol).multiply(new BigDecimal(100));
             newStockDetailMap.put("auctionTradeAmount", auctionTradeAmount);
-        }else {
-            auctionTradeAmount=new BigDecimal(newStockDetailMap.get("auctionTradeAmount").toString());
+        } else {
+            auctionTradeAmount = new BigDecimal(newStockDetailMap.get("auctionTradeAmount").toString());
         }
         //集合竞价换手率
         if (newStockDetailMap.get("auctionTurnOverRate") == null) {

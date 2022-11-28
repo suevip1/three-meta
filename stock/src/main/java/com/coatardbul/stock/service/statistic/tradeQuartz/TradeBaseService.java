@@ -195,6 +195,59 @@ public class TradeBaseService {
 
 
     /**
+     * 通过tick数据获取
+     * @param code
+     * @param date
+     * @return
+     */
+    public StockBaseDetail getImmediateStockBaseInfo(String code, String date) {
+        StockBaseDetail result = new StockBaseDetail();
+        result.setCode(code);
+        //金额判断,股票详情
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
+        dto.setDateStr(date);
+        dto.setStockCode(code);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            return result;
+        }
+        JSONObject jsonObject = strategy.getData().getJSONObject(0);
+        //当日
+        String dateFormat = date.replace("-", "");
+        for (String key : jsonObject.keySet()) {
+            if (key.contains("股票简称") ) {
+                result.setName(jsonObject.getString(key));
+            }
+            if (key.contains("收盘价") && !key.contains(dateFormat)) {
+                BigDecimal closePrice = stockParseAndConvertService.convert(jsonObject.get(key));
+                result.setLastClosePrice(closePrice);
+            }
+            if (key.contains("收盘价") && key.contains(dateFormat)) {
+                BigDecimal currPrice = stockParseAndConvertService.convert(jsonObject.get(key));
+                result.setCurrPrice(currPrice);
+            }
+            if (key.contains("最高价") && key.contains(dateFormat)) {
+                BigDecimal maxPrice = stockParseAndConvertService.convert(jsonObject.get(key));
+                result.setMaxPrice(maxPrice);
+            }
+            if (key.contains("最低价") && key.contains(dateFormat)) {
+                BigDecimal minPrice = stockParseAndConvertService.convert(jsonObject.get(key));
+                result.setMinPrice(minPrice);
+            }
+        }
+        rebuild(result);
+        return result;
+    }
+
+
+
+    /**
      * 获取股票基本详情
      * @param code
      * @param date

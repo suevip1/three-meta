@@ -1,7 +1,7 @@
 package com.coatardbul.sail.service;
 
 import com.coatardbul.baseService.service.HttpPoolService;
-import com.coatardbul.sail.common.constans.Constant;
+import com.coatardbul.baseCommon.constants.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

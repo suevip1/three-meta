@@ -85,7 +85,7 @@ public class CronRefreshService {
         setBatchNum(tempObj.getBatchNum());
     }
 
-    private boolean getProxyFlag() {
+    public boolean getProxyFlag() {
         Boolean hasKey = redisTemplate.hasKey(IS_PROXY);
         if (hasKey) {
             String isProxyStr = (String) redisTemplate.opsForValue().get(IS_PROXY);

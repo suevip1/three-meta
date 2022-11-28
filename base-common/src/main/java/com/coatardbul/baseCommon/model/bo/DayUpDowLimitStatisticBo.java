@@ -2,6 +2,9 @@ package com.coatardbul.baseCommon.model.bo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 /**
  * <p>
  * Note:
@@ -57,4 +60,6 @@ public class DayUpDowLimitStatisticBo {
      * 谢跌id
      */
     private String failId;
+
+
 }

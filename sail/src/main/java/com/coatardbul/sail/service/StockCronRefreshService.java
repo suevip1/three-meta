@@ -1,12 +1,13 @@
 package com.coatardbul.sail.service;
 
+import com.coatardbul.baseCommon.constants.DataSourceEnum;
+import com.coatardbul.baseCommon.constants.IsNotEnum;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseService.service.HttpPoolService;
-import com.coatardbul.sail.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeService;
 import com.coatardbul.sail.service.base.StockStrategyService;
 import com.coatardbul.sail.service.stockData.DataFactory;
-import com.coatardbul.sail.service.stockData.DataServiceBridge;
-import com.coatardbul.sail.common.constans.DataSourceEnum;
-import com.coatardbul.sail.common.constans.IsNotEnum;
+import com.coatardbul.baseService.service.DataServiceBridge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,9 +2,9 @@
 package com.coatardbul.sail.feign;
 
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.config.FeignLogConfig;
-import com.coatardbul.sail.model.feign.StockTemplateQueryDTO;
-import com.coatardbul.sail.common.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockTemplateQueryDTO;
 
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -1,7 +1,7 @@
-package com.coatardbul.sail.service;
+package com.coatardbul.baseService.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.coatardbul.sail.common.constans.StockTemplateEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
