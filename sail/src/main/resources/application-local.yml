@@ -1,0 +1,6 @@
+logging:
+  path: logs/
+  level:
+    com.coatardbul.sail.feign.*: debug
+    com.springboot.cloud: debug
+    java.sql.PreparedStatement: debug

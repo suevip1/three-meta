@@ -1,0 +1,36 @@
+server:
+  port: 10001
+  servlet:
+    #  全局路径配置
+    context-path: /sail
+spring:
+  application:
+    name: sail
+    #  配置切换
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:mysql://43.142.151.181:3306/stock?useSSL=false&characterEncoding=utf-8
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: Dream1226.27!
+  redis:
+    host: 43.142.151.181
+    port: 6399
+    database: 0
+    password:
+    max-idle: 8
+    max-active: 8
+    max-wait: -1
+    min-idle: 0
+    timeout: 5000
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.coatardbul.sail.model.entity
+
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://124.222.217.230:8001/eureka/

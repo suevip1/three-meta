@@ -1,0 +1,6 @@
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: sail
+    appname: sail
+    ip-address: 43.142.151.181
