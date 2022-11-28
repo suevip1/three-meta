@@ -1,0 +1,3 @@
+INSERT INTO river.auth_user (id, username, password, nickname, status, sex, birthday, phone, email, remark, gmt_create, gmt_modified, creator, modifier) VALUES ('123123', 'admin', '123456', null, null, null, null, null, null, null, null, null, null, null);
+INSERT INTO river.auth_user (id, username, password, nickname, status, sex, birthday, phone, email, remark, gmt_create, gmt_modified, creator, modifier) VALUES ('2131333', 'sxl14459048', '123456', null, null, null, null, null, null, null, null, null, null, null);
+INSERT INTO river.auth_user (id, username, password, nickname, status, sex, birthday, phone, email, remark, gmt_create, gmt_modified, creator, modifier) VALUES ('2312321', 'test', '123456', null, null, null, null, null, null, null, null, null, null, null);

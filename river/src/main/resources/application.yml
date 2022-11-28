@@ -1,0 +1,34 @@
+server:
+  port: 9002
+  servlet:
+    #  全局路径配置
+    context-path: /river
+spring:
+#  rabbitmq:
+#    host: localhost
+#    port: 15672
+#    username: dsfsd
+#    password: sdfjsdfl
+  application:
+    name: river
+  profiles:
+    active: tx
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.coatardbul.river.model.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  path: logs/
+  level:
+    org.springframework.web: debug
+    com.springboot.cloud: debug
+    java.sql.PreparedStatement: debug
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: rivers
+    appname: rivers

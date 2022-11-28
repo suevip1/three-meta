@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.river.mapper.StockQueryTemplateMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.StockQueryTemplate">
+    <!--@mbg.generated-->
+    <!--@Table stock_query_template-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="script_str" jdbcType="VARCHAR" property="scriptStr" />
+    <result column="example_str" jdbcType="VARCHAR" property="exampleStr" />
+    <result column="hot_value" jdbcType="INTEGER" property="hotValue" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="today_str" jdbcType="VARCHAR" property="todayStr" />
+    <result column="template_sign" jdbcType="VARCHAR" property="templateSign" />
+    <result column="theme_Str" jdbcType="VARCHAR" property="themeStr" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, `name`, script_str, example_str, hot_value, remark, today_str, template_sign, 
+    theme_Str
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from stock_query_template
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from stock_query_template
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.river.model.entity.StockQueryTemplate">
+    <!--@mbg.generated-->
+    insert into stock_query_template (id, `name`, script_str, 
+      example_str, hot_value, remark, 
+      today_str, template_sign, theme_Str
+      )
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{scriptStr,jdbcType=VARCHAR}, 
+      #{exampleStr,jdbcType=VARCHAR}, #{hotValue,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
+      #{todayStr,jdbcType=VARCHAR}, #{templateSign,jdbcType=VARCHAR}, #{themeStr,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.StockQueryTemplate">
+    <!--@mbg.generated-->
+    insert into stock_query_template
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="scriptStr != null">
+        script_str,
+      </if>
+      <if test="exampleStr != null">
+        example_str,
+      </if>
+      <if test="hotValue != null">
+        hot_value,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="todayStr != null">
+        today_str,
+      </if>
+      <if test="templateSign != null">
+        template_sign,
+      </if>
+      <if test="themeStr != null">
+        theme_Str,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptStr != null">
+        #{scriptStr,jdbcType=VARCHAR},
+      </if>
+      <if test="exampleStr != null">
+        #{exampleStr,jdbcType=VARCHAR},
+      </if>
+      <if test="hotValue != null">
+        #{hotValue,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="todayStr != null">
+        #{todayStr,jdbcType=VARCHAR},
+      </if>
+      <if test="templateSign != null">
+        #{templateSign,jdbcType=VARCHAR},
+      </if>
+      <if test="themeStr != null">
+        #{themeStr,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.StockQueryTemplate">
+    <!--@mbg.generated-->
+    update stock_query_template
+    <set>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptStr != null">
+        script_str = #{scriptStr,jdbcType=VARCHAR},
+      </if>
+      <if test="exampleStr != null">
+        example_str = #{exampleStr,jdbcType=VARCHAR},
+      </if>
+      <if test="hotValue != null">
+        hot_value = #{hotValue,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="todayStr != null">
+        today_str = #{todayStr,jdbcType=VARCHAR},
+      </if>
+      <if test="templateSign != null">
+        template_sign = #{templateSign,jdbcType=VARCHAR},
+      </if>
+      <if test="themeStr != null">
+        theme_Str = #{themeStr,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.StockQueryTemplate">
+    <!--@mbg.generated-->
+    update stock_query_template
+    set `name` = #{name,jdbcType=VARCHAR},
+      script_str = #{scriptStr,jdbcType=VARCHAR},
+      example_str = #{exampleStr,jdbcType=VARCHAR},
+      hot_value = #{hotValue,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      today_str = #{todayStr,jdbcType=VARCHAR},
+      template_sign = #{templateSign,jdbcType=VARCHAR},
+      theme_Str = #{themeStr,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2022-01-02-->
+  <select id="selectAllByNameAndScriptStr" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_query_template
+        <where>
+            <if test="name != null">
+                and name =#{name,jdbcType=VARCHAR}
+            </if>
+            <if test="scriptStr != null">
+                and script_str=#{scriptStr,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-01-02-->
+  <select id="selectByAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from stock_query_template
+    order by hot_value desc
+  </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-01-02-->
+  <update id="updateNameById">
+    update stock_query_template
+    set name=#{updatedName,jdbcType=VARCHAR}
+    where id=#{id,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2022-02-28-->
+  <select id="selectByIdAndNameLikeAndExampleStrLike" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_query_template
+        <where>
+            <if test="id != null and id != ''">
+                and id=#{id,jdbcType=VARCHAR}
+            </if>
+            <if test="likeName != null and likeName != ''">
+                and `name` like concat('%',#{likeName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="likeExampleStr != null and likeExampleStr != ''">
+                and example_str like concat('%',#{likeExampleStr,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    order by  hot_value desc
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-04-16-->
+  <select id="selectByTemplateSign" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_query_template
+        where template_sign=#{templateSign,jdbcType=VARCHAR}
+    </select>
+</mapper>

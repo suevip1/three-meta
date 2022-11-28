@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.river.mapper.AuthMenuMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.AuthMenu">
+    <!--@mbg.generated-->
+    <!--@Table auth_menu-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="parent_menu_id" jdbcType="VARCHAR" property="parentMenuId" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
+    <result column="router_url" jdbcType="VARCHAR" property="routerUrl" />
+    <result column="sequent" jdbcType="TINYINT" property="sequent" />
+    <result column="icon" jdbcType="LONGVARCHAR" property="icon" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="modifier" jdbcType="VARCHAR" property="modifier" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, parent_menu_id, menu_name, router_url, sequent, icon, `status`, gmt_create, gmt_modified, 
+    creator, modifier
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from auth_menu
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from auth_menu
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.river.model.entity.AuthMenu">
+    <!--@mbg.generated-->
+    insert into auth_menu (id, parent_menu_id, menu_name, 
+      router_url, sequent, icon, 
+      `status`, gmt_create, gmt_modified, 
+      creator, modifier)
+    values (#{id,jdbcType=VARCHAR}, #{parentMenuId,jdbcType=VARCHAR}, #{menuName,jdbcType=VARCHAR}, 
+      #{routerUrl,jdbcType=VARCHAR}, #{sequent,jdbcType=TINYINT}, #{icon,jdbcType=LONGVARCHAR}, 
+      #{status,jdbcType=TINYINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.AuthMenu">
+    <!--@mbg.generated-->
+    insert into auth_menu
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="parentMenuId != null">
+        parent_menu_id,
+      </if>
+      <if test="menuName != null">
+        menu_name,
+      </if>
+      <if test="routerUrl != null">
+        router_url,
+      </if>
+      <if test="sequent != null">
+        sequent,
+      </if>
+      <if test="icon != null">
+        icon,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="modifier != null">
+        modifier,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="parentMenuId != null">
+        #{parentMenuId,jdbcType=VARCHAR},
+      </if>
+      <if test="menuName != null">
+        #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="routerUrl != null">
+        #{routerUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sequent != null">
+        #{sequent,jdbcType=TINYINT},
+      </if>
+      <if test="icon != null">
+        #{icon,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null">
+        #{modifier,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.AuthMenu">
+    <!--@mbg.generated-->
+    update auth_menu
+    <set>
+      <if test="parentMenuId != null">
+        parent_menu_id = #{parentMenuId,jdbcType=VARCHAR},
+      </if>
+      <if test="menuName != null">
+        menu_name = #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="routerUrl != null">
+        router_url = #{routerUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sequent != null">
+        sequent = #{sequent,jdbcType=TINYINT},
+      </if>
+      <if test="icon != null">
+        icon = #{icon,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null">
+        modifier = #{modifier,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.AuthMenu">
+    <!--@mbg.generated-->
+    update auth_menu
+    set parent_menu_id = #{parentMenuId,jdbcType=VARCHAR},
+      menu_name = #{menuName,jdbcType=VARCHAR},
+      router_url = #{routerUrl,jdbcType=VARCHAR},
+      sequent = #{sequent,jdbcType=TINYINT},
+      icon = #{icon,jdbcType=LONGVARCHAR},
+      `status` = #{status,jdbcType=TINYINT},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      creator = #{creator,jdbcType=VARCHAR},
+      modifier = #{modifier,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+
+
+<!--auto generated by MybatisCodeHelper on 2022-02-09-->
+  <select id="selectMaxSequent" resultType="java.lang.Integer">
+    select Max(sequent)
+    from auth_menu
+  </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-02-10-->
+  <select id="selectAllByParentMenuIdAndMenuNameLikeAndRouterUrl" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from auth_menu
+    <where>
+      <if test="parentMenuId != null and parentMenuId !=''">
+        and parent_menu_id=#{parentMenuId,jdbcType=VARCHAR}
+      </if>
+      <if test="likeMenuName != null and likeMenuName != ''">
+        and menu_name like concat('%',#{likeMenuName,jdbcType=VARCHAR},'%')
+      </if>
+      <if test="routerUrl != null and routerUrl!=''">
+        and router_url=#{routerUrl,jdbcType=VARCHAR}
+      </if>
+    </where>
+    order by parent_menu_id,sequent asc
+  </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-05-06-->
+  <delete id="deleteByParentMenuId">
+    delete from auth_menu
+    where parent_menu_id=#{parentMenuId,jdbcType=VARCHAR}
+  </delete>
+</mapper>

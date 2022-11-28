@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.river.mapper.AuthCalendarMapper">
+    <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.AuthCalendar">
+        <!--@mbg.generated-->
+        <!--@Table auth_calendar-->
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="date" jdbcType="VARCHAR" property="date"/>
+        <result column="week" jdbcType="INTEGER" property="week"/>
+        <result column="date_prop" jdbcType="INTEGER" property="dateProp"/>
+        <result column="holiday_name" jdbcType="VARCHAR" property="holidayName"/>
+        <result column="lunar" jdbcType="VARCHAR" property="lunar"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="creator" jdbcType="VARCHAR" property="creator"/>
+        <result column="modifier" jdbcType="VARCHAR" property="modifier"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, `date`, week, date_prop, holiday_name, lunar, `status`, gmt_create, gmt_modified,
+        creator, modifier
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        <!--@mbg.generated-->
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        <!--@mbg.generated-->
+        delete
+        from auth_calendar
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.coatardbul.river.model.entity.AuthCalendar">
+        <!--@mbg.generated-->
+        insert into auth_calendar (id, date, week,
+                                   date_prop, holiday_name, lunar,
+                                   status, gmt_create, gmt_modified,
+                                   creator, modifier)
+        values (#{id,jdbcType=VARCHAR}, #{date,jdbcType=VARCHAR}, #{week,jdbcType=INTEGER},
+                #{dateProp,jdbcType=INTEGER}, #{holidayName,jdbcType=VARCHAR}, #{lunar,jdbcType=VARCHAR},
+                #{status,jdbcType=TINYINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP},
+                #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.AuthCalendar">
+        <!--@mbg.generated-->
+        insert into auth_calendar
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="date != null">
+                ` date`,
+            </if>
+            <if test="week != null">
+                week,
+            </if>
+            <if test="dateProp != null">
+                date_prop,
+            </if>
+            <if test="holidayName != null">
+                holiday_name,
+            </if>
+            <if test="lunar != null">
+                lunar,
+            </if>
+            <if test="status != null">
+                ` status`,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="creator != null">
+                creator,
+            </if>
+            <if test="modifier != null">
+                modifier,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="date != null">
+                #{date,jdbcType=VARCHAR},
+            </if>
+            <if test="week != null">
+                #{week,jdbcType=INTEGER},
+            </if>
+            <if test="dateProp != null">
+                #{dateProp,jdbcType=INTEGER},
+            </if>
+            <if test="holidayName != null">
+                #{holidayName,jdbcType=VARCHAR},
+            </if>
+            <if test="lunar != null">
+                #{lunar,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.AuthCalendar">
+        <!--@mbg.generated-->
+        update auth_calendar
+        <set>
+            <if test="date != null">
+                `date` = #{date,jdbcType=VARCHAR},
+            </if>
+            <if test="week != null">
+                week = #{week,jdbcType=INTEGER},
+            </if>
+            <if test="dateProp != null">
+                date_prop = #{dateProp,jdbcType=INTEGER},
+            </if>
+            <if test="holidayName != null">
+                holiday_name = #{holidayName,jdbcType=VARCHAR},
+            </if>
+            <if test="lunar != null">
+                lunar = #{lunar,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                creator = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                modifier = #{modifier,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.AuthCalendar">
+        <!--@mbg.generated-->
+        update auth_calendar
+        set `date`       = #{date,jdbcType=VARCHAR},
+            week         = #{week,jdbcType=INTEGER},
+            date_prop    = #{dateProp,jdbcType=INTEGER},
+            holiday_name = #{holidayName,jdbcType=VARCHAR},
+            lunar        = #{lunar,jdbcType=VARCHAR},
+            `status`     = #{status,jdbcType=TINYINT},
+            gmt_create   = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            creator      = #{creator,jdbcType=VARCHAR},
+            modifier     = #{modifier,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!--auto generated by MybatisCodeHelper on 2021-12-26-->
+    <select id="selectByAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+        <where>
+            <if test="id != null">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="date != null">
+                and "date" = #{date,jdbcType=VARCHAR}
+            </if>
+            <if test="week != null">
+                and week = #{week,jdbcType=INTEGER}
+            </if>
+            <if test="dateProp != null">
+                and date_prop = #{dateProp,jdbcType=INTEGER}
+            </if>
+            <if test="holidayName != null">
+                and holiday_name = #{holidayName,jdbcType=VARCHAR}
+            </if>
+            <if test="lunar != null">
+                and lunar = #{lunar,jdbcType=VARCHAR}
+            </if>
+            <if test="status != null">
+                and "status" = #{status,jdbcType=TINYINT}
+            </if>
+            <if test="gmtCreate != null">
+                and gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="gmtModified != null">
+                and gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+            </if>
+            <if test="creator != null">
+                and creator = #{creator,jdbcType=VARCHAR}
+            </if>
+            <if test="modifier != null">
+                and modifier = #{modifier,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-01-01-->
+    <select id="selectAllByDateBetween" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+                where "date" <![CDATA[>]]> #{minDate,jdbcType=VARCHAR}
+                  and "date" <![CDATA[<]]> #{maxDate,jdbcType=VARCHAR}
+        <if test="dateProp != null">
+            and date_prop = #{dateProp,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-01-02-->
+    <select id="selectMaxDateByDateLessThanAndDateProp" resultType="java.lang.String">
+        select max(date)
+        from auth_calendar
+        where date <![CDATA[<]]> #{maxDate,jdbcType=VARCHAR}
+          and date_prop = #{dateProp,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectDateListByDateLessThanAndDateProp" resultType="java.lang.String">
+        select date
+        from auth_calendar
+        where date <![CDATA[<=]]> #{maxDate,jdbcType=VARCHAR}
+          and date_prop = #{dateProp,jdbcType=INTEGER}
+        order by date desc
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-01-15-->
+
+    <!--auto generated by MybatisCodeHelper on 2022-02-17-->
+
+    <!--auto generated by MybatisCodeHelper on 2022-02-17-->
+    <select id="selectAllByDateLessThanAndDateProp" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+        where `date` <![CDATA[<]]> #{maxDate,jdbcType=VARCHAR}
+          and date_prop = #{dateProp,jdbcType=INTEGER}
+        order by date desc
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-01-15-->
+    <select id="selectAllByDateBetweenEqualAndDateProp" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+        where `date` <![CDATA[>=]]> #{minDate,jdbcType=VARCHAR} and `date` <![CDATA[<=]]> #{maxDate,jdbcType=VARCHAR}
+        and date_prop=#{dateProp,jdbcType=INTEGER}
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-02-21-->
+    <select id="selectCountByDateBetweenEqualAndDateProp" resultType="java.lang.Integer">
+        select count(date)
+        from auth_calendar
+                where `date` <![CDATA[>=]]> #{minDate,jdbcType=VARCHAR}
+                  and `date` <![CDATA[<=]]> #{maxDate,jdbcType=VARCHAR}
+        <if test="dateProp != null">
+            and date_prop = #{dateProp,jdbcType=INTEGER}
+        </if>
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-03-14-->
+    <select id="selectDateListByDateGreaterThanAndDateProp" resultType="java.lang.String">
+        select
+        date
+        from auth_calendar
+        where `date` <![CDATA[>=]]> #{minDate,jdbcType=VARCHAR} and date_prop=#{dateProp,jdbcType=INTEGER}
+        order by date asc
+    </select>
+
+
+    <!--auto generated by MybatisCodeHelper on 2022-02-17-->
+    <select id="selectAllByDateGreaterThanAndDateProp" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from auth_calendar
+        where `date` <![CDATA[>]]> #{minDate,jdbcType=VARCHAR}
+        and date_prop = #{dateProp,jdbcType=INTEGER}
+        order by date asc
+    </select>
+</mapper>
