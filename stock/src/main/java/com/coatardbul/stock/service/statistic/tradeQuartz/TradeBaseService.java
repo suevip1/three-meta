@@ -217,7 +217,7 @@ public class TradeBaseService {
         if (map.size()==0) {
             return result;
         }
-        result.setName(map.get("name").toString());
+//        result.setName(map.get("name").toString());
         result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
         result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
         result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));

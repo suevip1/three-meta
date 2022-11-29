@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
@@ -129,6 +130,7 @@ public class StockTradeService {
 
         try {
             String result = stockTradeBaseService.trade(url, dto);
+            log.info("交易对象"+ JsonUtil.toJson(dto) +"交易返回信息"+result);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
