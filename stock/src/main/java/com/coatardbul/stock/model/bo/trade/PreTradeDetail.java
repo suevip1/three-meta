@@ -1,6 +1,5 @@
 package com.coatardbul.stock.model.bo.trade;
 
-import com.coatardbul.stock.common.constants.TradeTypeEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;

@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
- *
- * 以river为准
  * @author: suxiaolei
  * @date: 2019/7/1
  */
@@ -24,6 +23,9 @@ public class DateTimeUtil {
 
 
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
+
+    public static final String YYYY_MM_DD_WORD = "yyyy年MM月dd日";
+
 
     public static final String HH_MM_SS = "HH:mm:ss";
 
@@ -55,9 +57,34 @@ public class DateTimeUtil {
      */
     public static Date parseDateStr(String dateStr, String format) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat(format);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.parse(dateStr);
     }
 
+    /**
+     *
+     * @param dateStr  字符串
+     * @param formatSource  匹配样式
+     * @param formatTarget  目标样式
+     * @return
+     * @throws ParseException
+     */
+    public static String parseDateStr(String dateStr, String formatSource,String formatTarget) throws ParseException {
+        Date date = parseDateStr(dateStr, formatSource);
+        return getDateFormat(date,formatTarget);
+    }
+    public static Date getBeforeDate(int num,int field) {
+        num = 0 - num;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(field, num);
+        return calendar.getTime();
+    }
+    public static Calendar getCalendar(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return  calendar;
+    }
 
     /**
      * 获取前几天的日期 yyyyMMdd
@@ -72,21 +99,6 @@ public class DateTimeUtil {
         calendar.add(Calendar.DATE, day);
         return new SimpleDateFormat("yyyyMMdd").format(calendar.getTime());
     }
-
-    public static Date getBeforeDate(int num,int field) {
-        num = 0 - num;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(field, num);
-        return calendar.getTime();
-    }
-
-    public static Calendar getCalendar(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return  calendar;
-    }
-
 
     /**
      * 获取从开始至结束的月分
@@ -148,7 +160,9 @@ public class DateTimeUtil {
         Integer endHour = Integer.valueOf(endTime.substring(0, 2));
         Integer endMinute = Integer.valueOf(endTime.substring(3, 5));
 
+
         int minuteAdd=0;
+
         for (int i = beginHour; i <= endHour; i++) {
             //小时相等
             if (beginHour.equals(endHour)) {
@@ -165,11 +179,13 @@ public class DateTimeUtil {
                     minuteAdd=jumpMinute(minuteAdd);
                 } else if (i == endHour) {
                     for (int j = minuteAdd; j <= endMinute; j+=interval) {
+                        minuteAdd=j;
                         result.add(getTime(i, j));
 
                     }
                 } else {
                     for (int j = minuteAdd; j <= MAX_MINUTE; j+=interval) {
+                        minuteAdd=j;
                         result.add(getTime(i, j));
                     }
                     minuteAdd+=interval;

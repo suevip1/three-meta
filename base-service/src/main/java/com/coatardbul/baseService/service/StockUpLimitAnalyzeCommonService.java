@@ -20,7 +20,9 @@ import java.util.Set;
  */
 @Slf4j
 @Service
-public class StockUpLimitAnalyzeService {
+public class StockUpLimitAnalyzeCommonService {
+
+
 
 
     public Map convert(JSONObject jsonObject, String dateStr) {

@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller.file;
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.bo.FileBo;
 import com.coatardbul.stock.model.dto.FileQueryDto;
 import com.coatardbul.stock.service.base.CosService;

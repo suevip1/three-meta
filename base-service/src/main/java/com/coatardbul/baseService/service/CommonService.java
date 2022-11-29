@@ -38,12 +38,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class CommonService {
     @Resource
- public    CronRefreshService cronRefreshService;
+    public CronRefreshService cronRefreshService;
     @Autowired
     RedisTemplate redisTemplate;
 
     @Autowired
-    StockUpLimitAnalyzeService stockUpLimitAnalyzeService;
+    StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
     public StockStrategyCommonService stockStrategyCommonService;
 
     @Autowired
@@ -79,7 +79,7 @@ public abstract class CommonService {
             return null;
         }
         JSONObject jsonObject = strategy.getData().getJSONObject(0);
-        Map convert = stockUpLimitAnalyzeService.convert(jsonObject, dateFormat);
+        Map convert = stockUpLimitAnalyzeCommonService.convert(jsonObject, dateFormat);
         return convert;
     }
 

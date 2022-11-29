@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller.trade;
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
 import com.coatardbul.stock.service.statistic.trade.StockTradeBuyTaskService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;

@@ -1,11 +1,11 @@
 package com.coatardbul.stock.service.romote;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.model.feign.CalendarDateDTO;
 import com.coatardbul.stock.model.feign.CalendarSpecialDTO;
 import com.coatardbul.stock.model.feign.StockTemplateDto;
-import com.coatardbul.stock.feign.RiverServerFeign;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

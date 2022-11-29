@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller.temporary;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockFilterDeleteInfoDTO;
 import com.coatardbul.stock.model.dto.StockFilterSaveInfoDTO;
 import com.coatardbul.stock.model.entity.StockFilter;

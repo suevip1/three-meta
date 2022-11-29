@@ -2,12 +2,12 @@ package com.coatardbul.stock.service.statistic;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.coatardbul.stock.common.constants.StockTemplateEnum;
-import com.coatardbul.stock.model.entity.StockFilter;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockFilterMapper;
 import com.coatardbul.stock.model.dto.StockFilterDeleteInfoDTO;
 import com.coatardbul.stock.model.dto.StockFilterSaveInfoDTO;
+import com.coatardbul.stock.model.entity.StockFilter;
 import com.coatardbul.stock.service.romote.RiverRemoteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

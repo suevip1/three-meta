@@ -1,4 +1,4 @@
-package com.coatardbul.sail.service.stockData;
+package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.constants.DataSourceEnum;
 import com.coatardbul.baseService.service.CronRefreshService;

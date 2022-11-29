@@ -1,18 +1,18 @@
 package com.coatardbul.stock.service.statistic;
 
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.constants.DataSourceEnum;
+import com.coatardbul.baseCommon.constants.IsNotEnum;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.HttpPoolService;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
-import com.coatardbul.stock.common.constants.DataSourceEnum;
-import com.coatardbul.stock.common.constants.IsNotEnum;
-import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.common.api.CommonResult;
-import com.coatardbul.stock.common.util.DateTimeUtil;
-import com.coatardbul.stock.common.util.JsonUtil;
 import com.coatardbul.stock.feign.SailServerFeign;
 import com.coatardbul.stock.model.bo.CronRefreshConfigBo;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
-import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitAnalyzeService;
+import com.coatardbul.stock.service.base.StockStrategyService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +68,7 @@ public class StockCronRefreshService {
     @Autowired
     SailServerFeign sailServerFeign;
     @Autowired
-    StockUpLimitAnalyzeService stockUpLimitAnalyzeService;
+    StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
     @Autowired
     StockStrategyService stockStrategyService;
 

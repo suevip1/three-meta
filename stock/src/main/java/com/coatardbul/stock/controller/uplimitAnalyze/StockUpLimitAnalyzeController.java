@@ -1,10 +1,10 @@
 package com.coatardbul.stock.controller.uplimitAnalyze;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockDefineStaticDTO;
 import com.coatardbul.stock.model.dto.StockUplimitAnalyzeDTO;
-import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitAnalyzeService;
+import com.coatardbul.stock.service.statistic.StockUpLimitAnalyzeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

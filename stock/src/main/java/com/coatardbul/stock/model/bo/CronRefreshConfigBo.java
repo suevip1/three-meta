@@ -1,6 +1,5 @@
 package com.coatardbul.stock.model.bo;
 
-import com.coatardbul.stock.common.constants.DataSourceEnum;
 import lombok.Data;
 
 /**

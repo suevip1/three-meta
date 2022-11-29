@@ -1,32 +1,34 @@
 package com.coatardbul.stock.service.statistic.tradeQuartz;
 
 import com.alibaba.fastjson.JSONObject;
-import com.coatardbul.stock.common.constants.SimulateTypeEnum;
-import com.coatardbul.stock.common.constants.StockTemplateEnum;
-import com.coatardbul.stock.common.util.DateTimeUtil;
+import com.coatardbul.baseCommon.constants.SimulateTypeEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseService.service.DataServiceBridge;
+import com.coatardbul.baseService.service.StockParseAndConvertService;
+import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTradeBuyConfigMapper;
 import com.coatardbul.stock.mapper.StockTradeDetailMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
-import com.coatardbul.stock.model.bo.StrategyBO;
 import com.coatardbul.stock.model.bo.trade.PreTradeDetail;
 import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
-import com.coatardbul.stock.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.model.entity.StockTradeConfig;
 import com.coatardbul.stock.model.entity.StockTradeDateSwitch;
 import com.coatardbul.stock.model.entity.StockTradeDetail;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.romote.RiverRemoteService;
-import com.coatardbul.stock.service.statistic.business.StockParseAndConvertService;
+import com.coatardbul.stock.service.statistic.DataFactory;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeAssetPositionService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeBaseService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeConfigService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeDateSwitchService;
-import com.coatardbul.stock.feign.BaseServerFeign;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,8 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -80,6 +84,9 @@ public class TradeBaseService {
     StockTradeAssetPositionService stockTradeAssetPositionService;
     @Autowired
     StockTradeStrategyMapper stockTradeStrategyMapper;
+
+    @Autowired
+    DataFactory dataFactory;
 
 //    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code, String name) {
 //        Boolean flag = false;
@@ -180,7 +187,7 @@ public class TradeBaseService {
         }
 
         //涨跌停价
-        StockBaseDetail upLimitPrice = getStockBaseInfo(code, date);
+        StockBaseDetail upLimitPrice = getImmediateStockBaseInfo(code, date);
         if (upLimitPrice.getUpLimitPrice() == null) {
             throw new IllegalArgumentException("upLimitPrice.getUpLimitPrice()涨停价不能为空");
         }
@@ -203,44 +210,18 @@ public class TradeBaseService {
     public StockBaseDetail getImmediateStockBaseInfo(String code, String date) {
         StockBaseDetail result = new StockBaseDetail();
         result.setCode(code);
-        //金额判断,股票详情
-        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
-        dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
-        dto.setDateStr(date);
-        dto.setStockCode(code);
-        StrategyBO strategy = null;
-        try {
-            strategy = stockStrategyService.strategy(dto);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        if (strategy == null || strategy.getTotalNum() == 0) {
+        DataServiceBridge build = dataFactory.build();
+        String response = build.getStockInfo(code);
+        Map map = new HashMap();
+        build.rebuildStockDetailMap(response,map);
+        if (map.size()==0) {
             return result;
         }
-        JSONObject jsonObject = strategy.getData().getJSONObject(0);
-        //当日
-        String dateFormat = date.replace("-", "");
-        for (String key : jsonObject.keySet()) {
-            if (key.contains("股票简称") ) {
-                result.setName(jsonObject.getString(key));
-            }
-            if (key.contains("收盘价") && !key.contains(dateFormat)) {
-                BigDecimal closePrice = stockParseAndConvertService.convert(jsonObject.get(key));
-                result.setLastClosePrice(closePrice);
-            }
-            if (key.contains("收盘价") && key.contains(dateFormat)) {
-                BigDecimal currPrice = stockParseAndConvertService.convert(jsonObject.get(key));
-                result.setCurrPrice(currPrice);
-            }
-            if (key.contains("最高价") && key.contains(dateFormat)) {
-                BigDecimal maxPrice = stockParseAndConvertService.convert(jsonObject.get(key));
-                result.setMaxPrice(maxPrice);
-            }
-            if (key.contains("最低价") && key.contains(dateFormat)) {
-                BigDecimal minPrice = stockParseAndConvertService.convert(jsonObject.get(key));
-                result.setMinPrice(minPrice);
-            }
-        }
+        result.setName(map.get("name").toString());
+        result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
+        result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
+        result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
+        result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
         rebuild(result);
         return result;
     }

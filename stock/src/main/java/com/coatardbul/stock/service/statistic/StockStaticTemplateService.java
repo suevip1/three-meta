@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.statistic;
 
+import com.coatardbul.baseCommon.constants.StaticLatitudeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.stock.common.constants.StaticLatitudeEnum;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
 import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.feign.RiverServerFeign;

@@ -1,5 +1,6 @@
 package com.coatardbul.stock.model.bo;
 
+import com.coatardbul.baseCommon.model.bo.LimitStrongWeakBO;
 import lombok.Data;
 
 /**

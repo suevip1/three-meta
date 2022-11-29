@@ -1,9 +1,9 @@
 package com.coatardbul.stock.controller.strategy;
 
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
-import com.coatardbul.stock.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

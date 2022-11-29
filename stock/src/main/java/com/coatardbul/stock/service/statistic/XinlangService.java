@@ -1,13 +1,11 @@
-package com.coatardbul.sail.service.stockData;
+package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseService.service.DataServiceBridge;
-import com.coatardbul.baseService.service.DongFangCommonService;
-import com.coatardbul.sail.service.base.StockStrategyService;
+import com.coatardbul.baseService.service.XinlangCommonService;
+import com.coatardbul.stock.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * <p>
@@ -19,17 +17,9 @@ import javax.annotation.Resource;
  */
 @Service
 @Slf4j
-public class DongFangService extends DongFangCommonService implements DataServiceBridge {
-
-
-
-    @Resource
-    XinlangService xinlangService;
-
-
+public class XinlangService extends XinlangCommonService
+        implements DataServiceBridge {
     @Autowired
     StockStrategyService stockStrategyService;
-
-
 
 }

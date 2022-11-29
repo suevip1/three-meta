@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.base;
 
 
-import com.coatardbul.stock.common.util.JsonUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.stock.model.bo.EmailSendBO;
 import com.sun.mail.util.MailSSLSocketFactory;
 import lombok.extern.slf4j.Slf4j;

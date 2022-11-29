@@ -89,16 +89,16 @@ public abstract class HttpCommonService {
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
             }
             result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
-            log.error("httpclient超时异常"+e.getMessage(), e);
+            log.error("httpclient超时异常"+e.getMessage());
         } catch (ClientProtocolException e) {
-            log.error(e.getMessage(), e);
+            log.error("ClientProtocolException"+e.getMessage());
         } catch (IOException e) {
             if (isProxy) {
                 //删除当前ip，重试
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
             }
             result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
-            log.error("httpclient请求IO异常"+e.getMessage(), e);
+            log.error("httpclient请求IO异常"+e.getMessage());
         } finally {
             closeStream(httpConfigBo);
         }
@@ -171,7 +171,7 @@ public abstract class HttpCommonService {
                 response.close();
             }
         } catch (IOException e) {
-            log.error("httpclient关闭请求流异常", e);
+            log.error("httpclient关闭请求流异常");
         }
     }
 

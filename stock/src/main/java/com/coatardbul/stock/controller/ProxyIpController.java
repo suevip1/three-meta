@@ -1,8 +1,8 @@
 package com.coatardbul.stock.controller;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.service.ProxyIpService;
 import com.coatardbul.baseCommon.model.entity.ProxyIp;
-import com.coatardbul.stock.common.api.CommonResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

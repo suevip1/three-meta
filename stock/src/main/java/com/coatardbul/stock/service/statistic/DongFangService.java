@@ -1,8 +1,8 @@
-package com.coatardbul.sail.service.stockData;
+package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.DongFangCommonService;
-import com.coatardbul.sail.service.base.StockStrategyService;
+import com.coatardbul.stock.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

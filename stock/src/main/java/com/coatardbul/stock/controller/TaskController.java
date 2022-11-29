@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.task.DayStatisticJob;
 import com.coatardbul.stock.service.statistic.business.StockStrategyWatchService;

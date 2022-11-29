@@ -1,13 +1,13 @@
 package com.coatardbul.stock.controller.staticModel;
 
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockEmotionDayRangeDTO;
 import com.coatardbul.stock.model.dto.StockEmotionQueryDTO;
 import com.coatardbul.stock.model.dto.StockEmotionRangeDayDTO;
-import com.coatardbul.stock.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;

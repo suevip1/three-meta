@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller.file;
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

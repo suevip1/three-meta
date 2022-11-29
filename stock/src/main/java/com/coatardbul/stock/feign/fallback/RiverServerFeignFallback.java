@@ -2,7 +2,7 @@
 package com.coatardbul.stock.feign.fallback;
 
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.feign.CalendarDateDTO;
 import com.coatardbul.stock.model.feign.CalendarSpecialDTO;
 import com.coatardbul.stock.model.feign.StockTemplateDto;

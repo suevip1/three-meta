@@ -32,8 +32,9 @@ import java.util.stream.Collectors;
 @Service
 public class UpLimitStrongWeakService {
 
-@Autowired
+    @Autowired
     StockParseAndConvertService stockParseAndConvertService;
+
     /**
      * 涨停分析
      *
@@ -199,9 +200,6 @@ public class UpLimitStrongWeakService {
     }
 
 
-
-
-
     public String getDownLimitStrongWeakType(JSONObject jo) {
         LimitStrongWeakBO upLimitStrongWeak = getLimitStrongWeak(jo, "跌停明细数据");
         if (upLimitStrongWeak.getLastUpLimitDate() == null) {
@@ -214,7 +212,6 @@ public class UpLimitStrongWeakService {
         }
 
     }
-
 
 
     public String getLimitStrongWeakFirstSubVolDescribe(JSONObject jo) {
@@ -325,7 +322,7 @@ public class UpLimitStrongWeakService {
         String upLimitStrongWeakDescribe = null;
         LimitStrongWeakBO upLimitStrongWeak = getLimitStrongWeak(jo, "涨停明细数据");
         if (upLimitStrongWeak != null) {
-            upLimitStrongWeakDescribe = getLimitStrongWeakDescribe(upLimitStrongWeak,jo);
+            upLimitStrongWeakDescribe = getLimitStrongWeakDescribe(upLimitStrongWeak, jo);
         }
         //分析结果
         return upLimitStrongWeakDescribe;
@@ -335,13 +332,11 @@ public class UpLimitStrongWeakService {
         String upLimitStrongWeakDescribe = null;
         LimitStrongWeakBO upLimitStrongWeak = getLimitStrongWeak(jo, "跌停明细数据");
         if (upLimitStrongWeak != null) {
-            upLimitStrongWeakDescribe = getLimitStrongWeakDescribe(upLimitStrongWeak,jo);
+            upLimitStrongWeakDescribe = getLimitStrongWeakDescribe(upLimitStrongWeak, jo);
         }
         //分析结果
         return upLimitStrongWeakDescribe;
     }
-
-
 
 
     public String getLimitStrongWeakDescribe(LimitStrongWeakBO up) {
@@ -400,12 +395,12 @@ public class UpLimitStrongWeakService {
     }
 
     private UpLimitValPriceBO getCallAuctionUpLimitInfo(JSONObject jo, String replaceDateStr) {
-        UpLimitValPriceBO upLimitValPriceBO=new UpLimitValPriceBO();
+        UpLimitValPriceBO upLimitValPriceBO = new UpLimitValPriceBO();
         for (String key : jo.keySet()) {
             if (key.contains("竞价涨幅") && key.contains(replaceDateStr)) {
                 upLimitValPriceBO.setCallAuctionIncreaseRate(stockParseAndConvertService.convert(jo.get(key)));
             }
-            if (key.contains("竞价金额") && key.contains(replaceDateStr)&& !key.contains("{/}")) {
+            if (key.contains("竞价金额") && key.contains(replaceDateStr) && !key.contains("{/}")) {
                 upLimitValPriceBO.setCallAuctionTradeAmount(stockParseAndConvertService.convert(jo.get(key)));
             }
             if (key.contains("分时换手率") && key.contains(replaceDateStr)) {
@@ -414,7 +409,7 @@ public class UpLimitStrongWeakService {
             if (key.contains("成交额") && key.contains(replaceDateStr)) {
                 upLimitValPriceBO.setTradeAmount(stockParseAndConvertService.convert(jo.get(key)));
             }
-            if (key.contains("换手率") && key.contains(replaceDateStr)&&!key.contains("分时")) {
+            if (key.contains("换手率") && key.contains(replaceDateStr) && !key.contains("分时")) {
                 upLimitValPriceBO.setTurnOverRate(stockParseAndConvertService.convert(jo.get(key)));
             }
         }
@@ -422,14 +417,14 @@ public class UpLimitStrongWeakService {
     }
 
 
-    private String getCallAuctionUpLimitInfoDescribe( UpLimitValPriceBO upLimitValPriceBO){
+    private String getCallAuctionUpLimitInfoDescribe(UpLimitValPriceBO upLimitValPriceBO) {
 
-        StringBuffer sb=new StringBuffer();
-        sb.append("竞价涨幅："+stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getCallAuctionIncreaseRate())+"--涨停\n");
-        sb.append("竞价金额："+stockParseAndConvertService.getMoneyFormat(upLimitValPriceBO.getCallAuctionTradeAmount())+"--"
-                +stockParseAndConvertService.getMoneyFormat(upLimitValPriceBO.getTradeAmount())+"\n");
-        sb.append("竞价换手："+stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getCallAuctionTurnOverRate())+"--"
-                +stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getTurnOverRate())+"\n");
+        StringBuffer sb = new StringBuffer();
+        sb.append("竞价涨幅：" + stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getCallAuctionIncreaseRate()) + "--涨停\n");
+        sb.append("竞价金额：" + stockParseAndConvertService.getMoneyFormat(upLimitValPriceBO.getCallAuctionTradeAmount()) + "--"
+                + stockParseAndConvertService.getMoneyFormat(upLimitValPriceBO.getTradeAmount()) + "\n");
+        sb.append("竞价换手：" + stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getCallAuctionTurnOverRate()) + "--"
+                + stockParseAndConvertService.getIncreaseRateFormat(upLimitValPriceBO.getTurnOverRate()) + "\n");
         return sb.toString();
     }
 }

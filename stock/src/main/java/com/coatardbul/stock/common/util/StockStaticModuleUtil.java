@@ -1,5 +1,6 @@
 package com.coatardbul.stock.common.util;
 
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.stock.model.bo.DayTrumpetCalcStatisticBo;
 import com.coatardbul.stock.model.bo.DayUpDowLimitStatisticBo;
 import com.coatardbul.stock.model.bo.DayUpLimitPromotionStatisticBo;

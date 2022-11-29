@@ -1,12 +1,12 @@
 package com.coatardbul.stock.service.statistic.business;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.stock.common.api.CommonResult;
-import com.coatardbul.stock.common.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.model.entity.StockStaticTemplate;
 import com.coatardbul.stock.model.feign.StockTimeInterval;
-import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.service.romote.RiverRemoteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

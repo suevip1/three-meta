@@ -2,8 +2,8 @@
 package com.coatardbul.stock.feign;
 
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.config.FeignLogConfig;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.feign.CalendarDateDTO;
 import com.coatardbul.stock.model.feign.CalendarSpecialDTO;
 import com.coatardbul.stock.model.feign.StockTemplateDto;

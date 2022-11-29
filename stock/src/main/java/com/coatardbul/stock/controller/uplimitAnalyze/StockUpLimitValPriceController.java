@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller.uplimitAnalyze;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockUpLimitNumDTO;
 import com.coatardbul.stock.model.dto.StockValPriceDTO;
 import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitValPriceService;

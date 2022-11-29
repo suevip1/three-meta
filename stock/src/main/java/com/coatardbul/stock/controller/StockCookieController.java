@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller;
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockCookieService;

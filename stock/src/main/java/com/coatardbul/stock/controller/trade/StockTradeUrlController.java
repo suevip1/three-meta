@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller.trade;
 
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.common.api.CommonResult;
 import com.coatardbul.stock.model.entity.StockTradeUrl;
 import com.coatardbul.stock.service.statistic.trade.StockTradeUrlService;
 import io.swagger.annotations.Api;

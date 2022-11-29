@@ -1,10 +1,10 @@
 package com.coatardbul.stock.task;
 
-import com.coatardbul.baseService.service.ProxyIpService;
-import com.coatardbul.stock.common.util.DateTimeUtil;
-import com.coatardbul.stock.common.util.JsonUtil;
-import com.coatardbul.stock.mapper.ProxyIpMapper;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.dto.ProxyIpQueryDTO;
+import com.coatardbul.baseService.service.ProxyIpService;
+import com.coatardbul.stock.mapper.ProxyIpMapper;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;

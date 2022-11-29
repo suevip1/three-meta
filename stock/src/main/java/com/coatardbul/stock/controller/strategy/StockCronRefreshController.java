@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller.strategy;
 
-import com.coatardbul.stock.common.api.CommonResult;
+import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.bo.CronRefreshConfigBo;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
