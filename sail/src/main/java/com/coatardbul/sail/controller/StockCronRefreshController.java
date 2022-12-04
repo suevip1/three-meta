@@ -44,6 +44,13 @@ public class StockCronRefreshController {
         return CommonResult.success(null);
     }
 
+    @ApiOperation("获取固定股票即时信息")
+    @RequestMapping(path = "/refreshHisStockInfo", method = RequestMethod.POST)
+    public CommonResult refreshHisStockInfo(@RequestBody StockCronRefreshDTO dto) {
+        stockCronRefreshService.refreshHisStockInfo(dto);
+        return CommonResult.success(null);
+    }
+
     /**
      * 获取固定股票分钟信息
      *
@@ -70,4 +77,9 @@ public class StockCronRefreshController {
         stockCronRefreshService.refreshStockTickInfo(dto.getCodeArr());
         return CommonResult.success(null);
     }
+
+
+
+
+
 }

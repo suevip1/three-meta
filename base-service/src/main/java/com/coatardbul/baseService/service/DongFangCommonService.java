@@ -8,6 +8,7 @@ import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.constants.UpDwonEnum;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -53,8 +54,22 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         String response = getStockInfo(code);
         // 将获取的信息更新到code上
         if (StringUtils.isNotBlank(response)) {
-            updateStockInfo(code, response);
+            updateStockInfo(code, response, null);
         }
+        //获取最新的对象
+    }
+
+    @Override
+    public void getAndRefreshStockInfo(String code, String dateFormat) {
+        updateStockInfo(code, null, dateFormat);
+        String key = RedisKeyUtils.getHisStockTickInfo(dateFormat, code);
+        String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
+        if(StringUtils.isNotBlank(stockTickArrStr)){
+            List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
+            });
+            updateStockBaseInfo(stockTickArr, code,dateFormat);
+        }
+
         //获取最新的对象
     }
 
@@ -85,35 +100,6 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         headerList.add(cookie);
     }
 
-    private Map updateStockInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
-        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        String key = RedisKeyUtils.getNowStockInfo(code);
-        Boolean hasKey = redisTemplate.hasKey(key);
-
-        if (hasKey) {
-            String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
-            Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
-            if (map.size() == 0) {
-                map = getStockDetailMap(code, dateFormat);
-                addCommonParam(map);
-                if (map == null) return null;
-                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            } else {
-                rebuildStockDetailMap(response, map);
-                addCommonParam(map);
-                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            }
-            return map;
-        } else {
-            Map stockDetailMap = getStockDetailMap(code, dateFormat);
-            addCommonParam(stockDetailMap);
-            if (stockDetailMap == null) return null;
-            redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockDetailMap), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            return stockDetailMap;
-        }
-    }
-
 
     /**
      * @param response
@@ -121,6 +107,10 @@ public class DongFangCommonService extends CommonService implements DataServiceB
      */
     @Override
     public void rebuildStockDetailMap(String response, Map map) {
+        if (!StringUtils.isNotBlank(response)) {
+            return;
+        }
+
         int beginIndex = response.indexOf("(");
         int endIndex = response.lastIndexOf(")");
         response = response.substring(beginIndex + 1, endIndex);
@@ -142,9 +132,9 @@ public class DongFangCommonService extends CommonService implements DataServiceB
             //未知？？
 //            map.put("minPrice", split1[7]);
             //交易量  需要除以100 ，总手
-            map.put("tradeVol", new BigDecimal(data.get("f47").toString()).multiply(new BigDecimal(100)));
+            map.put("tradeVol", getDongFangValue(data, "f47").multiply(new BigDecimal(100)));
             //成交金额
-            map.put("tradeAmount", new BigDecimal(data.get("f48").toString()));
+            map.put("tradeAmount", getDongFangValue(data, "f48"));
 
             map.put("buy1Price", getDongFangPrice(data, "f19"));
             map.put("buy2Price", getDongFangPrice(data, "f17"));
@@ -179,6 +169,14 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         }
     }
 
+    private BigDecimal getDongFangValue(JSONObject data, String key) {
+        if (data.get(key) == null || "-".equals(data.get(key).toString())) {
+            return BigDecimal.ZERO;
+        } else {
+            return new BigDecimal(data.get(key).toString());
+        }
+    }
+
     private BigDecimal getDongFangPrice(JSONObject data, String key) {
         if (data.get(key) == null || "-".equals(data.get(key).toString())) {
             return null;
@@ -201,15 +199,16 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         String response = getStockTickInfo(code);
         // 将获取的信息更新到code上
         if (StringUtils.isNotBlank(response)) {
-            List<TickInfo> list = updateStockTickInfo(code, response);
+            List<TickInfo> list = updateStockTickInfo(code, response, null);
             try {
-                updateStockBaseInfo(list, code);
+                updateStockBaseInfo(list, code,null);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
         }
         //获取最新的对象
     }
+
 
     @Override
     public String getStockTickInfo(String code) {
@@ -241,9 +240,12 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         return codeUrl;
     }
 
-    private List<TickInfo> updateStockTickInfo(String code, String response) {
+    private List<TickInfo> updateStockTickInfo(String code, String response, String dateFormat) {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
-        String key = RedisKeyUtils.getNowStockTickInfo(code);
+        if (!StringUtils.isNotBlank(dateFormat)) {
+            dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        }
+        String key = RedisKeyUtils.getHisStockTickInfo(dateFormat, code);
         List<TickInfo> stockTickDetail = getStockTickDetail(code, response);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {
             redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);

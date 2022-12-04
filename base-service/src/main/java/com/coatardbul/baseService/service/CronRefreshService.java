@@ -130,7 +130,7 @@ public class CronRefreshService {
         }
     }
 
-    private boolean getIsOpenCronRefreshFlag() {
+    public boolean getIsOpenCronRefreshFlag() {
         Boolean hasCronKey = redisTemplate.hasKey(IS_OPEN_CRON_REFRESH);
         if (hasCronKey) {
             String isCronRefreshStr = (String) redisTemplate.opsForValue().get(IS_OPEN_CRON_REFRESH);
@@ -176,7 +176,7 @@ public class CronRefreshService {
         redisTemplate.opsForValue().set(BATCH_NUM, batchNum.toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
     }
 
-    private Integer getBatchNum() {
+    public Integer getBatchNum() {
         Boolean hasKey = redisTemplate.hasKey(BATCH_NUM);
         if (hasKey) {
             String sockTimeoutStr = (String) redisTemplate.opsForValue().get(BATCH_NUM);

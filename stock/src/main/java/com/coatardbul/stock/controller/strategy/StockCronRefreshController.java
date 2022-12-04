@@ -1,7 +1,8 @@
 package com.coatardbul.stock.controller.strategy;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.stock.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import io.swagger.annotations.Api;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -30,7 +32,8 @@ import java.util.List;
 public class StockCronRefreshController {
     @Autowired
     StockCronRefreshService stockCronRefreshService;
-
+    @Resource
+     CronRefreshService cronRefreshService;
     @RequestMapping(path = "getThreadPoolConfig", method = RequestMethod.POST)
     public CommonResult getThreadPoolConfig() {
         Object dataThreadPoolConfig = stockCronRefreshService.getDataThreadPoolConfig();
@@ -40,14 +43,14 @@ public class StockCronRefreshController {
     @ApiOperation("设置配置")
     @RequestMapping(path = "/setConfig", method = RequestMethod.POST)
     public CommonResult setConfig(@RequestBody CronRefreshConfigBo bo) {
-        stockCronRefreshService.setCronRefreshConfigBo(bo);
+        cronRefreshService.setCronRefreshConfigBo(bo);
         return CommonResult.success(null);
     }
 
     @ApiOperation("获取配置")
     @RequestMapping(path = "/getConfig", method = RequestMethod.POST)
     public CommonResult getConfig() {
-        return CommonResult.success(stockCronRefreshService.getCronRefreshConfigBo());
+        return CommonResult.success(cronRefreshService.getCronRefreshConfigBo());
     }
 
 
@@ -59,8 +62,8 @@ public class StockCronRefreshController {
      */
     @ApiOperation("获取所有的股票信息")
     @RequestMapping(path = "/getStockInfo", method = RequestMethod.POST)
-    public CommonResult getStockInfo() {
-        return CommonResult.success(stockCronRefreshService.getStockInfo());
+    public CommonResult getStockInfo(@RequestBody StockCronRefreshDTO dto) {
+        return CommonResult.success(stockCronRefreshService.getStockInfo(dto));
     }
 
 
@@ -73,7 +76,7 @@ public class StockCronRefreshController {
     @ApiOperation("获取固定股票即时信息")
     @RequestMapping(path = "/refreshStockInfo", method = RequestMethod.POST)
     public CommonResult refreshStockInfo(@RequestBody StockCronRefreshDTO dto) {
-        stockCronRefreshService.refreshStockInfo(dto.getCodeArr());
+        stockCronRefreshService.refreshStockInfo(dto);
         return CommonResult.success(null);
     }
 
@@ -92,6 +95,20 @@ public class StockCronRefreshController {
 
 
     /**
+     * 获取固定历史股票tick信息
+     *
+     * @param dto
+     * @return
+     */
+    @ApiOperation("获取固定股票即时信息")
+    @RequestMapping(path = "/refreshHisStockTickInfo", method = RequestMethod.POST)
+    public CommonResult refreshHisStockTickInfo(@RequestBody StockCronRefreshDTO dto) {
+        stockCronRefreshService.refreshHisStockTickInfo(dto);
+        return CommonResult.success(null);
+    }
+
+
+    /**
      * 删除固定股票即时信息
      *
      * @param dto
@@ -100,7 +117,7 @@ public class StockCronRefreshController {
     @ApiOperation("删除固定股票即时信息")
     @RequestMapping(path = "/deleteStockInfo", method = RequestMethod.POST)
     public CommonResult deleteStockInfo(@RequestBody StockCronRefreshDTO dto) {
-        stockCronRefreshService.deleteStockInfo(dto.getCodeArr());
+        stockCronRefreshService.deleteStockInfo(dto.getCodeArr(),dto.getDateStr());
         return CommonResult.success(null);
     }
 

@@ -1,16 +1,17 @@
 package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.baseCommon.constants.DataSourceEnum;
-import com.coatardbul.baseCommon.constants.IsNotEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.entity.bo.TickInfo;
+import com.coatardbul.baseService.service.CronRefreshService;
+import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.feign.SailServerFeign;
-import com.coatardbul.stock.model.bo.CronRefreshConfigBo;
+import com.coatardbul.stock.feign.TickServerFeign;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,13 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -39,32 +40,18 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class StockCronRefreshService {
-    private CronRefreshConfigBo cronRefreshConfigBo;
-
-
-    private final static String IS_PROXY = "isProxy";
-
-    private final static String IS_OPEN_CRON_REFRESH = "isOpenCronRefresh";
-
-    private final static String CODE_EXIST_HOUR = "codeExistHour";
-
-
-    private final static String DATA_SOURCE = "dataSource";
-
-
-    private final static String SOCKET_TIMEOUT = "sockTimeout";
-
-
-    private final static String BATCH_NUM = "batchNum";
-
-    private final static Integer CONFIG_EXIST_DAY = 30;
-
+    @Resource
+    DataFactory dataFactory;
+    @Resource
+    public CronRefreshService cronRefreshService;
     @Autowired
     RedisTemplate redisTemplate;
 
     @Autowired
     HttpPoolService httpService;
 
+    @Resource
+    TickServerFeign tickServerFeign;
     @Autowired
     SailServerFeign sailServerFeign;
     @Autowired
@@ -73,162 +60,40 @@ public class StockCronRefreshService {
     StockStrategyService stockStrategyService;
 
 
-    @Autowired
-    private void setXlcjCronRefreshConfigBo() {
-        cronRefreshConfigBo = new CronRefreshConfigBo();
-        //代理
-        cronRefreshConfigBo.setIsProxy(getProxyFlag());
-        //code保存持续时间
-        cronRefreshConfigBo.setCodeExistHour(getCodeExistHour());
-        //定时刷新标识
-        cronRefreshConfigBo.setIsOpenCronRefreshFlag(getIsOpenCronRefreshFlag());
-        //数据来源
-        cronRefreshConfigBo.setDataSource(getDataSource());
-        //socket超时时间
-        cronRefreshConfigBo.setSockTimeout(getSockTimeout());
-        //批次数量
-        cronRefreshConfigBo.setBatchNum(getBatchNum());
-    }
-
-
-    public CronRefreshConfigBo getCronRefreshConfigBo() {
-        CronRefreshConfigBo configBo = new CronRefreshConfigBo();
-        configBo.setIsProxy(getProxyFlag());
-        configBo.setCodeExistHour(getCodeExistHour());
-        configBo.setIsOpenCronRefreshFlag(getIsOpenCronRefreshFlag());
-        configBo.setDataSource(getDataSource());
-        configBo.setSockTimeout(getSockTimeout());
-        configBo.setBatchNum(getBatchNum());
-        return configBo;
-    }
-
-
-    public void setCronRefreshConfigBo(CronRefreshConfigBo tempObj) {
-        setProxyFlag(tempObj.getIsProxy());
-        setIsOpenCronRefreshFlag(tempObj.getIsOpenCronRefreshFlag());
-        setCodeExistHour(tempObj.getCodeExistHour());
-        setDataSource(tempObj.getDataSource());
-        setSockTimeout(tempObj.getSockTimeout());
-        setBatchNum(tempObj.getBatchNum());
-    }
-
-    private boolean getProxyFlag() {
-        Boolean hasKey = redisTemplate.hasKey(IS_PROXY);
-        if (hasKey) {
-            String isProxyStr = (String) redisTemplate.opsForValue().get(IS_PROXY);
-            return Objects.equals(Integer.valueOf(isProxyStr), IsNotEnum.YES.getType());
-        } else {
-            //默认走代理
-            return true;
-        }
-    }
-
-    private void setProxyFlag(Boolean proxyFlag) {
-        if (proxyFlag) {
-            redisTemplate.opsForValue().set(IS_PROXY, IsNotEnum.YES.getType().toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-        } else {
-            //默认走代理
-            redisTemplate.opsForValue().set(IS_PROXY, IsNotEnum.NO.getType().toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-        }
-    }
-
-    private void setCodeExistHour(Integer codeExistHour) {
-        redisTemplate.opsForValue().set(CODE_EXIST_HOUR, codeExistHour.toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-    }
-
-    private Integer getCodeExistHour() {
-        Boolean hasKey = redisTemplate.hasKey(CODE_EXIST_HOUR);
-        if (hasKey) {
-            String codeExistHourStr = (String) redisTemplate.opsForValue().get(CODE_EXIST_HOUR);
-            return Integer.valueOf(codeExistHourStr);
-        } else {
-            //默认
-            return 3;
-        }
-    }
-
-
-    private void setIsOpenCronRefreshFlag(Boolean isOpenCronRefreshFlag) {
-        if (isOpenCronRefreshFlag) {
-            redisTemplate.opsForValue().set(IS_OPEN_CRON_REFRESH, IsNotEnum.YES.getType().toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-        } else {
-            //默认走代理
-            redisTemplate.opsForValue().set(IS_OPEN_CRON_REFRESH, IsNotEnum.NO.getType().toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-        }
-    }
-
-    public boolean getIsOpenCronRefreshFlag() {
-        Boolean hasCronKey = redisTemplate.hasKey(IS_OPEN_CRON_REFRESH);
-        if (hasCronKey) {
-            String isCronRefreshStr = (String) redisTemplate.opsForValue().get(IS_OPEN_CRON_REFRESH);
-            return Objects.equals(Integer.valueOf(isCronRefreshStr), IsNotEnum.YES.getType());
-        } else {
-            //默认刷新
-            return true;
-        }
-    }
-
-    private void setDataSource(String dataSource) {
-        redisTemplate.opsForValue().set(DATA_SOURCE, dataSource, CONFIG_EXIST_DAY, TimeUnit.DAYS);
-
-    }
-
-    private String getDataSource() {
-        Boolean hasCronKey = redisTemplate.hasKey(DATA_SOURCE);
-        if (hasCronKey) {
-            return (String) redisTemplate.opsForValue().get(DATA_SOURCE);
-        } else {
-            //默认
-            return DataSourceEnum.XIN_LANG.getSign();
-        }
-    }
-
-    private void setSockTimeout(Integer socketTimeout) {
-        redisTemplate.opsForValue().set(SOCKET_TIMEOUT, socketTimeout.toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-    }
-
-    public Integer getSockTimeout() {
-        Boolean hasKey = redisTemplate.hasKey(SOCKET_TIMEOUT);
-        if (hasKey) {
-            String sockTimeoutStr = (String) redisTemplate.opsForValue().get(SOCKET_TIMEOUT);
-            return Integer.valueOf(sockTimeoutStr);
-        } else {
-            //默认
-            return 5000;
-        }
-    }
-
-    private void setBatchNum(Integer batchNum) {
-        redisTemplate.opsForValue().set(BATCH_NUM, batchNum.toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
-    }
-
-    private Integer getBatchNum() {
-        Boolean hasKey = redisTemplate.hasKey(BATCH_NUM);
-        if (hasKey) {
-            String sockTimeoutStr = (String) redisTemplate.opsForValue().get(BATCH_NUM);
-            return Integer.valueOf(sockTimeoutStr);
-        } else {
-            //默认
-            return 5;
-        }
-    }
-
-
     /**
      * 查询redis上所有股票信息
      *
      * @return
      */
-    public List getStockInfo() {
+    public List getStockInfo(StockCronRefreshDTO dto) {
         List<Map<String, Object>> result = new ArrayList();
+        DataServiceBridge dataServiceBridge = dataFactory.build();
+        if(!StringUtils.isNotBlank(dto.getDateStr())){
+            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+        }
         //获取redis上所有当前时间的key
-        Set keys = redisTemplate.keys(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD) + "*");
+        Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
         if (keys.size() > 0) {
             for (Object codeKey : keys) {
                 if (codeKey instanceof String) {
-                    String key = codeKey.toString();
-                    String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
+                    String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
                     Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
+                    //如果有时间，需要根据tick数据动态计算缺省数值
+                    String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(), RedisKeyUtils.getCodeByStockInfoKey(codeKey.toString()));
+                    String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
+                    if (org.apache.commons.lang3.StringUtils.isNotBlank(stockTickArrStr)) {
+                        List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
+                        });
+                        //有过滤时间
+                        if (stockTickArr.size() > 0 && StringUtils.isNotBlank(dto.getTimeStr())) {
+                            stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
+                           try {
+                               dataServiceBridge.updateTickInfoToStockInfo(stockTickArr, stockMap);
+                           }catch (Exception e){
+                               log.error(e.getMessage());
+                           }
+                        }
+                    }
                     result.add(stockMap);
                 }
             }
@@ -239,10 +104,10 @@ public class StockCronRefreshService {
     /**
      * 获取刷新redis上股票信息
      *
-     * @param codes
+     * @param
      * @return
      */
-    public void refreshStockInfo(List<String> codes) {
+    public void refreshStockInfo(StockCronRefreshDTO dto) {
 //        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
 //        List<Map<String, Object>> result = new ArrayList();
 //        List<String> codeArr = new ArrayList<>();
@@ -259,7 +124,19 @@ public class StockCronRefreshService {
 //                result.add(map);
 //            }
 //        }
-        stockRefreshprocess(codes);
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+
+        if (dateFormat.equals(dto.getDateStr())||!StringUtils.isNotBlank(dto.getDateStr())) {
+            stockRefreshprocess(dto);
+        } else {
+            Constant.onceUpLimitThreadPool.submit(() -> {
+                tickServerFeign.refreshTickInfo(dto);
+            });
+            //历史
+            stockRefreshHisProcess(dto);
+
+        }
+
 //        return result;
     }
 
@@ -271,7 +148,7 @@ public class StockCronRefreshService {
         List<String> codeArr = new ArrayList<>();
         for (String code : codes) {
             codeArr.add(code);
-            if (codeArr.size() == cronRefreshConfigBo.getBatchNum()) {
+            if (codeArr.size() == cronRefreshService.getBatchNum()) {
                 List<String> finalCodeArr = codeArr;
                 Constant.minuterThreadPool.submit(() -> {
                     StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
@@ -282,7 +159,7 @@ public class StockCronRefreshService {
             }
         }
         List<String> finalCodeArr = codeArr;
-        if(finalCodeArr.size()>0){
+        if (finalCodeArr.size() > 0) {
             Constant.minuterThreadPool.submit(() -> {
                 StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
                 stockCronRefreshDTO.setCodeArr(finalCodeArr);
@@ -291,11 +168,39 @@ public class StockCronRefreshService {
         }
     }
 
-    private void stockRefreshprocess(List<String> codes) {
+    private void stockRefreshHisProcess(StockCronRefreshDTO dto) {
+        List<String> codes = dto.getCodeArr();
         List<String> codeArr = new ArrayList<>();
         for (String code : codes) {
             codeArr.add(code);
-            if (codeArr.size() == cronRefreshConfigBo.getBatchNum()) {
+            if (codeArr.size() == cronRefreshService.getBatchNum()) {
+                List<String> finalCodeArr = codeArr;
+                Constant.immediateThreadPool.submit(() -> {
+                    StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
+                    stockCronRefreshDTO.setCodeArr(finalCodeArr);
+                    stockCronRefreshDTO.setDateStr(dto.getDateStr());
+                    sailServerFeign.refreshHisStockInfo(stockCronRefreshDTO);
+                });
+                codeArr = new ArrayList<>();
+            }
+        }
+        List<String> finalCodeArr = codeArr;
+        if (finalCodeArr.size() > 0) {
+            Constant.immediateThreadPool.submit(() -> {
+                StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
+                stockCronRefreshDTO.setCodeArr(finalCodeArr);
+                stockCronRefreshDTO.setDateStr(dto.getDateStr());
+                sailServerFeign.refreshHisStockInfo(stockCronRefreshDTO);
+            });
+        }
+    }
+
+    private void stockRefreshprocess(StockCronRefreshDTO dto) {
+        List<String> codes = dto.getCodeArr();
+        List<String> codeArr = new ArrayList<>();
+        for (String code : codes) {
+            codeArr.add(code);
+            if (codeArr.size() == cronRefreshService.getBatchNum()) {
                 List<String> finalCodeArr = codeArr;
                 Constant.immediateThreadPool.submit(() -> {
                     StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
@@ -306,7 +211,7 @@ public class StockCronRefreshService {
             }
         }
         List<String> finalCodeArr = codeArr;
-        if(finalCodeArr.size()>0){
+        if (finalCodeArr.size() > 0) {
             Constant.immediateThreadPool.submit(() -> {
                 StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
                 stockCronRefreshDTO.setCodeArr(finalCodeArr);
@@ -320,16 +225,19 @@ public class StockCronRefreshService {
      * 删除redis上股票信息
      *
      * @param codes
+     * @param dateStr
      * @return
      */
-    public void deleteStockInfo(List<String> codes) {
-        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+    public void deleteStockInfo(List<String> codes, String dateStr) {
+        if(!StringUtils.isNotBlank(dateStr)){
+            dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        }
         for (String code : codes) {
-            String key = dateFormat + "_" + code;
+            String key = RedisKeyUtils.getHisStockInfo(dateStr,code);
             Boolean hasKey = redisTemplate.hasKey(key);
             if (hasKey) {
                 redisTemplate.delete(key);
-                redisTemplate.delete("tick_" + code);
+                redisTemplate.delete(RedisKeyUtils.getNowStockTickInfo(code));
             }
         }
     }
@@ -339,8 +247,9 @@ public class StockCronRefreshService {
      * 定时刷新
      */
     public void cronRefresh() {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         //获取redis上所有当前时间的key
-        Set keys = redisTemplate.keys(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD) + "*");
+        Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dateFormat));
 
         if (keys.size() > 0) {
             List<String> codes = new ArrayList<String>();
@@ -351,14 +260,17 @@ public class StockCronRefreshService {
                     codes.add(code);
                 }
             }
-            stockRefreshprocess(codes);
+            StockCronRefreshDTO stockRefreshprocess = new StockCronRefreshDTO();
+            stockRefreshprocess.setDateStr(dateFormat);
+            stockRefreshprocess.setCodeArr(codes);
+            stockRefreshprocess(stockRefreshprocess);
         }
 
     }
 
 
     public List getTickInfo(String code) {
-        String key = "tick_" + code;
+        String key = RedisKeyUtils.getNowStockTickInfo(code);
         String jsonStr = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isNotBlank(jsonStr)) {
             return JsonUtil.readToValue(jsonStr, new TypeReference<List<Map>>() {
@@ -387,5 +299,7 @@ public class StockCronRefreshService {
     }
 
 
-
+    public void refreshHisStockTickInfo(StockCronRefreshDTO dto) {
+        tickServerFeign.refreshTickInfo(dto);
+    }
 }

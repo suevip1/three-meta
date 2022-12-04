@@ -1,5 +1,6 @@
 package com.coatardbul.sail.service;
 
+import com.coatardbul.sail.model.dto.StockCronRefreshDTO;
 import com.coatardbul.sail.service.stockData.DataFactory;
 import com.coatardbul.baseService.service.DataServiceBridge;
 
@@ -71,6 +72,20 @@ public class StockCronRefreshService {
             }catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+        }
+    }
+
+
+    public void refreshHisStockInfo(StockCronRefreshDTO dto) {
+        DataServiceBridge dataServiceBridge = dataFactory.build();
+        for (String code : dto.getCodeArr()) {
+            try {
+                dataServiceBridge.getAndRefreshStockInfo(code,dto.getDateStr());
+
+            }catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+
         }
     }
 }

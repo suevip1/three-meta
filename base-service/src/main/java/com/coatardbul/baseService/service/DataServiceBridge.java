@@ -14,6 +14,14 @@ public interface DataServiceBridge {
      * @param code
      */
     void getAndRefreshStockInfo(String code);
+
+    /**
+     * 查看历史信息
+     * @param code
+     * @param dateFormat
+     */
+    void getAndRefreshStockInfo(String code,String dateFormat);
+
     String getStockInfo(String code);
     void rebuildStockDetailMap(String response, Map map);
 
@@ -24,14 +32,18 @@ public interface DataServiceBridge {
      */
 
     void refreshStockTickInfo(String code);
+
+
+
     String getStockTickInfo(String code);
     List<TickInfo> getStockTickDetail(String code, String response);
 
 
-    /**
-     * 分钟数据
-     * @param code
-     */
+     void updateTickInfoToStockInfo(List<TickInfo> list, Map newStockDetailMap);
+        /**
+         * 分钟数据
+         * @param code
+         */
 
     void refreshStockMinuterInfo(String code);
     String getStockMinuterInfo(String code);

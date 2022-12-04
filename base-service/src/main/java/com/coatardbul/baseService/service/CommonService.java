@@ -13,6 +13,7 @@ import com.coatardbul.baseService.entity.bo.BeginFiveTickScore;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -51,8 +52,9 @@ public abstract class CommonService {
         this.stockStrategyCommonService = stockStrategyCommonService;
     }
 
-    public void addCommonParam(Map stockDetailMap) {
-        stockDetailMap.put("lastUpdateTime", DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD_HH_MM_SS));
+    public void addCommonParam(Map stockDetailMap, String dateFormat) {
+        stockDetailMap.put("currDateStr",dateFormat);
+        stockDetailMap.put("lastUpdateTime", DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM_SS));
     }
 
 
@@ -83,6 +85,8 @@ public abstract class CommonService {
         return convert;
     }
 
+
+
     public void calcMap(Map map) {
         //竞价涨幅=(竞价-昨日价格)/昨日价格
         map.put("auctionIncreaseRate",
@@ -101,14 +105,52 @@ public abstract class CommonService {
                         divide(new BigDecimal(map.get("circulationMarketValue").toString()), 4, BigDecimal.ROUND_HALF_UP));
     }
 
+    public Map updateStockInfo(String code, String response, String dateFormat) {
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
+        if (!StringUtils.isNotBlank(dateFormat)) {
+            dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        }
+        String key = RedisKeyUtils.getHisStockInfo(dateFormat, code);
+        Boolean hasKey = redisTemplate.hasKey(key);
 
-    public void updateStockBaseInfo(List<TickInfo> list, String code) {
+        if (hasKey) {
+            String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
+            Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
+            if (map.size() == 0) {
+                map = getStockDetailMap(code, dateFormat);
+                addCommonParam(map,dateFormat);
+                if (map == null) return null;
+                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
+            } else {
+                rebuildStockDetailMap(response, map);
+                addCommonParam(map, dateFormat);
+                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
+            }
+            return map;
+        } else {
+            Map stockDetailMap = getStockDetailMap(code, dateFormat);
+            addCommonParam(stockDetailMap, dateFormat);
+            if (stockDetailMap == null) return null;
+            redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockDetailMap), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
+            return stockDetailMap;
+        }
+    }
+
+    public void rebuildStockDetailMap(String response, Map map) {
+
+    }
+
+    public void updateStockBaseInfo(List<TickInfo> list, String code, String dateFormat) {
+        if (!StringUtils.isNotBlank(dateFormat)) {
+            dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        }
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         if (list.size() > 0) {
             //获取股票基本信息key
-            String nowStockInfoKey = RedisKeyUtils.getNowStockInfo(code);
+            String nowStockInfoKey = RedisKeyUtils.getHisStockInfo(dateFormat,code);
             String stockDetailStr = (String) redisTemplate.opsForValue().get(nowStockInfoKey);
             Map newStockDetailMap = JsonUtil.readToValue(stockDetailStr, Map.class);
+            //更新竞价信息
             //更新竞价信息
             upAuctionInfo(list, newStockDetailMap);
             rebuildTickArr(list);
@@ -116,6 +158,19 @@ public abstract class CommonService {
             upCalcModuleInfo(list, newStockDetailMap);
             redisTemplate.opsForValue().set(nowStockInfoKey, JsonUtil.toJson(newStockDetailMap), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
         }
+    }
+    public void updateTickInfoToStockInfo(List<TickInfo> list, Map newStockDetailMap){
+        //更新竞价信息
+        upAuctionInfo(list, newStockDetailMap);
+        rebuildTickArr(list);
+        //更新tick计算信息
+        try {
+            upCalcModuleInfo(list, newStockDetailMap);
+        }catch (Exception e){
+            log.error("更新前五，一分钟，两分钟异常："+e.getMessage());
+        }
+        //历史模拟，涨幅，各种数据贴在历史信息中
+        upCalcHisModuleInfo(list,newStockDetailMap);
     }
 
     private void rebuildTickArr(List<TickInfo> list) {
@@ -151,6 +206,7 @@ public abstract class CommonService {
 
         List<TickInfo> firstMinuter = list.stream().filter(item -> item.getTime().contains("09:30:")).collect(Collectors.toList());
         List<TickInfo> twoMinuter = list.stream().filter(item -> item.getTime().contains("09:30:") || item.getTime().contains("09:31:")).collect(Collectors.toList());
+        List<TickInfo> secondMinuter = list.stream().filter(item -> item.getTime().contains("09:31:")).collect(Collectors.toList());
 
         //前5向上涨幅
         BigDecimal beginFiveTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(beginFiveTickInfo, auctionInfo, lastClosePrice);
@@ -161,6 +217,9 @@ public abstract class CommonService {
         newStockDetailMap.put("beginFirstMinuterTickVolPriceIncreaseRate", beginFirstMinuterTickVolPriceIncreaseRate);
         //前二分钟向上涨幅
         BigDecimal beginTwoMinuterTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(twoMinuter, auctionInfo, lastClosePrice);
+        if(secondMinuter==null ||secondMinuter.size()==0){
+            beginTwoMinuterTickVolPriceIncreaseRate=null;
+        }
         newStockDetailMap.put("beginTwoMinuterTickVolPriceIncreaseRate", beginTwoMinuterTickVolPriceIncreaseRate);
         //前五量占比
         BigDecimal proportionStatic = getProportionStatic(beginFiveTickInfo, auctionInfo);
@@ -184,6 +243,19 @@ public abstract class CommonService {
         }
         newStockDetailMap.put("beginFiveTickUpDownScore", beginFiveTickScore.getScore());
 
+
+    }
+
+
+    private void upCalcHisModuleInfo(List<TickInfo> list, Map newStockDetailMap) {
+        //当前价格，涨幅，涨速
+        TickInfo tickInfo = list.get(list.size() - 1);
+        newStockDetailMap.put("newPrice",tickInfo.getPrice());
+        //交易金额
+        BigDecimal allAmountStatic = getAllAmountStatic(list);
+        newStockDetailMap.put("tradeAmount",allAmountStatic);
+        //计算
+        calcMap(newStockDetailMap);
 
     }
 
@@ -359,6 +431,7 @@ public abstract class CommonService {
     private void upAuctionInfo(List<TickInfo> list, Map newStockDetailMap) {
         //获取集合竞价信息
         TickInfo auctionInfoMap = getAuctionInfo(list);
+        newStockDetailMap.put("auctionPrice", auctionInfoMap.getPrice());
         //集合竞价金额
         BigDecimal auctionTradeAmount = null;
         if (newStockDetailMap.get("auctionTradeAmount") == null) {

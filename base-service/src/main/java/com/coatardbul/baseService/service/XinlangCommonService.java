@@ -7,6 +7,7 @@ import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -54,8 +55,21 @@ public abstract class XinlangCommonService extends CommonService
         String response = getStockInfo(code);
         // 将获取的信息更新到code上
         if (StringUtils.isNotBlank(response)) {
-            updateStockInfo(code, response);
+            updateStockInfo(code, response,null);
         }
+        //获取最新的对象
+    }
+    @Override
+    public void getAndRefreshStockInfo(String code, String dateFormat) {
+        updateStockInfo(code, null, dateFormat);
+        String key = RedisKeyUtils.getHisStockTickInfo(dateFormat, code);
+        String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
+        if(StringUtils.isNotBlank(stockTickArrStr)){
+            List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
+            });
+            updateStockBaseInfo(stockTickArr, code,dateFormat);
+        }
+
         //获取最新的对象
     }
 
@@ -93,7 +107,7 @@ public abstract class XinlangCommonService extends CommonService
         if (StringUtils.isNotBlank(response)) {
             List<TickInfo> list = updateStockTickInfo(code, response);
             try {
-                updateStockBaseInfo(list, code);
+                updateStockBaseInfo(list, code,null);
             } catch (Exception e) {
             }
         }
@@ -207,33 +221,6 @@ public abstract class XinlangCommonService extends CommonService
     }
 
 
-    private Map updateStockInfo(String code, String response) {
-        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
-        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        String key = RedisKeyUtils.getNowStockInfo(code);
-        Boolean hasKey = redisTemplate.hasKey(key);
-        if (hasKey) {
-            String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
-            Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
-            if (map.size() == 0) {
-                map = getStockDetailMap(code, dateFormat);
-                addCommonParam(map);
-                if (map == null) return null;
-                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            } else {
-                rebuildStockDetailMap(response, map);
-                addCommonParam(map);
-                redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            }
-            return map;
-        } else {
-            Map stockDetailMap = getStockDetailMap(code, dateFormat);
-            addCommonParam(stockDetailMap);
-            if (stockDetailMap == null) return null;
-            redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockDetailMap), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
-            return stockDetailMap;
-        }
-    }
 
 
     /**
@@ -242,6 +229,9 @@ public abstract class XinlangCommonService extends CommonService
      */
     @Override
     public void rebuildStockDetailMap(String response, Map map) {
+        if(!StringUtils.isNotBlank(response)){
+            return;
+        }
         String[] split = response.split("\\n");
         if (split.length > 0) {
             String[] split1 = split[0].split("\"")[1].split(",");

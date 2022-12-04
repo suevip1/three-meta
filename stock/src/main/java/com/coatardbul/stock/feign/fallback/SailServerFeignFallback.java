@@ -23,19 +23,25 @@ public class SailServerFeignFallback implements FallbackFactory<SailServerFeign>
         return new SailServerFeign() {
             @Override
             public CommonResult refreshStockInfo(StockCronRefreshDTO dto) {
-                log.error(throwable.getMessage(),throwable);
+                log.error(throwable.getMessage(), throwable);
+                return null;
+            }
+
+            @Override
+            public CommonResult refreshHisStockInfo(StockCronRefreshDTO dto) {
+                log.error(throwable.getMessage(), throwable);
                 return null;
             }
 
             @Override
             public CommonResult refreshStockMinuterInfo(StockCronRefreshDTO dto) {
-                log.error(throwable.getMessage(),throwable);
+                log.error(throwable.getMessage(), throwable);
                 return null;
             }
 
             @Override
             public CommonResult getThreadPoolConfig() {
-                log.error(throwable.getMessage(),throwable);
+                log.error(throwable.getMessage(), throwable);
 
                 return null;
             }

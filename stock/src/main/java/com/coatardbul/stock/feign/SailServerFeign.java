@@ -24,6 +24,11 @@ public interface SailServerFeign {
     @Headers("Content-Type: application/json")
     public CommonResult refreshStockInfo(StockCronRefreshDTO dto);
 
+    @RequestMapping(value = "sail/cronRefresh/refreshHisStockInfo", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult refreshHisStockInfo(StockCronRefreshDTO dto);
+
+
 
     @RequestMapping(value = "sail/cronRefresh/refreshStockMinuterInfo", method = RequestMethod.POST)
     @Headers("Content-Type: application/json")

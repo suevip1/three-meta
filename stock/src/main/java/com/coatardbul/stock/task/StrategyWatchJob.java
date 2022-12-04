@@ -2,6 +2,7 @@ package com.coatardbul.stock.task;
 
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.business.StockStrategyWatchService;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -31,6 +33,8 @@ public class StrategyWatchJob {
     StockStrategyWatchService stockStrategyWatchService;
     @Autowired
     StockCronRefreshService stockCronRefreshService;
+    @Resource
+     CronRefreshService cronRefreshService;
     @Autowired
     StockTradeService stockTradeService;
 
@@ -79,7 +83,7 @@ public class StrategyWatchJob {
     @XxlJob("cronRefreshJobHandler")
     public void cronRefreshJobHandler() throws Exception {
         log.info("定时刷新股票信息定时任务开始,传递参数为：" );
-        Boolean isOpenCronRefreshFlag = stockCronRefreshService.getIsOpenCronRefreshFlag();
+        Boolean isOpenCronRefreshFlag = cronRefreshService.getIsOpenCronRefreshFlag();
         if(isOpenCronRefreshFlag){
             stockCronRefreshService.cronRefresh();
         }

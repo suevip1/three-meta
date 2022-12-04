@@ -15,30 +15,65 @@ import java.util.Date;
 public class RedisKeyUtils {
 
 
+
+    public static String getNowStockInfo(String code) {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        String key = getHisStockInfo(dateFormat, code);
+        return key;
+    }
+
+    public static String getHisStockInfo(String dateFormat, String code) {
+        String key = dateFormat + "_stock_" + code;
+        return key;
+    }
+
+    public static String getStockInfoPattern(String dateFormat) {
+        String key = dateFormat + "_stock_*" ;
+        return key;
+    }
+    public static String getCodeByStockInfoKey(String key) {
+        return key.substring(key.length()-6,key.length());
+    }
+
+
+
+
+
+
     /**
      * 获取redis股票分钟key
+     *
      * @param code
      * @return
      */
-    public static String getNowStockMinuterInfo(String code){
-        return  "minuter_" + code;
+    public static String getNowStockMinuterInfo(String code) {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        return getHisStockMinuterInfo(dateFormat,code);
     }
+
+    public static String getHisStockMinuterInfo(String dateFormat, String code) {
+        return dateFormat + "_minuter_" + code;
+    }
+
+
 
 
     /**
      * 获取redis股票Tick key
+     *
      * @param code
      * @return
      */
-    public static String getNowStockTickInfo(String code){
-        return  "tick_" + code;
-    }
-
-
-    public static String getNowStockInfo(String code){
+    public static String getNowStockTickInfo(String code) {
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        String key = dateFormat + "_" + code;
-        return key;
+        return getHisStockTickInfo(dateFormat, code);
     }
+
+    public static String getHisStockTickInfo(String dateFormat, String code) {
+        return dateFormat + "_tick_" + code;
+    }
+
+
+
 
 }
