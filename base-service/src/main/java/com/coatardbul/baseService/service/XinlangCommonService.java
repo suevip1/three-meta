@@ -165,7 +165,7 @@ public abstract class XinlangCommonService extends CommonService
 
     private void updateStockMinuterInfo(String code, String response) {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
-        String key = "minuter_" + code;
+        String key = RedisKeyUtils.getNowStockMinuterInfo(code);
         List stockTickDetail = getStockMinuterDetail(code, response);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {
             redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);

@@ -275,8 +275,8 @@ public class StockCronRefreshService {
     }
 
 
-    public List getTickInfo(String code) {
-        String key = RedisKeyUtils.getNowStockTickInfo(code);
+    public List getTickInfo(StockCronRefreshDTO dto) {
+        String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(),dto.getCodeArr().get(0));
         String jsonStr = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isNotBlank(jsonStr)) {
             return JsonUtil.readToValue(jsonStr, new TypeReference<List<Map>>() {
@@ -286,9 +286,9 @@ public class StockCronRefreshService {
 
     }
 
-    public List getMinuterInfo(String code) {
+    public List getMinuterInfo(StockCronRefreshDTO dto) {
 
-        String key = RedisKeyUtils.getNowStockMinuterInfo(code);
+        String key = RedisKeyUtils.getHisStockMinuterInfo(dto.getDateStr(),dto.getCodeArr().get(0));
         String jsonStr = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isNotBlank(jsonStr)) {
             return JsonUtil.readToValue(jsonStr, new TypeReference<List<Map>>() {

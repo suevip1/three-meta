@@ -125,14 +125,14 @@ public class StockCronRefreshController {
     @ApiOperation("获取固定股票即时信息")
     @RequestMapping(path = "/getTickInfo", method = RequestMethod.POST)
     public CommonResult getTickInfo(@RequestBody StockCronRefreshDTO dto) {
-        List tickInfo = stockCronRefreshService.getTickInfo(dto.getCodeArr().get(0));
+        List tickInfo = stockCronRefreshService.getTickInfo(dto);
         return CommonResult.success(tickInfo);
     }
 
     @ApiOperation("获取固定股票即时信息")
     @RequestMapping(path = "/getMinuterInfo", method = RequestMethod.POST)
     public CommonResult getMinuterInfo(@RequestBody StockCronRefreshDTO dto) {
-        List minuterInfo = stockCronRefreshService.getMinuterInfo(dto.getCodeArr().get(0));
+        List minuterInfo = stockCronRefreshService.getMinuterInfo(dto);
         return CommonResult.success(minuterInfo);
     }
 
