@@ -66,10 +66,12 @@ public class StockCronRefreshService {
      * @return
      */
     public List getStockInfo(StockCronRefreshDTO dto) {
+        Boolean isNow=false;
         List<Map<String, Object>> result = new ArrayList();
         DataServiceBridge dataServiceBridge = dataFactory.build();
         if(!StringUtils.isNotBlank(dto.getDateStr())){
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+            isNow=true;
         }
         //获取redis上所有当前时间的key
         Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
@@ -78,22 +80,26 @@ public class StockCronRefreshService {
                 if (codeKey instanceof String) {
                     String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
                     Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
-                    //如果有时间，需要根据tick数据动态计算缺省数值
-                    String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(), RedisKeyUtils.getCodeByStockInfoKey(codeKey.toString()));
-                    String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
-                    if (org.apache.commons.lang3.StringUtils.isNotBlank(stockTickArrStr)) {
-                        List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
-                        });
-                        //有过滤时间
-                        if (stockTickArr.size() > 0 && StringUtils.isNotBlank(dto.getTimeStr())) {
-                            stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
-                           try {
-                               dataServiceBridge.updateTickInfoToStockInfo(stockTickArr, stockMap);
-                           }catch (Exception e){
-                               log.error(e.getMessage());
-                           }
+                    //是否当前
+                    if(!isNow){
+                        //如果有时间，需要根据tick数据动态计算缺省数值
+                        String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(), RedisKeyUtils.getCodeByStockInfoKey(codeKey.toString()));
+                        String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
+                        if (org.apache.commons.lang3.StringUtils.isNotBlank(stockTickArrStr)) {
+                            List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
+                            });
+                            //有过滤时间
+                            if (stockTickArr.size() > 0 && StringUtils.isNotBlank(dto.getTimeStr())) {
+                                stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
+                                try {
+                                    dataServiceBridge.updateTickInfoToStockInfo(stockTickArr, stockMap);
+                                }catch (Exception e){
+                                    log.error(e.getMessage());
+                                }
+                            }
                         }
                     }
+
                     result.add(stockMap);
                 }
             }
@@ -237,7 +243,7 @@ public class StockCronRefreshService {
             Boolean hasKey = redisTemplate.hasKey(key);
             if (hasKey) {
                 redisTemplate.delete(key);
-                redisTemplate.delete(RedisKeyUtils.getNowStockTickInfo(code));
+                redisTemplate.delete(RedisKeyUtils.getHisStockTickInfo(dateStr,code));
             }
         }
     }
@@ -256,7 +262,7 @@ public class StockCronRefreshService {
             for (Object codeKey : keys) {
                 if (codeKey instanceof String) {
                     String key = codeKey.toString();
-                    String code = key.substring(11, 17);
+                    String code = RedisKeyUtils.getCodeByStockInfoKey(key);
                     codes.add(code);
                 }
             }

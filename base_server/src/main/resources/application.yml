@@ -15,7 +15,7 @@ spring:
     database: 0
     password:
     max-idle: 8
-    max-active: 8
+    max-active: 16
     max-wait: -1
     min-idle: 0
     timeout: 5000

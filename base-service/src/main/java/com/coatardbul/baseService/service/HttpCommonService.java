@@ -79,16 +79,17 @@ public abstract class HttpCommonService {
                 result.setResponseStr(res);
             }
             //407 Proxy Authentication Required
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
-                //返回json格式
-                throw new  ConnectTimeoutException();
-            }
+//            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
+//                //返回json格式
+//                throw new  ConnectTimeoutException();
+//            }
         } catch (ConnectTimeoutException | HttpHostConnectException e) {
             if (isProxy) {
                 //删除当前ip，重试
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                log.error("删除代理ip："+httpConfigBo.getProxy().getHostName()+" 端口："+httpConfigBo.getProxy().getPort());
             }
-            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
+//            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
             log.error("httpclient超时异常"+e.getMessage());
         } catch (ClientProtocolException e) {
             log.error("ClientProtocolException"+e.getMessage());
@@ -96,8 +97,9 @@ public abstract class HttpCommonService {
             if (isProxy) {
                 //删除当前ip，重试
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                log.error("删除代理ip："+httpConfigBo.getProxy().getHostName()+" 端口："+httpConfigBo.getProxy().getPort());
             }
-            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
+//            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
             log.error("httpclient请求IO异常"+e.getMessage());
         } finally {
             closeStream(httpConfigBo);
@@ -288,9 +290,7 @@ public abstract class HttpCommonService {
         //执行请求
         HttpResponseInfo httpResponseInfo = executeHttpRequest(httpConfigBo, isProxy);
 
-        if(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED==httpResponseInfo.getHttpStatus()){
-           return doGet(url, headerList, isProxy);
-        }else if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
+         if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
             return  httpResponseInfo.getResponseStr();
         }else {
             return null;
@@ -316,9 +316,7 @@ public abstract class HttpCommonService {
 
         HttpResponseInfo httpResponseInfo = executeHttpRequest(httpConfigBo, isProxy);
         //执行请求
-        if(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED==httpResponseInfo.getHttpStatus()){
-            return doPost(url, jsonString,headerList, isProxy);
-        }else if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
+         if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
             return  httpResponseInfo.getResponseStr();
         }else {
             return null;
