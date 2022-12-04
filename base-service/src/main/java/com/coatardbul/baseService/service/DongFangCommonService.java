@@ -41,13 +41,9 @@ public class DongFangCommonService extends CommonService implements DataServiceB
 
     @Autowired
     HttpPoolService httpService;
-
+    @Autowired(required = false)
     private XinlangCommonService xinlangService;
 
-    @Autowired
-    public void setXinlangService(XinlangCommonService xinlangService) {
-        this.xinlangService = xinlangService;
-    }
 
     @Override
     public void getAndRefreshStockInfo(String code) {

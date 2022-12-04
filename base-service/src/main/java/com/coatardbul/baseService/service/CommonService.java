@@ -45,12 +45,11 @@ public abstract class CommonService {
 
     @Autowired
     StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
+
+    @Autowired(required = false)
     public StockStrategyCommonService stockStrategyCommonService;
 
-    @Autowired
-    public void setStockStrategyCommonService(StockStrategyCommonService stockStrategyCommonService) {
-        this.stockStrategyCommonService = stockStrategyCommonService;
-    }
+
 
     public void addCommonParam(Map stockDetailMap, String dateFormat) {
         stockDetailMap.put("currDateStr",dateFormat);
