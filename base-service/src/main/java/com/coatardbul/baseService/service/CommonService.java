@@ -274,7 +274,7 @@ public abstract class CommonService {
     private BigDecimal getAllAmountStatic(List<TickInfo> beginFiveTickInfo) {
         BigDecimal bigDecimal = BigDecimal.ZERO;
         for (TickInfo tickInfo : beginFiveTickInfo) {
-            BigDecimal value = tickInfo.getVol().multiply(tickInfo.getPrice());
+            BigDecimal value = tickInfo.getVol().multiply(new BigDecimal(100)).multiply(tickInfo.getPrice());
             bigDecimal = bigDecimal.add(value);
         }
         return bigDecimal;

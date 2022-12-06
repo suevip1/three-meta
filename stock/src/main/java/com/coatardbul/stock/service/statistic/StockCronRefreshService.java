@@ -71,7 +71,9 @@ public class StockCronRefreshService {
         DataServiceBridge dataServiceBridge = dataFactory.build();
         if(!StringUtils.isNotBlank(dto.getDateStr())){
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-            isNow=true;
+           if( DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM_SS).compareTo("15:00:00")<0){
+               isNow=true;
+           }
         }
         //获取redis上所有当前时间的key
         Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
@@ -90,7 +92,7 @@ public class StockCronRefreshService {
                             });
                             //有过滤时间
                             if (stockTickArr.size() > 0 && StringUtils.isNotBlank(dto.getTimeStr())) {
-                                stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
+                                stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo("09:25:00")>=0&&item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
                                 try {
                                     dataServiceBridge.updateTickInfoToStockInfo(stockTickArr, stockMap);
                                 }catch (Exception e){
