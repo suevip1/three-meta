@@ -2,6 +2,7 @@ package com.coatardbul.stock.controller.trade;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
+import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
 import com.coatardbul.stock.service.statistic.trade.StockTradeUserService;
 import io.swagger.annotations.Api;
@@ -33,7 +34,7 @@ public class StockTradeUserController {
 
 
     /**
-     *
+     *            stockTradeUserService.autoLogin();
      */
     @WebLog(value = "updateCookie")
     @RequestMapping(path = "/updateCookie", method = RequestMethod.POST)
@@ -42,7 +43,32 @@ public class StockTradeUserController {
         return CommonResult.success(dto);
     }
 
+    @RequestMapping(path = "/login", method = RequestMethod.POST)
+    public CommonResult login(@Validated @RequestBody StockTradeLoginDTO dto) {
+        try {
+            stockTradeUserService.login(dto);
+            return CommonResult.success("登陆成功");
+        }catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
+        }
 
+    }
+
+    @RequestMapping(path = "/autoLogin", method = RequestMethod.POST)
+    public CommonResult autoLogin() {
+        try {
+            return CommonResult.success("登陆成功");
+        }catch (Exception e) {
+            return CommonResult.failed(e.getMessage());
+
+        }
+    }
+
+    @RequestMapping(path = "/baseInfo", method = RequestMethod.POST)
+    public CommonResult baseInfo(@Validated @RequestBody StockTradeLoginDTO dto) {
+        stockTradeUserService.baseInfo(dto.getId());
+        return CommonResult.success(null);
+    }
 
 
 

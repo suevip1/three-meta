@@ -45,8 +45,12 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
      */
     @RequestMapping(path = "/queryAssetAndPosition", method = RequestMethod.POST)
     public CommonResult queryAssetAndPosition() {
-        String result = stockTradeService.queryAssetAndPosition();
-        return CommonResult.success(result);
+        try {
+            String result = stockTradeService.queryAssetAndPosition();
+            return CommonResult.success(result);
+        }catch (Exception e){
+            return CommonResult.failed(e.getMessage());
+        }
     }
 
     /**
@@ -83,7 +87,7 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
     /**
      * 同步买入信息
      *
-     * @param dto
+     * @param
      * @return
      */
     @RequestMapping(path = "/syncBuyInfo", method = RequestMethod.POST)

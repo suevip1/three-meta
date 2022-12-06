@@ -29,8 +29,9 @@ public class StockTradeConfigController {
 
     @Autowired
     StockTradeConfigService stockTradeConfigService;
-@Autowired
-StockTradeDateSwitchService stockTradeDateSwitchService;
+    @Autowired
+    StockTradeDateSwitchService stockTradeDateSwitchService;
+
     /**
      * 同步买入信息
      *
@@ -55,6 +56,7 @@ StockTradeDateSwitchService stockTradeDateSwitchService;
         String date = stockTradeDateSwitchService.getCurrentDateSwitch();
         return CommonResult.success(date);
     }
+
     @RequestMapping(path = "/switchDate", method = RequestMethod.POST)
     public CommonResult switchDate(@RequestBody StockTradeDateSwitch dto) {
         stockTradeDateSwitchService.switchDate(dto);

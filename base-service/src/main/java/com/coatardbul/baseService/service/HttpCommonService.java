@@ -5,6 +5,7 @@ import com.coatardbul.baseService.entity.bo.HttpConfigBo;
 import com.coatardbul.baseService.entity.bo.HttpResponseInfo;
 import com.google.common.net.HttpHeaders;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -13,9 +14,12 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -26,6 +30,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +42,8 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -60,9 +67,7 @@ public abstract class HttpCommonService {
     ProxyIpService proxyIpService;
 
 
-
-
-    private HttpResponseInfo executeHttpRequest(HttpConfigBo httpConfigBo, boolean isProxy) {
+    public HttpResponseInfo executeHttpRequest(HttpConfigBo httpConfigBo, boolean isProxy) {
         HttpResponseInfo result = new HttpResponseInfo();
 
         CloseableHttpClient httpClient = httpConfigBo.getHttpClient();
@@ -87,26 +92,25 @@ public abstract class HttpCommonService {
             if (isProxy) {
                 //删除当前ip，重试
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
-                log.error("删除代理ip："+httpConfigBo.getProxy().getHostName()+" 端口："+httpConfigBo.getProxy().getPort());
+                log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
             }
 //            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
-            log.error("httpclient超时异常"+e.getMessage());
+            log.error("httpclient超时异常" + e.getMessage());
         } catch (ClientProtocolException e) {
-            log.error("ClientProtocolException"+e.getMessage());
+            log.error("ClientProtocolException" + e.getMessage());
         } catch (IOException e) {
             if (isProxy) {
                 //删除当前ip，重试
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
-                log.error("删除代理ip："+httpConfigBo.getProxy().getHostName()+" 端口："+httpConfigBo.getProxy().getPort());
+                log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
             }
 //            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
-            log.error("httpclient请求IO异常"+e.getMessage());
+            log.error("httpclient请求IO异常" + e.getMessage());
         } finally {
             closeStream(httpConfigBo);
         }
         return result;
     }
-
 
 
     /**
@@ -186,33 +190,64 @@ public abstract class HttpCommonService {
     }
 
     private HttpRequestBase setHttpPost(String url, String jsonString, List<Header> headerList, HttpConfigBo httpConfigBo) {
-        HttpPost httpPost = new HttpPost(url);
-        StringEntity entity = new StringEntity(jsonString, "UTF-8");
-        // post请求是将参数放在请求体里面传过去的;这里将entity放入post请求体中
-        httpPost.setEntity(entity);
-
-        httpPost.setHeader("Content-Type", "application/json;charset=utf8");
-
-        setHeader(headerList, httpPost);
+        HttpRequestBase httpPost = setHttpPost(url, jsonString, headerList);
         httpConfigBo.setHttpRequestBase(httpPost);
         return httpPost;
     }
 
+
+    /**
+     * 对于Content-Type == application/x-www-form-urlencoded，需要设置请求头
+     * @param url
+     * @param jsonString
+     * @param headerList
+     * @return
+     */
+    public HttpPost setHttpPost(String url, String jsonString, List<Header> headerList) {
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(jsonString, "UTF-8");
+        // post请求是将参数放在请求体里面传过去的;这里将entity放入post请求体中
+        httpPost.setEntity(entity);
+        if (headerList != null && headerList.size() > 0) {
+            List<Header> collect = headerList.stream().filter(item -> item.getName().equals("Content-Type")).collect(Collectors.toList());
+            if (collect.size() == 0) {
+                httpPost.addHeader("Content-Type", "application/json;charset=utf8");
+            }
+        }
+        setHeader(headerList, httpPost);
+        return httpPost;
+    }
+
+
+
+
+    public void setPostMapEntity(HttpEntityEnclosingRequestBase request, Map<String, Object> params) {
+        if (params != null) {
+            List<BasicNameValuePair> parameters = params.entrySet().stream().map(entry ->
+                    new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue()))
+            ).collect(Collectors.toList());
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, Consts.UTF_8);
+            request.setEntity(entity);
+        }
+
+    }
+
+
     private void setHeader(List<Header> headerList, HttpRequestBase httpRequestBase) {
         if (headerList != null && headerList.size() > 0) {
             for (Header headerTemp : headerList) {
-                httpRequestBase.setHeader(headerTemp);
+                httpRequestBase.addHeader(headerTemp);
             }
         }
-        httpRequestBase.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36");
+        httpRequestBase.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36");
 //        httpRequestBase.addHeader(HttpHeaders.CONNECTION, "close");
     }
 
 
-    public HttpConfigBo getHttpConfig(boolean isProxy){
+    public HttpConfigBo getHttpConfig(boolean isProxy) {
         HttpConfigBo httpConfigBo = new HttpConfigBo();
         //请求配置，配置代理，超时时间等
-        setRequestConfig(httpConfigBo,isProxy);
+        setRequestConfig(httpConfigBo, isProxy);
         //配置客户端
         setCloseableHttpClient(httpConfigBo, isProxy);
 
@@ -220,9 +255,9 @@ public abstract class HttpCommonService {
 
     }
 
-    abstract void setCloseableHttpClient(  HttpConfigBo httpConfigBo,boolean isProxy );
+    abstract void setCloseableHttpClient(HttpConfigBo httpConfigBo, boolean isProxy);
 
-    public void setRequestConfig( HttpConfigBo httpConfigBo,boolean isProxy) {
+    public void setRequestConfig(HttpConfigBo httpConfigBo, boolean isProxy) {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         Integer sockTimeout = cronRefreshConfigBo.getSockTimeout();
         RequestConfig defaultRequestConfig = null;
@@ -235,7 +270,6 @@ public abstract class HttpCommonService {
         }
         httpConfigBo.setDefaultRequestConfig(defaultRequestConfig);
     }
-
 
 
     /**
@@ -265,6 +299,20 @@ public abstract class HttpCommonService {
         return httpClient;
     }
 
+    public CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {
+        Integer sockTimeout = cronRefreshService.getSockTimeout();
+        CloseableHttpClient httpClient = null;
+
+        // 获得Http客户端(可以理解为:你得先有一个浏览器;注意:实际上HttpClient与浏览器是不一样的)
+        RequestConfig defaultRequestConfig = RequestConfig.custom().setConnectTimeout(sockTimeout)
+                .setConnectionRequestTimeout(sockTimeout)
+                .setSocketTimeout(sockTimeout)
+                .build();
+        httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).setDefaultCookieStore(cookieStore).setRetryHandler(httpRequestRetryHandler).build();
+
+        return httpClient;
+    }
+
 
     /**
      * 获取头信息
@@ -290,9 +338,9 @@ public abstract class HttpCommonService {
         //执行请求
         HttpResponseInfo httpResponseInfo = executeHttpRequest(httpConfigBo, isProxy);
 
-         if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
-            return  httpResponseInfo.getResponseStr();
-        }else {
+        if (HttpStatus.SC_OK == httpResponseInfo.getHttpStatus()) {
+            return httpResponseInfo.getResponseStr();
+        } else {
             return null;
         }
     }
@@ -308,17 +356,18 @@ public abstract class HttpCommonService {
     public String doPost(String url, String jsonString, List<Header> headerList) throws ConnectTimeoutException {
         return doPost(url, jsonString, headerList, true);
     }
+
     public String doPost(String url, String jsonString, List<Header> headerList, boolean isProxy) throws ConnectTimeoutException {
         //创建HttpClient对象
         HttpConfigBo httpConfigBo = getHttpConfig(isProxy);
         //设置请求头
-        setHttpPost(url,jsonString, headerList, httpConfigBo);
+        setHttpPost(url, jsonString, headerList, httpConfigBo);
 
         HttpResponseInfo httpResponseInfo = executeHttpRequest(httpConfigBo, isProxy);
         //执行请求
-         if (HttpStatus.SC_OK==httpResponseInfo.getHttpStatus()){
-            return  httpResponseInfo.getResponseStr();
-        }else {
+        if (HttpStatus.SC_OK == httpResponseInfo.getHttpStatus()) {
+            return httpResponseInfo.getResponseStr();
+        } else {
             return null;
         }
         //默认json，可以覆盖

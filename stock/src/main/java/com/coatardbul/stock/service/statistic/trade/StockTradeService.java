@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
+import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.stock.feign.BaseServerFeign;
@@ -110,12 +111,12 @@ public class StockTradeService {
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
                 return jsonObject.getString("Data");
+            }else {
+                throw new BusinessException("登陆异常");
             }
-            return result;
         } catch (ConnectTimeoutException e) {
-            log.error(e.getMessage(), e);
+            throw new BusinessException("登陆异常");
         }
-        return null;
     }
 
 

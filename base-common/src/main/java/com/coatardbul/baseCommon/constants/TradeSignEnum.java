@@ -4,7 +4,9 @@ public enum TradeSignEnum {
     ASSET_POSITION("asset_position","持仓"),
 
 
+    LOGIN("login","登陆"),
 
+    LOGIN_VALIDATEKEY("login_validatekey","登陆key"),
     BUY_SELL("buy_sell","买卖");
 
     private String sign;

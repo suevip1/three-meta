@@ -46,4 +46,10 @@ public class CronRefreshConfigBo {
      */
     private Integer batchNum;
 
+
+    /**
+     * 阿里验证码appcode
+     */
+    private String aliAppCode;
+
 }

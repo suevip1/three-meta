@@ -39,11 +39,13 @@ public class CronRefreshService {
 
 
     private final static String BATCH_NUM = "batchNum";
+
+    private final static String ALI_APP_CODE = "aliAppCode";
+
     private final static Integer CONFIG_EXIST_DAY = 30;
 
     @Autowired
     RedisTemplate redisTemplate;
-
 
 
     @Autowired
@@ -61,6 +63,8 @@ public class CronRefreshService {
         cronRefreshConfigBo.setSockTimeout(getSockTimeout());
         //批次数量
         cronRefreshConfigBo.setBatchNum(getBatchNum());
+        //阿里appcode
+        cronRefreshConfigBo.setAliAppCode(getAliAppCode());
     }
 
 
@@ -72,6 +76,7 @@ public class CronRefreshService {
         configBo.setDataSource(getDataSource());
         configBo.setSockTimeout(getSockTimeout());
         configBo.setBatchNum(getBatchNum());
+        configBo.setAliAppCode(getAliAppCode());
         return configBo;
     }
 
@@ -83,6 +88,7 @@ public class CronRefreshService {
         setDataSource(tempObj.getDataSource());
         setSockTimeout(tempObj.getSockTimeout());
         setBatchNum(tempObj.getBatchNum());
+        setAliAppCode(tempObj.getAliAppCode());
     }
 
     public boolean getProxyFlag() {
@@ -187,7 +193,19 @@ public class CronRefreshService {
         }
     }
 
+    private void setAliAppCode(String aliAppCode) {
+        redisTemplate.opsForValue().set(ALI_APP_CODE, aliAppCode, CONFIG_EXIST_DAY, TimeUnit.DAYS);
+    }
 
+    public String getAliAppCode() {
+        Boolean hasKey = redisTemplate.hasKey(ALI_APP_CODE);
+        if (hasKey) {
+            return (String) redisTemplate.opsForValue().get(ALI_APP_CODE);
+        } else {
+            //默认
+            return "46bb5bf04acf450eb90260f292f647a9";
+        }
+    }
 
 
 }

@@ -10,6 +10,7 @@ import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.ScatterDayUpLimitCallAuctionService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.StockScatterService;
+import com.coatardbul.stock.service.statistic.trade.StockTradeUserService;
 import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitValPriceService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -46,6 +47,9 @@ public class DayStatisticJob {
     ScatterDayUpLimitCallAuctionService stockScatterUpLimitService;
     @Autowired
     StockUpLimitValPriceService stockUpLimitValPriceService;
+    @Autowired
+    StockTradeUserService stockTradeUserService;
+
 
 
     @Autowired
@@ -102,13 +106,20 @@ public class DayStatisticJob {
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
             log.info("刷新涨停市值散点数据参数" + JsonUtil.toJson(dto));
             stockScatterService.refreshDay(dto);
-
         }
         log.info("刷新涨停市值散点数据结束");
     }
 
 
-
+    /**
+     * 自动登陆
+     * @throws IllegalAccessException
+     * @throws ParseException
+     */
+    @XxlJob("dayAutoLoginJobHandler")
+    public void dayAutoLoginJobHandler()  {
+        stockTradeUserService.autoLogin();
+    }
 
 
 }
