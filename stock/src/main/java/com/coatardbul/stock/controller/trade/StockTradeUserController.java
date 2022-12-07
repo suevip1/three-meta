@@ -32,9 +32,8 @@ public class StockTradeUserController {
     StockTradeUserService stockTradeUserService;
 
 
-
     /**
-     *            stockTradeUserService.autoLogin();
+     * stockTradeUserService.autoLogin();
      */
     @WebLog(value = "updateCookie")
     @RequestMapping(path = "/updateCookie", method = RequestMethod.POST)
@@ -48,7 +47,7 @@ public class StockTradeUserController {
         try {
             stockTradeUserService.login(dto);
             return CommonResult.success("登陆成功");
-        }catch (Exception e) {
+        } catch (Exception e) {
             return CommonResult.failed(e.getMessage());
         }
 
@@ -57,8 +56,9 @@ public class StockTradeUserController {
     @RequestMapping(path = "/autoLogin", method = RequestMethod.POST)
     public CommonResult autoLogin() {
         try {
+            stockTradeUserService.autoLogin();
             return CommonResult.success("登陆成功");
-        }catch (Exception e) {
+        } catch (Exception e) {
             return CommonResult.failed(e.getMessage());
 
         }
@@ -69,8 +69,6 @@ public class StockTradeUserController {
         stockTradeUserService.baseInfo(dto.getId());
         return CommonResult.success(null);
     }
-
-
 
 
 }

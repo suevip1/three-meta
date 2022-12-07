@@ -34,7 +34,7 @@ public class ProxyIpService {
     private static final String PROXY_IP = "proxyIp";
 
     @Autowired
-    HttpPoolService httpService;
+    HttpService httpService;
     @Autowired
     RedisTemplate redisTemplate;
 
