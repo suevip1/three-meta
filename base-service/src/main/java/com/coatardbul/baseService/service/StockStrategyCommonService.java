@@ -45,7 +45,7 @@ public abstract class StockStrategyCommonService {
 
 
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
 
 
 

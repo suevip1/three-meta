@@ -2,7 +2,7 @@ package com.coatardbul.stock.service.statistic.trade;
 
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.baseService.service.HttpService;
+import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.StockTradeUserMapper;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
 import com.coatardbul.stock.model.entity.StockTradeUser;
@@ -37,7 +37,7 @@ public class StockTradeBaseService {
     @Autowired
     StockTradeUserMapper stockTradeUserMapper;
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
 
     @Autowired
     RedisTemplate redisTemplate;

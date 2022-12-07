@@ -1,6 +1,6 @@
 package com.coatardbul.stock.controller;
 
-import com.coatardbul.baseService.service.HttpService;
+import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.service.base.CosService;
@@ -71,7 +71,7 @@ public class TestController {
     StockTradeService stockTradeService;
 
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
     @Autowired
     StockQuartzService stockQuartzService;
     @Autowired

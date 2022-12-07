@@ -34,7 +34,7 @@ public class HttpClientConnectionMonitorThread extends Thread {
                     // 关闭过期的链接
                     connManager.closeExpiredConnections();
                     // 选择关闭 空闲30秒的链接
-                    connManager.closeIdleConnections(15, TimeUnit.SECONDS);
+                    connManager.closeIdleConnections(30, TimeUnit.SECONDS);
                 }
             }
         } catch (InterruptedException ex) {

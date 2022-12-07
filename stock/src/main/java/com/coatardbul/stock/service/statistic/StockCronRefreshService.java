@@ -6,7 +6,7 @@ import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.baseService.service.DataServiceBridge;
-import com.coatardbul.baseService.service.HttpService;
+import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
@@ -48,7 +48,7 @@ public class StockCronRefreshService {
     RedisTemplate redisTemplate;
 
     @Autowired
-    HttpService httpService;
+    HttpPoolService HttpPoolService;
 
     @Resource
     TickServerFeign tickServerFeign;

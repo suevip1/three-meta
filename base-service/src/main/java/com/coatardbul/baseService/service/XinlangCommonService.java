@@ -40,7 +40,7 @@ public abstract class XinlangCommonService extends CommonService
     RedisTemplate redisTemplate;
 
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
 
 
     @Autowired

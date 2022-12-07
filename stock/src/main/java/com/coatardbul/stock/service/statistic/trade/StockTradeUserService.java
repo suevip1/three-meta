@@ -17,7 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseService.client.TradeClient;
 import com.coatardbul.baseService.entity.bo.HttpConfigBo;
-import com.coatardbul.baseService.service.HttpService;
+import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
@@ -63,7 +63,7 @@ public class StockTradeUserService {
     @Autowired
     StockTradeUserMapper stockTradeUserMapper;
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
     @Autowired
     CronRefreshService cronRefreshService;
     @Autowired

@@ -40,7 +40,7 @@ public class DongFangCommonService extends CommonService implements DataServiceB
     RedisTemplate redisTemplate;
 
     @Autowired
-    HttpService httpService;
+    HttpPoolService httpService;
     @Autowired(required = false)
     private XinlangCommonService xinlangService;
 
