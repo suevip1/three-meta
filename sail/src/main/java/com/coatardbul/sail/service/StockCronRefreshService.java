@@ -1,10 +1,17 @@
 package com.coatardbul.sail.service;
 
+import com.coatardbul.baseCommon.constants.Constant;
+import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
+import com.coatardbul.baseService.service.AiStrategyService;
+import com.coatardbul.sail.feign.StockServerFeign;
 import com.coatardbul.sail.model.dto.StockCronRefreshDTO;
 import com.coatardbul.sail.service.stockData.DataFactory;
 import com.coatardbul.baseService.service.DataServiceBridge;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
+import org.aspectj.apache.bcel.Constants;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -23,12 +30,12 @@ import java.util.List;
 public class StockCronRefreshService {
 
 
-
-
     @Resource
     DataFactory dataFactory;
-
-
+    @Resource
+    AiStrategyService aiStrategyService;
+    @Resource
+    StockServerFeign stockServerFeign;
 
     /**
      * 获取刷新redis上股票信息
@@ -41,11 +48,38 @@ public class StockCronRefreshService {
         for (String code : codes) {
             try {
                 dataServiceBridge.getAndRefreshStockInfo(code);
+                //嵌入交易模块
+                Constant.strategyThreadPool.submit(() -> {
+                    try {
+                        preQuartzTradeDetailProcess(code);
+                    } catch (Exception e) {
+                        log.error("交易模块异常" + e.getMessage(), e);
+                    }
+                });
+
                 dataServiceBridge.refreshStockTickInfo(code);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
 
+        }
+    }
+
+    private void preQuartzTradeDetailProcess(String code) {
+        PreQuartzTradeDetail preQuartzTradeDetail = aiStrategyService.getPreQuartzTradeDetail(code);
+        if (preQuartzTradeDetail.getTradeFlag()) {
+            StockTradeBuyTask stockTradeBuyTask = new StockTradeBuyTask();
+            stockTradeBuyTask.setStockCode(preQuartzTradeDetail.getCode());
+            stockTradeBuyTask.setStockName(preQuartzTradeDetail.getName());
+            stockTradeBuyTask.setStrategySign(preQuartzTradeDetail.getQuartzSign());
+            stockTradeBuyTask.setCron("0/1 * * * * ? ");
+            stockTradeBuyTask.setTradeAmount(preQuartzTradeDetail.getUserMoney().toString());
+            stockTradeBuyTask.setTradeRateType(0);
+            stockTradeBuyTask.setStrategyParam("{\"greateRate\":9}");
+            if (preQuartzTradeDetail.getTradeNum() != null) {
+                stockTradeBuyTask.setTradeNum(preQuartzTradeDetail.getTradeNum().toString());
+            }
+            stockServerFeign.add(stockTradeBuyTask);
         }
     }
 
@@ -56,7 +90,7 @@ public class StockCronRefreshService {
         for (String code : codeArr) {
             try {
                 dataServiceBridge.refreshStockTickInfo(code);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -69,7 +103,7 @@ public class StockCronRefreshService {
             try {
                 dataServiceBridge.refreshStockMinuterInfo(code);
 
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -80,9 +114,9 @@ public class StockCronRefreshService {
         DataServiceBridge dataServiceBridge = dataFactory.build();
         for (String code : dto.getCodeArr()) {
             try {
-                dataServiceBridge.getAndRefreshStockInfo(code,dto.getDateStr());
+                dataServiceBridge.getAndRefreshStockInfo(code, dto.getDateStr());
 
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
 

@@ -70,4 +70,6 @@ public class StockTradeStrategyController {
     public CommonResult findAll(@Validated @RequestBody StockTradeStrategyDTO dto)  {
         return CommonResult.success( stockTradeStrategyService.findAll(dto));
     }
+
+
 }

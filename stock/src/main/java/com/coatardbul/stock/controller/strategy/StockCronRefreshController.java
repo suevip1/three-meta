@@ -4,6 +4,7 @@ import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
+import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,6 +65,18 @@ public class StockCronRefreshController {
     @RequestMapping(path = "/getStockInfo", method = RequestMethod.POST)
     public CommonResult getStockInfo(@RequestBody StockCronRefreshDTO dto) {
         return CommonResult.success(stockCronRefreshService.getStockInfo(dto));
+    }
+
+    @ApiOperation("获取所有的股票信息")
+    @RequestMapping(path = "/getSimpleStockInfo", method = RequestMethod.POST)
+    public CommonResult getSimpleStockInfo(@RequestBody StockCronRefreshDTO dto) {
+        return CommonResult.success(stockCronRefreshService.getSimpleStockInfo(dto));
+    }
+    @ApiOperation("获取所有的股票信息")
+    @RequestMapping(path = "/addStrategyTab", method = RequestMethod.POST)
+    public CommonResult addStrategyTab(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.addStrategyTab(dto);
+        return CommonResult.success(null);
     }
 
 

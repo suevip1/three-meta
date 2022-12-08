@@ -4,7 +4,7 @@ import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockTradeBuyTaskMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
-import com.coatardbul.stock.model.entity.StockTradeBuyTask;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.stock.model.entity.StockTradeStrategy;
 import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;

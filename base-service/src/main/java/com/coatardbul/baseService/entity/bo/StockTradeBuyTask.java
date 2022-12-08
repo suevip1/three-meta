@@ -1,4 +1,4 @@
-package com.coatardbul.stock.model.entity;
+package com.coatardbul.baseService.entity.bo;
 
 import lombok.Data;
 

@@ -4,7 +4,7 @@ import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
 import com.coatardbul.stock.service.statistic.trade.StockTradeBuyTaskService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;
-import com.coatardbul.stock.model.entity.StockTradeBuyTask;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

@@ -3,7 +3,7 @@ package com.coatardbul.stock.controller.trade;
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.service.statistic.trade.StockTradeBuyTaskService;
-import com.coatardbul.stock.model.entity.StockTradeBuyTask;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

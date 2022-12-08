@@ -74,6 +74,20 @@ public class RedisKeyUtils {
     }
 
 
+    /**
+     * 获取ai 策略
+     * @param dateFormat
+     * @param code
+     * @return
+     */
+    public static String getAiStrategyParam( String strategySign) {
+        return "ai_strategy_" + strategySign;
+    }
+
+
+    public static String getPreTradeCode( ) {
+        return "pre_trade_code" ;
+    }
 
 
 }

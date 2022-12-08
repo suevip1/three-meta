@@ -115,7 +115,7 @@ public class CronRefreshService {
         redisTemplate.opsForValue().set(CODE_EXIST_HOUR, codeExistHour.toString(), CONFIG_EXIST_DAY, TimeUnit.DAYS);
     }
 
-    private Integer getCodeExistHour() {
+    public Integer getCodeExistHour() {
         Boolean hasKey = redisTemplate.hasKey(CODE_EXIST_HOUR);
         if (hasKey) {
             String codeExistHourStr = (String) redisTemplate.opsForValue().get(CODE_EXIST_HOUR);

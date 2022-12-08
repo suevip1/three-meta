@@ -1,4 +1,4 @@
-package com.coatardbul.baseCommon.model.bo.trade;
+package com.coatardbul.baseService.entity.bo;
 
 import lombok.Data;
 
@@ -14,7 +14,6 @@ import java.math.BigDecimal;
  */
 @Data
 public class PreTradeDetail {
-
 
 
     private String code;
@@ -35,7 +34,7 @@ public class PreTradeDetail {
 
     /**
      * B  S
-     * @see com.coatardbul.stock.common.constants.TradeTypeEnum
+     * @see TradeTypeEnum
      */
     private String tradeType;
 

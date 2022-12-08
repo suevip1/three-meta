@@ -15,7 +15,7 @@ import com.coatardbul.stock.mapper.StockTradeDetailMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
-import com.coatardbul.stock.model.bo.trade.PreTradeDetail;
+import com.coatardbul.baseService.entity.bo.PreTradeDetail;
 import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
 import com.coatardbul.stock.model.entity.StockTradeConfig;

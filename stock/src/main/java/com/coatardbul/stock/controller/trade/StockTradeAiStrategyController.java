@@ -2,8 +2,8 @@ package com.coatardbul.stock.controller.trade;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.model.entity.StockTradeBuyStrategy;
-import com.coatardbul.stock.service.statistic.trade.StockTradeBuyStrategyService;
+import com.coatardbul.stock.model.entity.StockTradeAiStrategy;
+import com.coatardbul.stock.service.statistic.trade.StockTradeAiStrategyService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Api(tags = "定时任务相关")
-@RequestMapping("/buyStrategy")
-public class StockTradeBuyStrategyController {
+@RequestMapping("/aiStrategy")
+public class StockTradeAiStrategyController {
 
 
     @Autowired
-    StockTradeBuyStrategyService stockTradeBuyStrategyService;
+    StockTradeAiStrategyService stockTradeAiStrategyService;
 
 
 
@@ -38,8 +38,8 @@ public class StockTradeBuyStrategyController {
      */
     @WebLog(value = "保存所有信息")
     @RequestMapping(path = "/add", method = RequestMethod.POST)
-    public CommonResult add(@Validated @RequestBody StockTradeBuyStrategy dto)  {
-        stockTradeBuyStrategyService.add(dto);
+    public CommonResult add(@Validated @RequestBody StockTradeAiStrategy dto)  {
+        stockTradeAiStrategyService.add(dto);
         return CommonResult.success(null);
     }
     
@@ -48,8 +48,8 @@ public class StockTradeBuyStrategyController {
      */
     @WebLog(value = "保存所有信息")
     @RequestMapping(path = "/modify", method = RequestMethod.POST)
-    public CommonResult modify(@Validated @RequestBody StockTradeBuyStrategy dto)  {
-        stockTradeBuyStrategyService.modify(dto);
+    public CommonResult modify(@Validated @RequestBody StockTradeAiStrategy dto)  {
+        stockTradeAiStrategyService.modify(dto);
         return CommonResult.success(null);
     }
     /**
@@ -57,8 +57,8 @@ public class StockTradeBuyStrategyController {
      */
     @WebLog(value = "保存所有信息")
     @RequestMapping(path = "/delete", method = RequestMethod.POST)
-    public CommonResult delete(@Validated @RequestBody StockTradeBuyStrategy dto)  {
-        stockTradeBuyStrategyService.delete(dto);
+    public CommonResult delete(@Validated @RequestBody StockTradeAiStrategy dto)  {
+        stockTradeAiStrategyService.delete(dto);
         return CommonResult.success(null);
     }
 
@@ -70,6 +70,6 @@ public class StockTradeBuyStrategyController {
      */
     @RequestMapping(path = "/findAll", method = RequestMethod.POST)
     public CommonResult findAll() {
-        return CommonResult.success(stockTradeBuyStrategyService.findAll());
+        return CommonResult.success(stockTradeAiStrategyService.findAll());
     }
 }

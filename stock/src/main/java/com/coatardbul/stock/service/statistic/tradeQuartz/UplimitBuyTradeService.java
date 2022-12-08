@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.statistic.tradeQuartz;
 
 import com.coatardbul.baseCommon.constants.SimulateTypeEnum;
-import com.coatardbul.stock.model.bo.trade.PreTradeDetail;
+import com.coatardbul.baseService.entity.bo.PreTradeDetail;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

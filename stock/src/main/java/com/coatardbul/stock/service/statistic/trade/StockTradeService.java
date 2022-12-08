@@ -18,7 +18,7 @@ import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
-import com.coatardbul.stock.model.entity.StockTradeBuyTask;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
 import com.coatardbul.stock.model.entity.StockTradeSellTask;
 import com.coatardbul.stock.model.entity.StockTradeStrategy;
@@ -254,7 +254,7 @@ public class StockTradeService {
         quartzBean.setJobClass(stockTradeStrategy.getJobClass());
         quartzBean.setJobName(jobName);
         Date now = new Date();
-        quartzBean.setStartTime(DateUtils.addSeconds(now, 10));
+        quartzBean.setStartTime(DateUtils.addSeconds(now, 0));
         quartzBean.setCronExpression(cron);
         JobDataMap map = new JobDataMap();
         quartzBean.setJobDataMap(map);

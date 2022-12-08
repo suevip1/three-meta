@@ -46,4 +46,6 @@ public class StockTradeStrategyService {
     public void delete(StockTradeStrategy dto) {
         stockTradeStrategyMapper.deleteByPrimaryKey(dto.getId());
     }
+
+
 }

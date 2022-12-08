@@ -1,6 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockTradeBuyTask;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 
 import java.util.List;
 

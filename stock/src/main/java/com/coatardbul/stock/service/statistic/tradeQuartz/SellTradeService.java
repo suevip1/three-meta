@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.statistic.tradeQuartz;
 
 import com.coatardbul.baseCommon.constants.TradeTypeEnum;
-import com.coatardbul.stock.model.bo.trade.PreTradeDetail;
+import com.coatardbul.baseService.entity.bo.PreTradeDetail;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;

@@ -1,6 +1,7 @@
 package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.TickInfo;
@@ -13,6 +14,7 @@ import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.feign.SailServerFeign;
 import com.coatardbul.stock.feign.TickServerFeign;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
+import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -66,14 +69,14 @@ public class StockCronRefreshService {
      * @return
      */
     public List getStockInfo(StockCronRefreshDTO dto) {
-        Boolean isNow=false;
+        Boolean isNow = false;
         List<Map<String, Object>> result = new ArrayList();
         DataServiceBridge dataServiceBridge = dataFactory.build();
-        if(!StringUtils.isNotBlank(dto.getDateStr())){
+        if (!StringUtils.isNotBlank(dto.getDateStr())) {
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-           if( DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM_SS).compareTo("15:00:00")<0){
-               isNow=true;
-           }
+            if (DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM_SS).compareTo("15:00:00") < 0) {
+                isNow = true;
+            }
         }
         //获取redis上所有当前时间的key
         Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
@@ -83,7 +86,7 @@ public class StockCronRefreshService {
                     String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
                     Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
                     //是否当前
-                    if(!isNow){
+                    if (!isNow) {
                         //如果有时间，需要根据tick数据动态计算缺省数值
                         String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(), RedisKeyUtils.getCodeByStockInfoKey(codeKey.toString()));
                         String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
@@ -92,10 +95,10 @@ public class StockCronRefreshService {
                             });
                             //有过滤时间
                             if (stockTickArr.size() > 0 && StringUtils.isNotBlank(dto.getTimeStr())) {
-                                stockTickArr= stockTickArr.stream().filter(item-> item.getTime().compareTo("09:25:00")>=0&&item.getTime().compareTo(dto.getTimeStr())<=0).collect(Collectors.toList());
+                                stockTickArr = stockTickArr.stream().filter(item -> item.getTime().compareTo("09:25:00") >= 0 && item.getTime().compareTo(dto.getTimeStr()) <= 0).collect(Collectors.toList());
                                 try {
                                     dataServiceBridge.updateTickInfoToStockInfo(stockTickArr, stockMap);
-                                }catch (Exception e){
+                                } catch (Exception e) {
                                     log.error(e.getMessage());
                                 }
                             }
@@ -107,6 +110,42 @@ public class StockCronRefreshService {
             }
         }
         return result;
+    }
+
+    public Object getSimpleStockInfo(StockCronRefreshDTO dto) {
+        List<Map<String, Object>> result = new ArrayList();
+        if (!StringUtils.isNotBlank(dto.getDateStr())) {
+            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+        }
+        //获取redis上所有当前时间的key
+        Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
+        if (keys.size() > 0) {
+            for (Object codeKey : keys) {
+                if (codeKey instanceof String) {
+                    String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
+                    Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
+                    result.add(stockMap);
+                }
+            }
+        }
+        return result;
+    }
+
+    public void addStrategyTab(StockCronStrategyTabDTO dto) {
+        if (!StringUtils.isNotBlank(dto.getDateStr())) {
+            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+        }
+        for (String code : dto.getCodeArr()) {
+            if (code instanceof String) {
+                String codeKey = RedisKeyUtils.getHisStockInfo(dto.getDateStr(), code);
+                String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
+                Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
+                stockMap.put("aiStrategySign",dto.getStrategySign());
+                redisTemplate.opsForValue().set(codeKey, JsonUtil.toJson(stockMap), cronRefreshService.getCodeExistHour(), TimeUnit.HOURS);
+            }
+
+        }
+
     }
 
     /**
@@ -134,7 +173,7 @@ public class StockCronRefreshService {
 //        }
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
 
-        if (dateFormat.equals(dto.getDateStr())||!StringUtils.isNotBlank(dto.getDateStr())) {
+        if (dateFormat.equals(dto.getDateStr()) || !StringUtils.isNotBlank(dto.getDateStr())) {
             stockRefreshprocess(dto);
         } else {
             Constant.onceUpLimitThreadPool.submit(() -> {
@@ -237,15 +276,15 @@ public class StockCronRefreshService {
      * @return
      */
     public void deleteStockInfo(List<String> codes, String dateStr) {
-        if(!StringUtils.isNotBlank(dateStr)){
+        if (!StringUtils.isNotBlank(dateStr)) {
             dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         }
         for (String code : codes) {
-            String key = RedisKeyUtils.getHisStockInfo(dateStr,code);
+            String key = RedisKeyUtils.getHisStockInfo(dateStr, code);
             Boolean hasKey = redisTemplate.hasKey(key);
             if (hasKey) {
                 redisTemplate.delete(key);
-                redisTemplate.delete(RedisKeyUtils.getHisStockTickInfo(dateStr,code));
+                redisTemplate.delete(RedisKeyUtils.getHisStockTickInfo(dateStr, code));
             }
         }
     }
@@ -278,7 +317,7 @@ public class StockCronRefreshService {
 
 
     public List getTickInfo(StockCronRefreshDTO dto) {
-        String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(),dto.getCodeArr().get(0));
+        String key = RedisKeyUtils.getHisStockTickInfo(dto.getDateStr(), dto.getCodeArr().get(0));
         String jsonStr = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isNotBlank(jsonStr)) {
             return JsonUtil.readToValue(jsonStr, new TypeReference<List<Map>>() {
@@ -290,7 +329,7 @@ public class StockCronRefreshService {
 
     public List getMinuterInfo(StockCronRefreshDTO dto) {
 
-        String key = RedisKeyUtils.getHisStockMinuterInfo(dto.getDateStr(),dto.getCodeArr().get(0));
+        String key = RedisKeyUtils.getHisStockMinuterInfo(dto.getDateStr(), dto.getCodeArr().get(0));
         String jsonStr = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isNotBlank(jsonStr)) {
             return JsonUtil.readToValue(jsonStr, new TypeReference<List<Map>>() {
@@ -310,4 +349,6 @@ public class StockCronRefreshService {
     public void refreshHisStockTickInfo(StockCronRefreshDTO dto) {
         tickServerFeign.refreshTickInfo(dto);
     }
+
+
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coatardbul.stock.mapper.StockTradeBuyTaskMapper">
-  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockTradeBuyTask">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
     <!--@Table stock_trade_buy_task-->
     <id column="id" jdbcType="VARCHAR" property="id" />
@@ -36,7 +36,7 @@
     delete from stock_trade_buy_task
     where id = #{id,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockTradeBuyTask">
+  <insert id="insert" parameterType="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
     insert into stock_trade_buy_task (id, strategy_id, strategy_sign, 
       strategy_name, strategy_param, job_name, 
@@ -49,7 +49,7 @@
       #{tradeRate,jdbcType=VARCHAR}, #{stockCode,jdbcType=VARCHAR}, #{stockName,jdbcType=VARCHAR}, 
       #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTradeBuyTask">
+  <insert id="insertSelective" parameterType="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
     insert into stock_trade_buy_task
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -141,7 +141,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockTradeBuyTask">
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
     update stock_trade_buy_task
     <set>
@@ -187,7 +187,7 @@
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockTradeBuyTask">
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
     update stock_trade_buy_task
     set strategy_id = #{strategyId,jdbcType=VARCHAR},
