@@ -61,7 +61,6 @@ public class StockCronRefreshService {
                     try {
                         preQuartzTradeDetailProcess(code);
                     } catch (Exception e) {
-                       aiStrategyService.removeCodeFromPreTrade(code);
                         log.error("交易模块异常" + e.getMessage(), e);
                     }
                 });
