@@ -87,7 +87,12 @@ public class StockCronRefreshService {
             if (preQuartzTradeDetail.getTradeNum() != null) {
                 stockTradeBuyTask.setTradeNum(preQuartzTradeDetail.getTradeNum().toString());
             }
-            stockServerFeign.add(stockTradeBuyTask);
+            try {
+                stockServerFeign.add(stockTradeBuyTask);
+            } catch (Exception e) {
+                aiStrategyService.removeCodeFromPreTrade(code);
+                log.error("请求stock定时任务异常" + e.getMessage(), e);
+            }
         }
     }
 
