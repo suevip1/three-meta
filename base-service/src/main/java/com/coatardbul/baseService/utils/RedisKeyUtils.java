@@ -92,6 +92,6 @@ public class RedisKeyUtils {
 
 
     public static String getStockPool(String dateStr){
-        return dateStr+"_stock_pool";
+        return dateStr+"_pool";
     }
 }
