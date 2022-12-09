@@ -436,7 +436,7 @@ public class StockCronRefreshService {
         StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
         stockCronRefreshDTO.setDateStr(dto.getDateStr());
         stockCronRefreshDTO.setCodeArr(collect);
-        stockCronRefreshService.stockRefreshHisProcess(stockCronRefreshDTO);
+        refreshStockInfo(stockCronRefreshDTO);
 
 
     }
