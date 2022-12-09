@@ -82,7 +82,6 @@ public class StockCronRefreshService {
             stockTradeBuyTask.setStrategySign(preQuartzTradeDetail.getQuartzSign());
             stockTradeBuyTask.setCron("0/1 * * * * ? ");
             stockTradeBuyTask.setTradeAmount(preQuartzTradeDetail.getUserMoney().toString());
-            stockTradeBuyTask.setTradeRateType(0);
             stockTradeBuyTask.setStrategyParam("{\"greateRate\":9}");
             if (preQuartzTradeDetail.getTradeNum() != null) {
                 stockTradeBuyTask.setTradeNum(preQuartzTradeDetail.getTradeNum().toString());

@@ -49,6 +49,9 @@ public class SnowFlakeService {
     public synchronized long snowflakeId() {
         return snowflake.nextId();
     }
+    public synchronized String getSnowId() {
+        return String.valueOf(snowflake.nextId());
+    }
 
     /**
      * 有参根据参数获取ID

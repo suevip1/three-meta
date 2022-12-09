@@ -235,9 +235,9 @@ public class StockTradeService {
         return dto.getId() + "_" + dto.getStrategySign() + "_" + dto.getStockCode() + "_" + dto.getStockName();
     }
 
-    public QuartzBean getQuartzBean(String strategyId, String jobName, String cron) {
+    public QuartzBean getQuartzBean(String strategySign, String jobName, String cron) {
         QuartzBean quartzBean = new QuartzBean();
-        StockTradeStrategy stockTradeStrategy = stockTradeStrategyMapper.selectByPrimaryKey(strategyId);
+        StockTradeStrategy stockTradeStrategy = stockTradeStrategyMapper.selectAllBySign(strategySign);
         quartzBean.setJobClass(stockTradeStrategy.getJobClass());
         quartzBean.setJobName(jobName);
         Date now = new Date();

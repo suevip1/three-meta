@@ -79,6 +79,10 @@ public class StockUpLimitAnalyzeCommonService {
             ) {
                 jsonMap.put("auctionTradeAmount", jsonObject.get(key));
             }
+            if (key.indexOf("最高价") > -1 && key.indexOf(dateStr) > -1 && key.indexOf("{/}") < 0
+            ) {
+                jsonMap.put("maxPrice", jsonObject.get(key));
+            }
             if (key.indexOf("总市值") > -1 && key.indexOf(dateStr) > -1
             ) {
                 jsonMap.put("marketValue", jsonObject.get(key));

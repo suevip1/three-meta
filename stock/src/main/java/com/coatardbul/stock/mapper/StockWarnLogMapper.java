@@ -1,9 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockWarnLog;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
+import com.coatardbul.stock.model.entity.StockWarnLog;import org.apache.ibatis.annotations.Param;import java.util.List;
 
 public interface StockWarnLogMapper {
     int deleteByPrimaryKey(String id);
@@ -18,18 +15,11 @@ public interface StockWarnLogMapper {
 
     int updateByPrimaryKey(StockWarnLog record);
 
-    List<StockWarnLog> selectAllByTemplateIdAndDate(@Param("templateId")String templateId,@Param("date")String date);
-
+    List<StockWarnLog> selectAllByTemplateIdAndDate(@Param("templateId") String templateId, @Param("date") String date);
 
     List<StockWarnLog> selectByAll(StockWarnLog stockWarnLog);
 
-int deleteByDate(@Param("date")String date);
+    int deleteByDate(@Param("date") String date);
 
-
-
-    List<StockWarnLog> selectAllByDateAndTemplateId(@Param("date")String date,@Param("templateId")String templateId);
-
-
-
-
+    List<StockWarnLog> selectAllByDateAndTemplateId(@Param("date") String date, @Param("templateId") String templateId);
 }

@@ -54,8 +54,7 @@ public class StockTradeBuyTaskService {
     public void modify(StockTradeBuyTask dto) throws Exception {
         stockTradeBuyTaskMapper.updateByPrimaryKeySelective(dto);
         StockTradeBuyTask stockTradeBuyTask = stockTradeBuyTaskMapper.selectByPrimaryKey(dto.getId());
-
-        QuartzBean quartzBean=stockTradeService.getQuartzBean(stockTradeBuyTask.getStrategyId(),stockTradeBuyTask.getJobName(),stockTradeBuyTask.getCron());
+        QuartzBean quartzBean=stockTradeService.getQuartzBean(dto.getStrategySign(),stockTradeBuyTask.getJobName(),stockTradeBuyTask.getCron());
         stockQuartzService.updateScheduleJobCron(quartzBean);
     }
 

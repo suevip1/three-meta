@@ -1,22 +1,36 @@
 package com.coatardbul.stock.service.statistic;
 
+import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.constants.AiStrategyEnum;
+import com.coatardbul.baseCommon.constants.BuySellQuartzStrategySignEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
 import com.coatardbul.baseService.entity.bo.TickInfo;
+import com.coatardbul.baseService.service.AiStrategyService;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.HttpPoolService;
+import com.coatardbul.baseService.service.SnowFlakeService;
+import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.feign.SailServerFeign;
 import com.coatardbul.stock.feign.TickServerFeign;
+import com.coatardbul.stock.mapper.StockWarnLogMapper;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
+import com.coatardbul.stock.model.entity.StockWarnLog;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import gnu.trove.set.hash.THashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +40,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,10 +64,20 @@ public class StockCronRefreshService {
     public CronRefreshService cronRefreshService;
     @Autowired
     RedisTemplate redisTemplate;
-
+    @Autowired
+    RiverRemoteService riverRemoteService;
     @Autowired
     HttpPoolService HttpPoolService;
-
+    @Autowired
+    AiStrategyService aiStrategyService;
+    @Autowired
+    StockCronRefreshService stockCronRefreshService;
+    @Autowired
+    SnowFlakeService snowFlakeService;
+    @Autowired
+    StockStrategyCommonService stockStrategyCommonService;
+    @Autowired
+    StockWarnLogMapper stockWarnLogMapper;
     @Resource
     TickServerFeign tickServerFeign;
     @Autowired
@@ -140,7 +165,7 @@ public class StockCronRefreshService {
                 String codeKey = RedisKeyUtils.getHisStockInfo(dto.getDateStr(), code);
                 String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
                 Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
-                stockMap.put("aiStrategySign",dto.getStrategySign());
+                stockMap.put("aiStrategySign", dto.getStrategySign());
                 redisTemplate.opsForValue().set(codeKey, JsonUtil.toJson(stockMap), cronRefreshService.getCodeExistHour(), TimeUnit.HOURS);
             }
 
@@ -215,7 +240,7 @@ public class StockCronRefreshService {
         }
     }
 
-    private void stockRefreshHisProcess(StockCronRefreshDTO dto) {
+    public void stockRefreshHisProcess(StockCronRefreshDTO dto) {
         List<String> codes = dto.getCodeArr();
         List<String> codeArr = new ArrayList<>();
         for (String code : codes) {
@@ -351,4 +376,94 @@ public class StockCronRefreshService {
     }
 
 
+    public void simulateHis(StockCronStrategyTabDTO dto) {
+        Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
+
+        for (Object codeKey : keys) {
+            if (codeKey instanceof String) {
+                String key = codeKey.toString();
+                String code = RedisKeyUtils.getCodeByStockInfoKey(key);
+                try {
+                    PreQuartzTradeDetail preQuartzTradeDetail = aiStrategyService.getPreQuartzTradeDetail(code, dto.getStrategySign(), dto.getDateStr());
+                    if (preQuartzTradeDetail.getTradeFlag()) {
+                        StockWarnLog stockWarnLog = new StockWarnLog();
+                        stockWarnLog.setId(String.valueOf(snowFlakeService.getSnowId()));
+                        stockWarnLog.setStockCode(preQuartzTradeDetail.getCode());
+                        stockWarnLog.setStockName(preQuartzTradeDetail.getName());
+                        stockWarnLog.setDate(preQuartzTradeDetail.getDate());
+                        Date date = DateTimeUtil.parseDateStr(preQuartzTradeDetail.getDate() + preQuartzTradeDetail.getTime(), DateTimeUtil.YYYY_MM_DD + DateTimeUtil.HH_MM_SS);
+                        stockWarnLog.setCreateTime(date);
+                        stockWarnLog.setTemplateSign(preQuartzTradeDetail.getQuartzSign());
+                        stockWarnLog.setTemplateName(BuySellQuartzStrategySignEnum.getDescByCode(preQuartzTradeDetail.getQuartzSign()));
+                        stockWarnLogMapper.insert(stockWarnLog);
+                    }
+                } catch (Exception e) {
+                    log.error("模拟历史异常" + e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    public void addStockPool(StockCronStrategyTabDTO dto) {
+        String stockPoolKey = RedisKeyUtils.getStockPool(dto.getDateStr());
+        Set<String> codeArr = new HashSet<>();
+        if (redisTemplate.hasKey(stockPoolKey)) {
+            String stockPool = (String) redisTemplate.opsForValue().get(stockPoolKey);
+            codeArr = JsonUtil.readToValue(stockPool, new TypeReference<Set<String>>() {
+            });
+        }
+        //6天的数据，当天是否为交易日
+        for (int i = 0; i < 6; i++) {
+            String specialDay = null;
+            if (i == 0) {
+                specialDay = dto.getDateStr();
+            } else {
+                specialDay = riverRemoteService.getSpecialDay(dto.getDateStr(), 0 - i);
+            }
+            List<String> stockCodeArr = getStockCodeArr(specialDay, StockTemplateEnum.XXX.getSign());
+            codeArr.addAll(stockCodeArr);
+
+        }
+        String specialDay = riverRemoteService.getSpecialDay(dto.getDateStr(), -1);
+        List<String> stockCodeArr = getStockCodeArr(specialDay, StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
+        for (String code : stockCodeArr) {
+            codeArr.remove(code);
+        }
+        redisTemplate.opsForValue().set(stockPoolKey, JsonUtil.toJson(codeArr), 24, TimeUnit.HOURS);
+
+        //调用历史接口
+        List<String> collect = codeArr.stream().collect(Collectors.toList());
+        StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
+        stockCronRefreshDTO.setDateStr(dto.getDateStr());
+        stockCronRefreshDTO.setCodeArr(collect);
+        stockCronRefreshService.stockRefreshHisProcess(stockCronRefreshDTO);
+
+
+    }
+
+    private List<String> getStockCodeArr(String dateStr, String templateSign) {
+        List<String> result = new ArrayList<>();
+        StockStrategyQueryDTO stockStrategyQueryDTO = new StockStrategyQueryDTO();
+        stockStrategyQueryDTO.setRiverStockTemplateSign(templateSign);
+        stockStrategyQueryDTO.setDateStr(dateStr);
+        StrategyBO strategy = null;
+        int retryNum = 5;
+        while (retryNum > 0) {
+            try {
+                strategy = stockStrategyCommonService.strategy(stockStrategyQueryDTO);
+                break;
+            } catch (Exception e) {
+                retryNum--;
+                log.error(e.getMessage(), e);
+            }
+        }
+        if (strategy != null && strategy.getTotalNum() > 0) {
+            for (int k = 0; k < strategy.getData().size(); k++) {
+                JSONObject jsonObject = strategy.getData().getJSONObject(k);
+                String code = jsonObject.getString("股票代码").substring(0, 6);
+                result.add(code);
+            }
+        }
+        return result;
+    }
 }

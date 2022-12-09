@@ -57,7 +57,7 @@ public class DateTimeUtil {
      */
     public static Date parseDateStr(String dateStr, String format) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.parse(dateStr);
     }
 

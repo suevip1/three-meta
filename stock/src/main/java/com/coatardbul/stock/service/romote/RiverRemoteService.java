@@ -63,7 +63,7 @@ public class RiverRemoteService {
             stockTemplateDto.setId(id);
             CommonResult<StockTemplateDto> riverDate = riverServerFeign.findOne(stockTemplateDto);
             if (riverDate.getData() == null) {
-                throw new BusinessException("模板id不正确");
+                return "";
             }
             sb.append(riverDate.getData().getName());
         }

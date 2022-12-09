@@ -11,10 +11,11 @@
     <result column="template_name" jdbcType="VARCHAR" property="templateName" />
     <result column="date" jdbcType="VARCHAR" property="date" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="template_sign" jdbcType="VARCHAR" property="templateSign" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, stock_code, stock_name, template_id, template_name, `date`, create_time
+    id, stock_code, stock_name, template_id, template_name, `date`, create_time, template_sign
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -32,58 +33,64 @@
     <!--@mbg.generated-->
     insert into stock_warn_log (id, stock_code, stock_name, 
       template_id, template_name, `date`, 
-      create_time)
+      create_time, template_sign)
     values (#{id,jdbcType=VARCHAR}, #{stockCode,jdbcType=VARCHAR}, #{stockName,jdbcType=VARCHAR}, 
       #{templateId,jdbcType=VARCHAR}, #{templateName,jdbcType=VARCHAR}, #{date,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP})
+      #{createTime,jdbcType=TIMESTAMP}, #{templateSign,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockWarnLog">
     <!--@mbg.generated-->
     insert into stock_warn_log
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         id,
       </if>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         stock_code,
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         stock_name,
       </if>
-      <if test="templateId != null">
+      <if test="templateId != null and templateId != ''">
         template_id,
       </if>
-      <if test="templateName != null">
+      <if test="templateName != null and templateName != ''">
         template_name,
       </if>
-      <if test="date != null">
+      <if test="date != null and date != ''">
         `date`,
       </if>
       <if test="createTime != null">
         create_time,
       </if>
+      <if test="templateSign != null and templateSign != ''">
+        template_sign,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         #{id,jdbcType=VARCHAR},
       </if>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         #{stockCode,jdbcType=VARCHAR},
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         #{stockName,jdbcType=VARCHAR},
       </if>
-      <if test="templateId != null">
+      <if test="templateId != null and templateId != ''">
         #{templateId,jdbcType=VARCHAR},
       </if>
-      <if test="templateName != null">
+      <if test="templateName != null and templateName != ''">
         #{templateName,jdbcType=VARCHAR},
       </if>
-      <if test="date != null">
+      <if test="date != null and date != ''">
         #{date,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="templateSign != null and templateSign != ''">
+        #{templateSign,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -91,23 +98,26 @@
     <!--@mbg.generated-->
     update stock_warn_log
     <set>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         stock_code = #{stockCode,jdbcType=VARCHAR},
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         stock_name = #{stockName,jdbcType=VARCHAR},
       </if>
-      <if test="templateId != null">
+      <if test="templateId != null and templateId != ''">
         template_id = #{templateId,jdbcType=VARCHAR},
       </if>
-      <if test="templateName != null">
+      <if test="templateName != null and templateName != ''">
         template_name = #{templateName,jdbcType=VARCHAR},
       </if>
-      <if test="date != null">
+      <if test="date != null and date != ''">
         `date` = #{date,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="templateSign != null and templateSign != ''">
+        template_sign = #{templateSign,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
@@ -120,14 +130,15 @@
       template_id = #{templateId,jdbcType=VARCHAR},
       template_name = #{templateName,jdbcType=VARCHAR},
       `date` = #{date,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      template_sign = #{templateSign,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 
 <!--auto generated by MybatisCodeHelper on 2022-03-05-->
   <select id="selectAllByTemplateIdAndDate" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from stock_warn_log
         where template_id=#{templateId,jdbcType=VARCHAR} and `date`=#{date,jdbcType=VARCHAR}
     </select>
@@ -135,7 +146,7 @@
 <!--auto generated by MybatisCodeHelper on 2022-03-06-->
   <select id="selectByAll" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from stock_warn_log
         <where>
             <if test="id != null">
@@ -165,7 +176,7 @@
 <!--auto generated by MybatisCodeHelper on 2022-03-09-->
   <select id="selectAllByDateAndTemplateId" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List"/>
+    <include refid="Base_Column_List" />
     from stock_warn_log
     <where>
       `date`=#{date,jdbcType=VARCHAR}

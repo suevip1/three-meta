@@ -41,7 +41,7 @@ public class StockTradeSellTaskService {
         dto.setJobName(stockTradeService.getJobName(dto));
         stockTradeSellTaskMapper.insert(dto);
 
-        QuartzBean quartzBean=stockTradeService.getQuartzBean(dto.getStrategyId(),dto.getJobName(),dto.getCron());
+        QuartzBean quartzBean=stockTradeService.getQuartzBean(dto.getStrategySign(),dto.getJobName(),dto.getCron());
         stockQuartzService.createScheduleJobCron(quartzBean);
     }
 
@@ -49,7 +49,7 @@ public class StockTradeSellTaskService {
         stockTradeSellTaskMapper.updateByPrimaryKeySelective(dto);
         StockTradeSellTask stockTradeSellTask = stockTradeSellTaskMapper.selectByPrimaryKey(dto.getId());
 
-        QuartzBean quartzBean=stockTradeService.getQuartzBean(stockTradeSellTask.getStrategyId(),stockTradeSellTask.getJobName(),stockTradeSellTask.getCron());
+        QuartzBean quartzBean=stockTradeService.getQuartzBean(stockTradeSellTask.getStrategySign(),stockTradeSellTask.getJobName(),stockTradeSellTask.getCron());
         stockQuartzService.updateScheduleJobCron(quartzBean);
     }
 

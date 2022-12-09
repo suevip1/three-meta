@@ -150,4 +150,19 @@ public class StockCronRefreshController {
     }
 
 
+    @ApiOperation("模拟历史")
+    @RequestMapping(path = "/simulateHis", method = RequestMethod.POST)
+    public CommonResult simulateHis(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.simulateHis(dto);
+        return CommonResult.success(null);
+    }
+
+    @ApiOperation("一键添加股票信息")
+    @RequestMapping(path = "/addStockPool", method = RequestMethod.POST)
+    public CommonResult addStockPool(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.addStockPool(dto);
+        return CommonResult.success(null);
+    }
+
+
 }

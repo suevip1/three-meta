@@ -30,4 +30,15 @@ public enum AiStrategyEnum {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+
+
+    public static String getDescByCode(String code) {
+        AiStrategyEnum[] values = AiStrategyEnum.values();
+        for(AiStrategyEnum aiStrategyEnum:values){
+            if(aiStrategyEnum.getCode().equals(code)){
+                return aiStrategyEnum.getDesc();
+            }
+        }
+        return "";
+    }
 }

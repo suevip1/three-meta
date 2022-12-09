@@ -37,4 +37,14 @@ public enum BuySellQuartzStrategySignEnum {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+
+    public static  String getDescByCode(String code){
+        BuySellQuartzStrategySignEnum[] values = BuySellQuartzStrategySignEnum.values();
+        for(BuySellQuartzStrategySignEnum buySellQuartzStrategySignEnum:values){
+            if(buySellQuartzStrategySignEnum.getCode().equals(code)){
+                return buySellQuartzStrategySignEnum.getDesc();
+            }
+        }
+        return "";
+    }
 }

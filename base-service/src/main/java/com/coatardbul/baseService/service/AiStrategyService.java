@@ -8,8 +8,11 @@ import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.AiStrategyParamBo;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
 import com.coatardbul.baseService.entity.bo.PreTradeDetail;
+import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -17,8 +20,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -71,6 +76,46 @@ public class AiStrategyService {
         return result;
     }
 
+    public PreQuartzTradeDetail getPreQuartzTradeDetail(String code, String aiStrategySig,String dateStr){
+        PreQuartzTradeDetail result = new PreQuartzTradeDetail();
+        String key = RedisKeyUtils.getHisStockInfo(dateStr,code);
+        String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
+        Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
+
+        if (AiStrategyEnum.DU_GU_SWORD.getCode().equals(aiStrategySig)) {
+
+            BigDecimal auctionIncreaseRate = new BigDecimal(map.get("auctionIncreaseRate").toString());
+            BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
+            //最大价格
+            BigDecimal maxPrice = new BigDecimal(map.get("maxPrice").toString());
+            BigDecimal maxIncreaseRate = maxPrice.subtract(lastClosePrice).multiply(new BigDecimal(100)).divide(lastClosePrice, 2, BigDecimal.ROUND_HALF_DOWN);
+            //最大价格涨幅-竞价涨幅=涨幅（预警计算方式）
+            BigDecimal subIncreaseRate = maxIncreaseRate.subtract(auctionIncreaseRate);
+            //竞价涨幅在 -2 到 0  之间，最高点到达7个点， 9个点买入，或者涨停前五买入
+            if (auctionIncreaseRate.compareTo(new BigDecimal(-2)) >= 0 && auctionIncreaseRate.compareTo(BigDecimal.ZERO) <= 0) {
+                if (subIncreaseRate.compareTo(new BigDecimal(7)) >= 0) {
+                    //计算
+                    calcProcess(map,result,code);
+                }
+            }
+            //竞价涨幅在 0 到 2 之间， 6个点预警， 9个点买入，或者涨停前五买入
+            if (auctionIncreaseRate.compareTo(BigDecimal.ZERO) >= 0 && auctionIncreaseRate.compareTo(new BigDecimal(3)) <= 0) {
+                if (subIncreaseRate.compareTo(new BigDecimal(6)) >= 0) {
+                    //计算
+                    calcProcess(map,result,code);
+                }
+            }
+            //竞价涨幅在 3 之间， 5个点预警， 9个点买入，或者涨停前五买入
+            if (auctionIncreaseRate.compareTo(new BigDecimal(3)) >= 0 && auctionIncreaseRate.compareTo(new BigDecimal(4)) <= 0) {
+                if (subIncreaseRate.compareTo(new BigDecimal(5)) >= 0) {
+                    //计算
+                    calcProcess(map,result,code);
+                }
+            }
+        }
+        return result;
+    }
+
 
     /**
      * 条件判断
@@ -106,6 +151,68 @@ public class AiStrategyService {
             if (subIncreaseRate.compareTo(new BigDecimal(5)) >= 0) {
                 //计算
                 calcProcess(map,aiStrategyParamBo,result,code);
+            }
+        }
+
+    }
+
+    /**
+     * 通过tick数据来计算准确的买入位置
+     * @param map
+     * @param result
+     * @param code
+     */
+    private void calcProcess(Map map, PreQuartzTradeDetail result,String code) {
+        String name = map.get("name").toString();
+        result.setCode(code);
+        result.setName(name);
+        BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
+
+        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
+
+        BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.01));
+        //涨幅前五小于9 ,走大于9的策略，否则走涨停前五
+        BigDecimal divide = upLimitFivePrice.subtract(lastClosePrice).multiply(new BigDecimal(100)).divide(lastClosePrice, 2, BigDecimal.ROUND_HALF_DOWN);
+        if(divide.compareTo(new BigDecimal(9))<=0){
+            result.setQuartzSign(BuySellQuartzStrategySignEnum.RATE_GREATE_BUY.getCode());
+        }else {
+            result.setQuartzSign(BuySellQuartzStrategySignEnum.UPLIMIT_BUY_FIVE.getCode());
+        }
+
+        calcSuitPrice(map, result,upLimitFivePrice);
+    }
+
+    /**
+     * 计算合适的价格，通过tick
+     * @param map
+     * @param result
+     */
+    private void calcSuitPrice(Map map,  PreQuartzTradeDetail result,  BigDecimal upLimitFivePrice){
+        String currDateStr = map.get("currDateStr").toString();
+        String code = map.get("code").toString();
+
+        BigDecimal target=null;
+        //大于9，可以买
+        if(BuySellQuartzStrategySignEnum.RATE_GREATE_BUY.getCode().equals(result.getQuartzSign())){
+            BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
+            target = lastClosePrice.multiply(new BigDecimal(1.09));
+        }else {
+            target=upLimitFivePrice;
+        }
+
+        String key = RedisKeyUtils.getHisStockTickInfo(currDateStr, code);
+        String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
+        if(StringUtils.isNotBlank(stockTickArrStr)){
+            List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
+            });
+            BigDecimal finalTarget = target;
+            List<TickInfo> collect = stockTickArr.stream().filter(item ->item.getTime().compareTo("09:29:55")>0&& item.getPrice().compareTo(finalTarget) >= 0).collect(Collectors.toList());
+            if(collect.size()>0){
+                TickInfo tickInfo = collect.get(0);
+                result.setTradeFlag(true);
+                result.setDate(currDateStr);
+                result.setTime(tickInfo.getTime());
+                result.setPrice(tickInfo.getPrice());
             }
         }
 
