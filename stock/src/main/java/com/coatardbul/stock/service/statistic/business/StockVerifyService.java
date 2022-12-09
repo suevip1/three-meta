@@ -2,7 +2,9 @@ package com.coatardbul.stock.service.statistic.business;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.model.entity.StockStaticTemplate;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +33,8 @@ public class StockVerifyService {
 
     @Autowired
     RiverRemoteService riverRemoteService;
-
+    @Resource
+    public CronRefreshService cronRefreshService;
     @Autowired
     RiverServerFeign riverServerFeign;
     @Autowired
@@ -98,14 +102,19 @@ public class StockVerifyService {
      * @throws ParseException
      */
     public Boolean isIllegalDateTimeStr(String  dateStr,String timeStr) throws ParseException {
-        Date date=DateTimeUtil.parseDateStr(dateStr+timeStr,DateTimeUtil.YYYY_MM_DD+DateTimeUtil.HH_MM);
-        if (new Date().compareTo(date) < 0) {
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
+
+//        Date date=DateTimeUtil.parseDateStr(dateStr+timeStr,DateTimeUtil.YYYY_MM_DD+DateTimeUtil.HH_MM);
+//        if (new Date().compareTo(date) < 0) {
+//            return true;
+//        }
+        if(timeStr.compareTo(cronRefreshConfigBo.getCronAmBeginTime())<0){
             return true;
         }
-        if(timeStr.compareTo("09:30")<0){
+        if(timeStr.compareTo(cronRefreshConfigBo.getCronAmEndTime())>0&&timeStr.compareTo(cronRefreshConfigBo.getCronPmBeginTime())<0){
             return true;
         }
-        if(timeStr.compareTo("11:30")>0&&timeStr.compareTo("13:00")<0){
+        if(timeStr.compareTo(cronRefreshConfigBo.getCronPmEndTime())>0){
             return true;
         }
         return false;

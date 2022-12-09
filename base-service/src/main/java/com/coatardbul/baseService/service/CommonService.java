@@ -96,8 +96,22 @@ public abstract class CommonService {
                 new BigDecimal(map.get("newPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
                         divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
 
+        //最大涨幅=(目前价格-昨日价格)/昨日价格
+        map.put("maxIncreaseRate",
+                new BigDecimal(map.get("maxPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
+                        divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
+        //最小涨幅=(目前价格-昨日价格)/昨日价格
+        map.put("minIncreaseRate",
+                new BigDecimal(map.get("minPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
+                        divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
+
         //涨速=涨幅-竞价涨幅
         map.put("subIncreaseRate", ((BigDecimal) (map.get("newIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
+
+        //最大涨速=涨幅-竞价涨幅
+        map.put("subMaxIncreaseRate", ((BigDecimal) (map.get("maxIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
+        //最大跌=涨幅-竞价涨幅
+        map.put("subMinIncreaseRate", ((BigDecimal) (map.get("minIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
         //实时换手率
         map.put("turnOverRate",
                 new BigDecimal(map.get("tradeAmount").toString()).multiply(new BigDecimal(100)).

@@ -159,11 +159,23 @@ public class AiStrategyService {
         String preTradeCodeKey = RedisKeyUtils.getPreTradeCode();
         Map preTradeCodeMap = null;
         if(redisTemplate.hasKey(preTradeCodeKey)){
-             preTradeCodeMap = JsonUtil.readToValue(preTradeCodeKey, Map.class);
+            String preTradeCode = (String)redisTemplate.opsForValue().get(preTradeCodeKey);
+            preTradeCodeMap = JsonUtil.readToValue(preTradeCode, Map.class);
         }else {
             preTradeCodeMap=new HashMap();
         }
         preTradeCodeMap.put(code, code);
         redisTemplate.opsForValue().set(preTradeCodeKey, JsonUtil.toJson(preTradeCodeMap), 4, TimeUnit.HOURS);
     }
+    public void removeCodeFromPreTrade(String code){
+        String preTradeCodeKey = RedisKeyUtils.getPreTradeCode();
+        Map preTradeCodeMap = null;
+        if(redisTemplate.hasKey(preTradeCodeKey)){
+            String preTradeCode = (String)redisTemplate.opsForValue().get(preTradeCodeKey);
+            preTradeCodeMap = JsonUtil.readToValue(preTradeCode, Map.class);
+            preTradeCodeMap.remove(code);
+            redisTemplate.opsForValue().set(preTradeCodeKey, JsonUtil.toJson(preTradeCodeMap), 4, TimeUnit.HOURS);
+        }
+    }
+
 }

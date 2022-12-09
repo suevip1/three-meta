@@ -42,6 +42,13 @@ public class CronRefreshService {
 
     private final static String ALI_APP_CODE = "aliAppCode";
 
+    private final static String CRON_AM_BEGIN_TIME = "cronAmBeginTime";
+    private final static String CRON_AM_END_TIME = "cronAmEndTime";
+    private final static String CRON_PM_BEGIN_TIME = "cronPmBeginTime";
+    private final static String CRON_PM_END_TIME = "cronPmEndTime";
+
+
+
     private final static Integer CONFIG_EXIST_DAY = 30;
 
     @Autowired
@@ -65,6 +72,13 @@ public class CronRefreshService {
         cronRefreshConfigBo.setBatchNum(getBatchNum());
         //阿里appcode
         cronRefreshConfigBo.setAliAppCode(getAliAppCode());
+
+        cronRefreshConfigBo.setCronAmBeginTime(getCronAmBeginTime());
+        cronRefreshConfigBo.setCronAmEndTime(getCronAmEndTime());
+        cronRefreshConfigBo.setCronPmBeginTime(getCronPmBeginTime());
+        cronRefreshConfigBo.setCronPmEndTime(getCronPmEndTime());
+
+
     }
 
 
@@ -77,6 +91,10 @@ public class CronRefreshService {
         configBo.setSockTimeout(getSockTimeout());
         configBo.setBatchNum(getBatchNum());
         configBo.setAliAppCode(getAliAppCode());
+        configBo.setCronAmBeginTime(getCronAmBeginTime());
+        configBo.setCronAmEndTime(getCronAmEndTime());
+        configBo.setCronPmBeginTime(getCronPmBeginTime());
+        configBo.setCronPmEndTime(getCronPmEndTime());
         return configBo;
     }
 
@@ -89,6 +107,10 @@ public class CronRefreshService {
         setSockTimeout(tempObj.getSockTimeout());
         setBatchNum(tempObj.getBatchNum());
         setAliAppCode(tempObj.getAliAppCode());
+        setCronAmBeginTime(tempObj.getCronAmBeginTime());
+        setCronAmEndTime(tempObj.getCronAmEndTime());
+        setCronPmBeginTime(tempObj.getCronPmBeginTime());
+        setCronPmEndTime(tempObj.getCronPmEndTime());
     }
 
     public boolean getProxyFlag() {
@@ -207,5 +229,52 @@ public class CronRefreshService {
         }
     }
 
-
+    private void setCronAmBeginTime(String cronAmBeginTime) {
+        redisTemplate.opsForValue().set(CRON_AM_BEGIN_TIME, cronAmBeginTime, CONFIG_EXIST_DAY, TimeUnit.DAYS);
+    }
+    public String getCronAmBeginTime() {
+        Boolean hasKey = redisTemplate.hasKey(CRON_AM_BEGIN_TIME);
+        if (hasKey) {
+            return (String) redisTemplate.opsForValue().get(CRON_AM_BEGIN_TIME);
+        } else {
+            //默认
+            return "09:30";
+        }
+    }
+    private void setCronAmEndTime(String cronAmEndTime) {
+        redisTemplate.opsForValue().set(CRON_AM_END_TIME, cronAmEndTime, CONFIG_EXIST_DAY, TimeUnit.DAYS);
+    }
+    public String getCronAmEndTime() {
+        Boolean hasKey = redisTemplate.hasKey(CRON_AM_END_TIME);
+        if (hasKey) {
+            return (String) redisTemplate.opsForValue().get(CRON_AM_END_TIME);
+        } else {
+            //默认
+            return "11:30";
+        }
+    }
+    private void setCronPmBeginTime(String cronPmBeginTime) {
+        redisTemplate.opsForValue().set(CRON_PM_BEGIN_TIME, cronPmBeginTime, CONFIG_EXIST_DAY, TimeUnit.DAYS);
+    }
+    public String getCronPmBeginTime() {
+        Boolean hasKey = redisTemplate.hasKey(CRON_PM_BEGIN_TIME);
+        if (hasKey) {
+            return (String) redisTemplate.opsForValue().get(CRON_PM_BEGIN_TIME);
+        } else {
+            //默认
+            return "13:00";
+        }
+    }
+    private void setCronPmEndTime(String cronPmEndTime) {
+        redisTemplate.opsForValue().set(CRON_PM_END_TIME, cronPmEndTime, CONFIG_EXIST_DAY, TimeUnit.DAYS);
+    }
+    public String getCronPmEndTime() {
+        Boolean hasKey = redisTemplate.hasKey(CRON_PM_END_TIME);
+        if (hasKey) {
+            return (String) redisTemplate.opsForValue().get(CRON_PM_END_TIME);
+        } else {
+            //默认
+            return "15:00";
+        }
+    }
 }

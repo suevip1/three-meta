@@ -52,4 +52,22 @@ public class CronRefreshConfigBo {
      */
     private String aliAppCode;
 
+
+    /**
+     * 定时任务，早上开始时间
+     */
+    private String cronAmBeginTime;
+    /**
+     * 09:30
+     */
+    private String cronAmEndTime;
+    /**
+     * 09:30
+     */
+    private String cronPmBeginTime;
+    /**
+     * 09:30
+     */
+    private String cronPmEndTime;
+
 }
