@@ -479,6 +479,10 @@ public class StockCronRefreshService {
             stockCronStrategyTabDTO.setStrategySign(AiStrategyEnum.DU_GU_SWORD.getCode());
             addStockPool(stockCronStrategyTabDTO);
             simulateHis(stockCronStrategyTabDTO);
+            try {
+                Thread.sleep(60*1000);
+            } catch (InterruptedException e) {
+            }
         }
 
     }
