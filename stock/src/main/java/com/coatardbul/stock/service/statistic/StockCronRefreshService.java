@@ -413,7 +413,7 @@ public class StockCronRefreshService {
             });
         }
         //6天的数据，当天是否为交易日
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i <=6; i++) {
             String specialDay = null;
             if (i == 0) {
                 specialDay = dto.getDateStr();
