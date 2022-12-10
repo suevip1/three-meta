@@ -466,4 +466,20 @@ public class StockCronRefreshService {
         }
         return result;
     }
+
+    public void addMonthStockPool(StockCronStrategyTabDTO dto) {
+        String dateStr = dto.getDateStr();
+        String beginDateStr = dateStr.substring(0,dateStr.length() - 2)+"01";
+        String endDateStr = dateStr.substring(0,dateStr.length() - 2)+"31";
+
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, endDateStr);
+        for(String currDateStr:dateIntervalList){
+            StockCronStrategyTabDTO stockCronStrategyTabDTO=new StockCronStrategyTabDTO();
+            stockCronStrategyTabDTO.setDateStr(currDateStr);
+            stockCronStrategyTabDTO.setStrategySign(AiStrategyEnum.DU_GU_SWORD.getCode());
+            addStockPool(stockCronStrategyTabDTO);
+            simulateHis(stockCronStrategyTabDTO);
+        }
+
+    }
 }

@@ -164,6 +164,12 @@ public class StockCronRefreshController {
         return CommonResult.success(null);
     }
 
+    @ApiOperation("按月当月一键添加测试")
+    @RequestMapping(path = "/addMonthStockPool", method = RequestMethod.POST)
+    public CommonResult addMonthStockPool(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.addMonthStockPool(dto);
+        return CommonResult.success(null);
+    }
 
 
 }
