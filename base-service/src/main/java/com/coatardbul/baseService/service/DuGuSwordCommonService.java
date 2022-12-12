@@ -2,12 +2,10 @@ package com.coatardbul.baseService.service;
 
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.constants.BuySellQuartzStrategySignEnum;
-import com.coatardbul.baseCommon.constants.IsNotEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.AiStrategyParamBo;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
-import com.coatardbul.baseService.entity.bo.PreTradeDetail;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,21 +27,17 @@ import java.util.stream.Collectors;
  * <p>
  * Note:
  * <p>
- * Date: 2022/12/8
+ * Date: 2022/12/11
  *
  * @author Su Xiaolei
  */
 @Service
 @Slf4j
-public class AiStrategyService {
+public abstract class DuGuSwordCommonService {
     @Autowired
     RedisTemplate redisTemplate;
     @Autowired
     StockParseAndConvertService stockParseAndConvertService;
-    @Autowired
-    DuGuSwordDelayService duGuSwordDelayService;
-    @Autowired
-    DuGuSwordService duGuSwordService;
 
     /**
      * 获取预交易的配置信息
@@ -81,23 +75,43 @@ public class AiStrategyService {
         return result;
     }
 
-    /**
-     * 历史模拟，将历史的基础信息和tick进行计算
-     * @param code
-     * @param aiStrategySig
-     * @param dateStr
-     * @return
-     */
     public PreQuartzTradeDetail getPreQuartzTradeDetail(String code, String aiStrategySig, String dateStr) {
+        PreQuartzTradeDetail result = new PreQuartzTradeDetail();
+        String key = RedisKeyUtils.getHisStockInfo(dateStr, code);
+        String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
+        Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
 
-        if (AiStrategyEnum.DU_GU_SWORD.getCode().equals(aiStrategySig)) {
-            return duGuSwordService.getPreQuartzTradeDetail(code, aiStrategySig, dateStr);
-        }
-        if (AiStrategyEnum.DU_GU_SWORD_DELAY.getCode().equals(aiStrategySig)) {
-            return duGuSwordDelayService.getPreQuartzTradeDetail(code, aiStrategySig, dateStr);
-        }
-        return new PreQuartzTradeDetail();
 
+        BigDecimal auctionIncreaseRate = new BigDecimal(map.get("auctionIncreaseRate").toString());
+        BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
+        //最大价格
+        BigDecimal maxPrice = new BigDecimal(map.get("maxPrice").toString());
+        BigDecimal maxIncreaseRate = maxPrice.subtract(lastClosePrice).multiply(new BigDecimal(100)).divide(lastClosePrice, 2, BigDecimal.ROUND_HALF_DOWN);
+        //最大价格涨幅-竞价涨幅=涨幅（预警计算方式）
+        BigDecimal subIncreaseRate = maxIncreaseRate.subtract(auctionIncreaseRate);
+        //竞价涨幅在 -2 到 0  之间，最高点到达7个点， 9个点买入，或者涨停前五买入
+        if (auctionIncreaseRate.compareTo(new BigDecimal(-2)) >= 0 && auctionIncreaseRate.compareTo(BigDecimal.ZERO) <= 0) {
+            if (subIncreaseRate.compareTo(new BigDecimal(7)) >= 0) {
+                //计算
+                calcProcess(map, result, code);
+            }
+        }
+        //竞价涨幅在 0 到 2 之间， 6个点预警， 9个点买入，或者涨停前五买入
+        if (auctionIncreaseRate.compareTo(BigDecimal.ZERO) >= 0 && auctionIncreaseRate.compareTo(new BigDecimal(3)) <= 0) {
+            if (subIncreaseRate.compareTo(new BigDecimal(6)) >= 0) {
+                //计算
+                calcProcess(map, result, code);
+            }
+        }
+        //竞价涨幅在 3 之间， 5个点预警， 9个点买入，或者涨停前五买入
+        if (auctionIncreaseRate.compareTo(new BigDecimal(3)) >= 0 && auctionIncreaseRate.compareTo(new BigDecimal(4)) <= 0) {
+            if (subIncreaseRate.compareTo(new BigDecimal(5)) >= 0) {
+                //计算
+                calcProcess(map, result, code);
+            }
+        }
+
+        return result;
     }
 
 
@@ -140,6 +154,23 @@ public class AiStrategyService {
         }
 
     }
+
+    /**
+     * 通过tick数据来计算准确的买入位置
+     *
+     * @param map
+     * @param result
+     * @param code
+     */
+    public abstract void calcProcess(Map map, PreQuartzTradeDetail result, String code);
+
+    /**
+     * 计算合适的价格，通过tick
+     *
+     * @param map
+     * @param result
+     */
+    public abstract void calcSuitPrice(Map map, PreQuartzTradeDetail result, BigDecimal upLimitFivePrice, BigDecimal upLimitPrice);
 
     private void calcProcess(Map map, AiStrategyParamBo aiStrategyParamBo, PreQuartzTradeDetail result, String code) {
         String name = map.get("name").toString();
@@ -200,15 +231,5 @@ public class AiStrategyService {
         redisTemplate.opsForValue().set(preTradeCodeKey, JsonUtil.toJson(preTradeCodeMap), 4, TimeUnit.HOURS);
     }
 
-    public void removeCodeFromPreTrade(String code) {
-        String preTradeCodeKey = RedisKeyUtils.getPreTradeCode();
-        Map preTradeCodeMap = null;
-        if (redisTemplate.hasKey(preTradeCodeKey)) {
-            String preTradeCode = (String) redisTemplate.opsForValue().get(preTradeCodeKey);
-            preTradeCodeMap = JsonUtil.readToValue(preTradeCode, Map.class);
-            preTradeCodeMap.remove(code);
-            redisTemplate.opsForValue().set(preTradeCodeKey, JsonUtil.toJson(preTradeCodeMap), 4, TimeUnit.HOURS);
-        }
-    }
 
 }

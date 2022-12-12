@@ -1,8 +1,7 @@
 package com.coatardbul.stock.model.entity;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
+import lombok.Data;
 
 /**
  * 股票模型预测表
@@ -10,6 +9,13 @@ import java.math.BigDecimal;
 @Data
 public class StockTemplatePredict {
     private String id;
+
+    /**
+     * 股票代码
+     */
+    private String code;
+
+    private String name;
 
     /**
      * YYYY-MM-DD日期
@@ -22,27 +28,12 @@ public class StockTemplatePredict {
     private String templatedId;
     private String templatedName;
 
-    /**
-     * 持有天数
-     */
-    private Integer holdDay;
+    private String templatedSign;
 
     /**
-     * 卖出时间，年月日时分
+     * 买入时间 年月日时分
      */
-    private String saleTime;
-
-    /**
-     * 股票代码
-     */
-    private String code;
-
-    private String name;
-
-    /**
-     * 市值
-     */
-    private BigDecimal marketValue;
+    private String buyTime;
 
     /**
      * 买入价格
@@ -60,6 +51,26 @@ public class StockTemplatePredict {
     private BigDecimal closeIncreaseRate;
 
     /**
+     * 持有天数
+     */
+    private Integer holdDay;
+
+    /**
+     * 卖出时间，年月日时分
+     */
+    private String saleTime;
+
+    /**
+     * 卖出价格
+     */
+    private BigDecimal salePrice;
+
+    /**
+     * 市值
+     */
+    private BigDecimal marketValue;
+
+    /**
      * 具体详情
      */
     private String detail;
@@ -68,14 +79,4 @@ public class StockTemplatePredict {
      * 换手率
      */
     private BigDecimal turnoverRate;
-
-    /**
-     * 卖出价格
-     */
-    private BigDecimal salePrice;
-
-    /**
-     * 买入时间 年月日时分
-     */
-    private String buyTime;
 }

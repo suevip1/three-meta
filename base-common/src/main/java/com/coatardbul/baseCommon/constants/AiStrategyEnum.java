@@ -2,7 +2,7 @@ package com.coatardbul.baseCommon.constants;
 
 public enum AiStrategyEnum {
 
-
+    DU_GU_SWORD_DELAY("DU_GU_SWORD_DELAY","独孤一剑延迟"),
     DU_GU_SWORD("DU_GU_SWORD","独孤一剑");
 
     private String code;

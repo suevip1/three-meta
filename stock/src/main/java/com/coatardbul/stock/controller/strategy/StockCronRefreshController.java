@@ -157,6 +157,13 @@ public class StockCronRefreshController {
         return CommonResult.success(null);
     }
 
+    @ApiOperation("策略回测")
+    @RequestMapping(path = "/strategyBackTest", method = RequestMethod.POST)
+    public CommonResult strategyBackTest(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.strategyBackTest(dto);
+        return CommonResult.success(null);
+    }
+
     @ApiOperation("一键添加股票信息")
     @RequestMapping(path = "/addStockPool", method = RequestMethod.POST)
     public CommonResult addStockPool(@RequestBody StockCronStrategyTabDTO dto) {
@@ -171,5 +178,24 @@ public class StockCronRefreshController {
         return CommonResult.success(null);
     }
 
+    @ApiOperation("按月当月一键删除")
+    @RequestMapping(path = "/deleteMonthStockPool", method = RequestMethod.POST)
+    public CommonResult deleteMonthStockPool(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.deleteMonthStockPool(dto);
+        return CommonResult.success(null);
+    }
+    @ApiOperation("按月当月一键模拟")
+    @RequestMapping(path = "/simulateHisMonthStockPool", method = RequestMethod.POST)
+    public CommonResult simulateHisMonthStockPool(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.simulateHisMonthStockPool(dto);
+        return CommonResult.success(null);
+    }
+
+    @ApiOperation("策略回测")
+    @RequestMapping(path = "/strategyMonthBackTest", method = RequestMethod.POST)
+    public CommonResult strategyMonthBackTest(@RequestBody StockCronStrategyTabDTO dto) {
+        stockCronRefreshService.strategyMonthBackTest(dto);
+        return CommonResult.success(null);
+    }
 
 }

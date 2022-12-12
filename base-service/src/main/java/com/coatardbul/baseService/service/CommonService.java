@@ -50,12 +50,14 @@ public abstract class CommonService {
     public StockStrategyCommonService stockStrategyCommonService;
 
 
-
     public void addCommonParam(Map stockDetailMap, String dateFormat) {
-        stockDetailMap.put("currDateStr",dateFormat);
+        stockDetailMap.put("currDateStr", dateFormat);
         stockDetailMap.put("lastUpdateTime", DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM_SS));
     }
 
+    public Map getStockDetailMap(String code, String dateFormat) {
+        return getStockDetailMap(code, dateFormat, null);
+    }
 
     /**
      * 获取股票详情信息
@@ -64,11 +66,12 @@ public abstract class CommonService {
      * @param dateFormat
      * @return
      */
-    public Map getStockDetailMap(String code, String dateFormat) {
+    public Map getStockDetailMap(String code, String dateFormat, String timeStr) {
         //金额判断,股票详情
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
         dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
         dto.setDateStr(dateFormat);
+        dto.setTimeStr(timeStr);
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
@@ -85,10 +88,9 @@ public abstract class CommonService {
     }
 
 
-
     public void calcMap(Map map) {
         //竞价涨幅=(竞价-昨日价格)/昨日价格
-        if(map.get("auctionIncreaseRate")==null){
+        if (map.get("auctionIncreaseRate") == null) {
             map.put("auctionIncreaseRate",
                     new BigDecimal(map.get("auctionPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
                             divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
@@ -104,19 +106,19 @@ public abstract class CommonService {
                 new BigDecimal(map.get("maxPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
                         divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
         //最小涨幅=(目前价格-昨日价格)/昨日价格
-        if(map.get("minPrice")!=null){
+        if (map.get("minPrice") != null) {
             map.put("minIncreaseRate",
                     new BigDecimal(map.get("minPrice").toString()).subtract(new BigDecimal(map.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
                             divide(new BigDecimal(map.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
         }
         //涨速=涨幅-竞价涨幅
-        map.put("subIncreaseRate", ((BigDecimal) (map.get("newIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
+        map.put("subIncreaseRate", (new BigDecimal(map.get("newIncreaseRate").toString())).subtract(new BigDecimal(map.get("auctionIncreaseRate").toString())));
 
         //最大涨速=涨幅-竞价涨幅
-        map.put("subMaxIncreaseRate", ((BigDecimal) (map.get("maxIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
+        map.put("subMaxIncreaseRate", (new BigDecimal(map.get("maxIncreaseRate").toString())).subtract(new BigDecimal(map.get("auctionIncreaseRate").toString())));
         //最大跌=涨幅-竞价涨幅
-        if(map.get("minIncreaseRate")!=null){
-            map.put("subMinIncreaseRate", ((BigDecimal) (map.get("minIncreaseRate"))).subtract((BigDecimal) (map.get("auctionIncreaseRate"))));
+        if (map.get("minIncreaseRate") != null) {
+            map.put("subMinIncreaseRate", (new BigDecimal(map.get("minIncreaseRate").toString())).subtract(new BigDecimal(map.get("auctionIncreaseRate").toString())));
         }
         //实时换手率
         map.put("turnOverRate",
@@ -137,7 +139,7 @@ public abstract class CommonService {
             Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
             if (map.size() == 0) {
                 map = getStockDetailMap(code, dateFormat);
-                addCommonParam(map,dateFormat);
+                addCommonParam(map, dateFormat);
                 if (map == null) return null;
                 redisTemplate.opsForValue().set(key, JsonUtil.toJson(map), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
             } else {
@@ -167,7 +169,7 @@ public abstract class CommonService {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
         if (list.size() > 0) {
             //获取股票基本信息key
-            String nowStockInfoKey = RedisKeyUtils.getHisStockInfo(dateFormat,code);
+            String nowStockInfoKey = RedisKeyUtils.getHisStockInfo(dateFormat, code);
             String stockDetailStr = (String) redisTemplate.opsForValue().get(nowStockInfoKey);
             Map newStockDetailMap = JsonUtil.readToValue(stockDetailStr, Map.class);
             //更新竞价信息
@@ -179,18 +181,19 @@ public abstract class CommonService {
             redisTemplate.opsForValue().set(nowStockInfoKey, JsonUtil.toJson(newStockDetailMap), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
         }
     }
-    public void updateTickInfoToStockInfo(List<TickInfo> list, Map newStockDetailMap){
+
+    public void updateTickInfoToStockInfo(List<TickInfo> list, Map newStockDetailMap) {
         //更新竞价信息
         upAuctionInfo(list, newStockDetailMap);
         rebuildTickArr(list);
         //更新tick计算信息
         try {
             upCalcModuleInfo(list, newStockDetailMap);
-        }catch (Exception e){
-            log.error("更新前五，一分钟，两分钟异常："+e.getMessage());
+        } catch (Exception e) {
+            log.error("更新前五，一分钟，两分钟异常：" + e.getMessage());
         }
         //历史模拟，涨幅，各种数据贴在历史信息中
-        upCalcHisModuleInfo(list,newStockDetailMap);
+        upCalcHisModuleInfo(list, newStockDetailMap);
     }
 
     private void rebuildTickArr(List<TickInfo> list) {
@@ -237,8 +240,8 @@ public abstract class CommonService {
         newStockDetailMap.put("beginFirstMinuterTickVolPriceIncreaseRate", beginFirstMinuterTickVolPriceIncreaseRate);
         //前二分钟向上涨幅
         BigDecimal beginTwoMinuterTickVolPriceIncreaseRate = getTickVolPriceIncreaseRate(twoMinuter, auctionInfo, lastClosePrice);
-        if(secondMinuter==null ||secondMinuter.size()==0){
-            beginTwoMinuterTickVolPriceIncreaseRate=null;
+        if (secondMinuter == null || secondMinuter.size() == 0) {
+            beginTwoMinuterTickVolPriceIncreaseRate = null;
         }
         newStockDetailMap.put("beginTwoMinuterTickVolPriceIncreaseRate", beginTwoMinuterTickVolPriceIncreaseRate);
         //前五量占比
@@ -270,10 +273,10 @@ public abstract class CommonService {
     private void upCalcHisModuleInfo(List<TickInfo> list, Map newStockDetailMap) {
         //当前价格，涨幅，涨速
         TickInfo tickInfo = list.get(list.size() - 1);
-        newStockDetailMap.put("newPrice",tickInfo.getPrice());
+        newStockDetailMap.put("newPrice", tickInfo.getPrice());
         //交易金额
         BigDecimal allAmountStatic = getAllAmountStatic(list);
-        newStockDetailMap.put("tradeAmount",allAmountStatic);
+        newStockDetailMap.put("tradeAmount", allAmountStatic);
         //计算
         calcMap(newStockDetailMap);
 

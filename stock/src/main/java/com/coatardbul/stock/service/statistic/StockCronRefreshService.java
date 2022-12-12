@@ -13,8 +13,10 @@ import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.service.AiStrategyService;
+import com.coatardbul.baseService.service.CommonService;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.baseService.service.DataServiceBridge;
+import com.coatardbul.baseService.service.DongFangCommonService;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
@@ -23,9 +25,11 @@ import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.feign.SailServerFeign;
 import com.coatardbul.stock.feign.TickServerFeign;
+import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.mapper.StockWarnLogMapper;
 import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
+import com.coatardbul.stock.model.entity.StockTemplatePredict;
 import com.coatardbul.stock.model.entity.StockWarnLog;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.romote.RiverRemoteService;
@@ -38,6 +42,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -80,6 +85,10 @@ public class StockCronRefreshService {
     StockWarnLogMapper stockWarnLogMapper;
     @Resource
     TickServerFeign tickServerFeign;
+    @Autowired
+    DongFangCommonService dongFangCommonService;
+    @Autowired
+    StockTemplatePredictMapper stockTemplatePredictMapper;
     @Autowired
     SailServerFeign sailServerFeign;
     @Autowired
@@ -413,7 +422,7 @@ public class StockCronRefreshService {
             });
         }
         //6天的数据，当天是否为交易日
-        for (int i = 0; i <=6; i++) {
+        for (int i = 0; i <= 6; i++) {
             String specialDay = null;
             if (i == 0) {
                 specialDay = dto.getDateStr();
@@ -469,21 +478,103 @@ public class StockCronRefreshService {
 
     public void addMonthStockPool(StockCronStrategyTabDTO dto) {
         String dateStr = dto.getDateStr();
-        String beginDateStr = dateStr.substring(0,dateStr.length() - 2)+"01";
-        String endDateStr = dateStr.substring(0,dateStr.length() - 2)+"31";
+        String beginDateStr = dateStr.substring(0, dateStr.length() - 2) + "01";
+        String endDateStr = dateStr.substring(0, dateStr.length() - 2) + "31";
 
         List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, endDateStr);
-        for(String currDateStr:dateIntervalList){
-            StockCronStrategyTabDTO stockCronStrategyTabDTO=new StockCronStrategyTabDTO();
-            stockCronStrategyTabDTO.setDateStr(currDateStr);
-            stockCronStrategyTabDTO.setStrategySign(AiStrategyEnum.DU_GU_SWORD.getCode());
-            addStockPool(stockCronStrategyTabDTO);
-            simulateHis(stockCronStrategyTabDTO);
+        for (String currDateStr : dateIntervalList) {
             try {
-                Thread.sleep(60*1000);
-            } catch (InterruptedException e) {
+                StockCronStrategyTabDTO stockCronStrategyTabDTO = new StockCronStrategyTabDTO();
+                stockCronStrategyTabDTO.setDateStr(currDateStr);
+                addStockPool(stockCronStrategyTabDTO);
+                Thread.sleep(60 * 1000);
+            } catch (Exception e) {
+                log.error(currDateStr+"当日添加数据异常"+ e.getMessage());
             }
         }
 
+    }
+
+    public void deleteMonthStockPool(StockCronStrategyTabDTO dto) {
+        String dateStr = dto.getDateStr();
+        String keyPatten = dateStr.substring(0, dateStr.length() - 2) + "*";
+        Set keys = redisTemplate.keys(keyPatten);
+        for (Object key : keys) {
+            redisTemplate.delete(key);
+        }
+    }
+
+    public void simulateHisMonthStockPool(StockCronStrategyTabDTO dto) {
+        String dateStr = dto.getDateStr();
+        String beginDateStr = dateStr.substring(0, dateStr.length() - 2) + "01";
+        String endDateStr = dateStr.substring(0, dateStr.length() - 2) + "31";
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, endDateStr);
+        for (String currDateStr : dateIntervalList) {
+            StockCronStrategyTabDTO stockCronStrategyTabDTO = new StockCronStrategyTabDTO();
+            stockCronStrategyTabDTO.setDateStr(currDateStr);
+            stockCronStrategyTabDTO.setStrategySign(dto.getStrategySign());
+            simulateHis(stockCronStrategyTabDTO);
+        }
+    }
+
+    public void strategyBackTest(StockCronStrategyTabDTO dto) {
+        Set keys = redisTemplate.keys(RedisKeyUtils.getStockInfoPattern(dto.getDateStr()));
+
+        for (Object codeKey : keys) {
+            if (codeKey instanceof String) {
+                String key = codeKey.toString();
+                String code = RedisKeyUtils.getCodeByStockInfoKey(key);
+                try {
+                    PreQuartzTradeDetail preQuartzTradeDetail = aiStrategyService.getPreQuartzTradeDetail(code, dto.getStrategySign(), dto.getDateStr());
+                    if (preQuartzTradeDetail.getTradeFlag()) {
+                        StockTemplatePredict stockTemplatePredict = new StockTemplatePredict();
+                        stockTemplatePredict.setId(snowFlakeService.getSnowId());
+                        stockTemplatePredict.setDate(preQuartzTradeDetail.getDate());
+                        stockTemplatePredict.setTemplatedSign(dto.getStrategySign());
+                        stockTemplatePredict.setTemplatedName(AiStrategyEnum.getDescByCode(dto.getStrategySign()));
+                        stockTemplatePredict.setHoldDay(1);
+                        stockTemplatePredict.setCode(preQuartzTradeDetail.getCode());
+                        stockTemplatePredict.setName(preQuartzTradeDetail.getName());
+                        stockTemplatePredict.setBuyPrice(preQuartzTradeDetail.getPrice());
+                        stockTemplatePredict.setBuyTime(preQuartzTradeDetail.getTime());
+                        stockTemplatePredict.setBuyIncreaseRate(preQuartzTradeDetail.getIncreaseRate());
+                        stockTemplatePredict.setCloseIncreaseRate(preQuartzTradeDetail.getCloseIncreaseRate());
+                        stockTemplatePredictMapper.insert(stockTemplatePredict);
+                        calcSaleInfo(stockTemplatePredict);
+                    }
+                } catch (Exception e) {
+                    log.error("模拟历史异常" + e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 计算卖出信息
+     *
+     * @param stockTemplatePredict
+     */
+
+    private void calcSaleInfo(StockTemplatePredict stockTemplatePredict) {
+        String specialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), stockTemplatePredict.getHoldDay());
+        Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
+        BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
+        stockTemplatePredict.setSalePrice(newPrice);
+        stockTemplatePredict.setSaleTime("11:29");
+        stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
+
+    }
+
+    public void strategyMonthBackTest(StockCronStrategyTabDTO dto) {
+        String dateStr = dto.getDateStr();
+        String beginDateStr = dateStr.substring(0, dateStr.length() - 2) + "01";
+        String endDateStr = dateStr.substring(0, dateStr.length() - 2) + "31";
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, endDateStr);
+        for (String currDateStr : dateIntervalList) {
+            StockCronStrategyTabDTO stockCronStrategyTabDTO = new StockCronStrategyTabDTO();
+            stockCronStrategyTabDTO.setDateStr(currDateStr);
+            stockCronStrategyTabDTO.setStrategySign(dto.getStrategySign());
+            strategyBackTest(stockCronStrategyTabDTO);
+        }
     }
 }

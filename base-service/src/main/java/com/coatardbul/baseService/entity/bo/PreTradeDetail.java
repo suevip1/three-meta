@@ -32,6 +32,11 @@ public class PreTradeDetail {
 
     private BigDecimal price;
 
+
+    private BigDecimal increaseRate;
+
+    private BigDecimal closeIncreaseRate;
+
     /**
      * B  S
      * @see TradeTypeEnum

@@ -16,9 +16,14 @@ import java.math.BigDecimal;
 public class AiStrategyParamBo {
 
 
+    /**
+     * HH：mm
+     */
     private String beginStr;
 
     private String endStr;
+
+    private String lastEndStr;
 
 
     /**
@@ -32,6 +37,17 @@ public class AiStrategyParamBo {
      */
     private Integer buyCodeNum;
 
+
+    /**
+     * 延迟买入分钟
+     */
+    private Integer delayMinuter;
+
+
+    /**
+     * 最小涨幅
+     */
+    private Integer minIncrease;
 
 //    /**
 //     * 买入的策略标识，涨停买还是前五买

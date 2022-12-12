@@ -5,25 +5,26 @@
     <!--@mbg.generated-->
     <!--@Table stock_template_predict-->
     <id column="id" jdbcType="VARCHAR" property="id" />
-    <result column="date" jdbcType="VARCHAR" property="date" />
-    <result column="templated_id" jdbcType="VARCHAR" property="templatedId" />
-    <result column="hold_day" jdbcType="INTEGER" property="holdDay" />
-    <result column="sale_time" jdbcType="VARCHAR" property="saleTime" />
     <result column="code" jdbcType="VARCHAR" property="code" />
     <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="market_value" jdbcType="DECIMAL" property="marketValue" />
+    <result column="date" jdbcType="VARCHAR" property="date" />
+    <result column="templated_id" jdbcType="VARCHAR" property="templatedId" />
+    <result column="templated_sign" jdbcType="VARCHAR" property="templatedSign" />
+    <result column="buy_time" jdbcType="VARCHAR" property="buyTime" />
     <result column="buy_price" jdbcType="DECIMAL" property="buyPrice" />
     <result column="buy_increase_rate" jdbcType="DECIMAL" property="buyIncreaseRate" />
     <result column="close_increase_rate" jdbcType="DECIMAL" property="closeIncreaseRate" />
+    <result column="hold_day" jdbcType="INTEGER" property="holdDay" />
+    <result column="sale_time" jdbcType="VARCHAR" property="saleTime" />
+    <result column="sale_price" jdbcType="DECIMAL" property="salePrice" />
+    <result column="market_value" jdbcType="DECIMAL" property="marketValue" />
     <result column="detail" jdbcType="LONGVARCHAR" property="detail" />
     <result column="turnover_rate" jdbcType="DECIMAL" property="turnoverRate" />
-    <result column="sale_price" jdbcType="DECIMAL" property="salePrice" />
-    <result column="buy_time" jdbcType="VARCHAR" property="buyTime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, `date`, templated_id, hold_day, sale_time, code, `name`, market_value, buy_price, 
-    buy_increase_rate, close_increase_rate, detail, turnover_rate, sale_price, buy_time
+    id, code, `name`, `date`, templated_id, templated_sign, buy_time, buy_price, buy_increase_rate, 
+    close_increase_rate, hold_day, sale_time, sale_price, market_value, detail, turnover_rate
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -39,46 +40,43 @@
   </delete>
   <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
     <!--@mbg.generated-->
-    insert into stock_template_predict (id, `date`, templated_id, 
-      hold_day, sale_time, code, 
-      `name`, market_value, buy_price, 
-      buy_increase_rate, close_increase_rate, detail, 
-      turnover_rate, sale_price, buy_time
-      )
-    values (#{id,jdbcType=VARCHAR}, #{date,jdbcType=VARCHAR}, #{templatedId,jdbcType=VARCHAR}, 
-      #{holdDay,jdbcType=INTEGER}, #{saleTime,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, 
-      #{name,jdbcType=VARCHAR}, #{marketValue,jdbcType=DECIMAL}, #{buyPrice,jdbcType=DECIMAL}, 
-      #{buyIncreaseRate,jdbcType=DECIMAL}, #{closeIncreaseRate,jdbcType=DECIMAL}, #{detail,jdbcType=LONGVARCHAR}, 
-      #{turnoverRate,jdbcType=DECIMAL}, #{salePrice,jdbcType=DECIMAL}, #{buyTime,jdbcType=VARCHAR}
-      )
+    insert into stock_template_predict (id, code, `name`, 
+      `date`, templated_id, templated_sign, 
+      buy_time, buy_price, buy_increase_rate, 
+      close_increase_rate, hold_day, sale_time, 
+      sale_price, market_value, detail, 
+      turnover_rate)
+    values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{date,jdbcType=VARCHAR}, #{templatedId,jdbcType=VARCHAR}, #{templatedSign,jdbcType=VARCHAR}, 
+      #{buyTime,jdbcType=VARCHAR}, #{buyPrice,jdbcType=DECIMAL}, #{buyIncreaseRate,jdbcType=DECIMAL}, 
+      #{closeIncreaseRate,jdbcType=DECIMAL}, #{holdDay,jdbcType=INTEGER}, #{saleTime,jdbcType=VARCHAR}, 
+      #{salePrice,jdbcType=DECIMAL}, #{marketValue,jdbcType=DECIMAL}, #{detail,jdbcType=LONGVARCHAR}, 
+      #{turnoverRate,jdbcType=DECIMAL})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
     <!--@mbg.generated-->
     insert into stock_template_predict
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         id,
       </if>
-      <if test="date != null">
-        `date`,
-      </if>
-      <if test="templatedId != null">
-        templated_id,
-      </if>
-      <if test="holdDay != null">
-        hold_day,
-      </if>
-      <if test="saleTime != null">
-        sale_time,
-      </if>
-      <if test="code != null">
+      <if test="code != null and code != ''">
         code,
       </if>
-      <if test="name != null">
+      <if test="name != null and name != ''">
         `name`,
       </if>
-      <if test="marketValue != null">
-        market_value,
+      <if test="date != null and date != ''">
+        `date`,
+      </if>
+      <if test="templatedId != null and templatedId != ''">
+        templated_id,
+      </if>
+      <if test="templatedSign != null and templatedSign != ''">
+        templated_sign,
+      </if>
+      <if test="buyTime != null and buyTime != ''">
+        buy_time,
       </if>
       <if test="buyPrice != null">
         buy_price,
@@ -89,43 +87,46 @@
       <if test="closeIncreaseRate != null">
         close_increase_rate,
       </if>
-      <if test="detail != null">
+      <if test="holdDay != null">
+        hold_day,
+      </if>
+      <if test="saleTime != null and saleTime != ''">
+        sale_time,
+      </if>
+      <if test="salePrice != null">
+        sale_price,
+      </if>
+      <if test="marketValue != null">
+        market_value,
+      </if>
+      <if test="detail != null and detail != ''">
         detail,
       </if>
       <if test="turnoverRate != null">
         turnover_rate,
       </if>
-      <if test="salePrice != null">
-        sale_price,
-      </if>
-      <if test="buyTime != null">
-        buy_time,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         #{id,jdbcType=VARCHAR},
       </if>
-      <if test="date != null">
-        #{date,jdbcType=VARCHAR},
-      </if>
-      <if test="templatedId != null">
-        #{templatedId,jdbcType=VARCHAR},
-      </if>
-      <if test="holdDay != null">
-        #{holdDay,jdbcType=INTEGER},
-      </if>
-      <if test="saleTime != null">
-        #{saleTime,jdbcType=VARCHAR},
-      </if>
-      <if test="code != null">
+      <if test="code != null and code != ''">
         #{code,jdbcType=VARCHAR},
       </if>
-      <if test="name != null">
+      <if test="name != null and name != ''">
         #{name,jdbcType=VARCHAR},
       </if>
-      <if test="marketValue != null">
-        #{marketValue,jdbcType=DECIMAL},
+      <if test="date != null and date != ''">
+        #{date,jdbcType=VARCHAR},
+      </if>
+      <if test="templatedId != null and templatedId != ''">
+        #{templatedId,jdbcType=VARCHAR},
+      </if>
+      <if test="templatedSign != null and templatedSign != ''">
+        #{templatedSign,jdbcType=VARCHAR},
+      </if>
+      <if test="buyTime != null and buyTime != ''">
+        #{buyTime,jdbcType=VARCHAR},
       </if>
       <if test="buyPrice != null">
         #{buyPrice,jdbcType=DECIMAL},
@@ -136,17 +137,23 @@
       <if test="closeIncreaseRate != null">
         #{closeIncreaseRate,jdbcType=DECIMAL},
       </if>
-      <if test="detail != null">
-        #{detail,jdbcType=LONGVARCHAR},
+      <if test="holdDay != null">
+        #{holdDay,jdbcType=INTEGER},
       </if>
-      <if test="turnoverRate != null">
-        #{turnoverRate,jdbcType=DECIMAL},
+      <if test="saleTime != null and saleTime != ''">
+        #{saleTime,jdbcType=VARCHAR},
       </if>
       <if test="salePrice != null">
         #{salePrice,jdbcType=DECIMAL},
       </if>
-      <if test="buyTime != null">
-        #{buyTime,jdbcType=VARCHAR},
+      <if test="marketValue != null">
+        #{marketValue,jdbcType=DECIMAL},
+      </if>
+      <if test="detail != null and detail != ''">
+        #{detail,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="turnoverRate != null">
+        #{turnoverRate,jdbcType=DECIMAL},
       </if>
     </trim>
   </insert>
@@ -154,26 +161,23 @@
     <!--@mbg.generated-->
     update stock_template_predict
     <set>
-      <if test="date != null">
-        `date` = #{date,jdbcType=VARCHAR},
-      </if>
-      <if test="templatedId != null">
-        templated_id = #{templatedId,jdbcType=VARCHAR},
-      </if>
-      <if test="holdDay != null">
-        hold_day = #{holdDay,jdbcType=INTEGER},
-      </if>
-      <if test="saleTime != null">
-        sale_time = #{saleTime,jdbcType=VARCHAR},
-      </if>
-      <if test="code != null">
+      <if test="code != null and code != ''">
         code = #{code,jdbcType=VARCHAR},
       </if>
-      <if test="name != null">
+      <if test="name != null and name != ''">
         `name` = #{name,jdbcType=VARCHAR},
       </if>
-      <if test="marketValue != null">
-        market_value = #{marketValue,jdbcType=DECIMAL},
+      <if test="date != null and date != ''">
+        `date` = #{date,jdbcType=VARCHAR},
+      </if>
+      <if test="templatedId != null and templatedId != ''">
+        templated_id = #{templatedId,jdbcType=VARCHAR},
+      </if>
+      <if test="templatedSign != null and templatedSign != ''">
+        templated_sign = #{templatedSign,jdbcType=VARCHAR},
+      </if>
+      <if test="buyTime != null and buyTime != ''">
+        buy_time = #{buyTime,jdbcType=VARCHAR},
       </if>
       <if test="buyPrice != null">
         buy_price = #{buyPrice,jdbcType=DECIMAL},
@@ -184,17 +188,23 @@
       <if test="closeIncreaseRate != null">
         close_increase_rate = #{closeIncreaseRate,jdbcType=DECIMAL},
       </if>
-      <if test="detail != null">
-        detail = #{detail,jdbcType=LONGVARCHAR},
+      <if test="holdDay != null">
+        hold_day = #{holdDay,jdbcType=INTEGER},
       </if>
-      <if test="turnoverRate != null">
-        turnover_rate = #{turnoverRate,jdbcType=DECIMAL},
+      <if test="saleTime != null and saleTime != ''">
+        sale_time = #{saleTime,jdbcType=VARCHAR},
       </if>
       <if test="salePrice != null">
         sale_price = #{salePrice,jdbcType=DECIMAL},
       </if>
-      <if test="buyTime != null">
-        buy_time = #{buyTime,jdbcType=VARCHAR},
+      <if test="marketValue != null">
+        market_value = #{marketValue,jdbcType=DECIMAL},
+      </if>
+      <if test="detail != null and detail != ''">
+        detail = #{detail,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="turnoverRate != null">
+        turnover_rate = #{turnoverRate,jdbcType=DECIMAL},
       </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
@@ -202,20 +212,21 @@
   <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
     <!--@mbg.generated-->
     update stock_template_predict
-    set `date` = #{date,jdbcType=VARCHAR},
-      templated_id = #{templatedId,jdbcType=VARCHAR},
-      hold_day = #{holdDay,jdbcType=INTEGER},
-      sale_time = #{saleTime,jdbcType=VARCHAR},
-      code = #{code,jdbcType=VARCHAR},
+    set code = #{code,jdbcType=VARCHAR},
       `name` = #{name,jdbcType=VARCHAR},
-      market_value = #{marketValue,jdbcType=DECIMAL},
+      `date` = #{date,jdbcType=VARCHAR},
+      templated_id = #{templatedId,jdbcType=VARCHAR},
+      templated_sign = #{templatedSign,jdbcType=VARCHAR},
+      buy_time = #{buyTime,jdbcType=VARCHAR},
       buy_price = #{buyPrice,jdbcType=DECIMAL},
       buy_increase_rate = #{buyIncreaseRate,jdbcType=DECIMAL},
       close_increase_rate = #{closeIncreaseRate,jdbcType=DECIMAL},
-      detail = #{detail,jdbcType=LONGVARCHAR},
-      turnover_rate = #{turnoverRate,jdbcType=DECIMAL},
+      hold_day = #{holdDay,jdbcType=INTEGER},
+      sale_time = #{saleTime,jdbcType=VARCHAR},
       sale_price = #{salePrice,jdbcType=DECIMAL},
-      buy_time = #{buyTime,jdbcType=VARCHAR}
+      market_value = #{marketValue,jdbcType=DECIMAL},
+      detail = #{detail,jdbcType=LONGVARCHAR},
+      turnover_rate = #{turnoverRate,jdbcType=DECIMAL}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 
@@ -238,9 +249,13 @@
             <if test="templatedId != null and templatedId != ''">
                 and templated_id = #{templatedId,jdbcType=VARCHAR}
             </if>
+          <if test="templatedSign != null and templatedSign != ''">
+            and templated_sign = #{templatedSign,jdbcType=VARCHAR}
+          </if>
             <if test="holdDay != null">
                 and hold_day = #{holdDay,jdbcType=INTEGER}
             </if>
+
             order by date asc
         </where>
     </select>

@@ -3,6 +3,7 @@ package com.coatardbul.stock.service.statistic;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
@@ -224,10 +225,10 @@ public class StockPredictService {
 
     public List<StockTemplatePredict> getAll(StockPredictDto dto) {
 
-        List<StockTemplatePredict> stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(), dto.getHoleDay());
+        List<StockTemplatePredict> stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(),dto.getStrategySign(), dto.getHoleDay());
 
         if (stockTemplatePredicts != null && stockTemplatePredicts.size() > 0) {
-            Map<String, String> templateIdMap = stockTemplatePredicts.stream().collect(Collectors.toMap(StockTemplatePredict::getTemplatedId, StockTemplatePredict::getTemplatedId, (o1, o2) -> o1));
+            Map<String, String> templateIdMap = stockTemplatePredicts.stream().filter(item->StringUtils.isNotBlank(item.getTemplatedId())).collect(Collectors.toMap(StockTemplatePredict::getTemplatedId, StockTemplatePredict::getTemplatedId, (o1, o2) -> o1));
             for (Map.Entry<String, String> entry : templateIdMap.entrySet()) {
                 String templateName = riverRemoteService.getTemplateNameById(entry.getKey());
                 entry.setValue(templateName);
@@ -238,7 +239,13 @@ public class StockPredictService {
     }
 
     private StockTemplatePredict convert(StockTemplatePredict stockTemplatePredict, Map<String, String> templateIdMap) {
-        stockTemplatePredict.setTemplatedName(templateIdMap.get(stockTemplatePredict.getTemplatedId()));
+        if(StringUtils.isNotBlank(stockTemplatePredict.getTemplatedId())){
+            stockTemplatePredict.setTemplatedName(templateIdMap.get(stockTemplatePredict.getTemplatedId()));
+        }else {
+            stockTemplatePredict.setTemplatedId(stockTemplatePredict.getTemplatedSign());
+            stockTemplatePredict.setTemplatedName(AiStrategyEnum.getDescByCode(stockTemplatePredict.getTemplatedSign()));
+
+        }
         return stockTemplatePredict;
     }
 
