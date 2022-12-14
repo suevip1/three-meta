@@ -27,7 +27,6 @@ public class StockUpLimitAnalyzeCommonService {
 
     public Map convert(JSONObject jsonObject, String dateStr) {
 
-
         Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("dateStr", dateStr);
         dateStr=dateStr.replaceAll("-","");
@@ -136,6 +135,26 @@ public class StockUpLimitAnalyzeCommonService {
             if (key.indexOf("收盘价") > -1 && key.indexOf(dateStr) > -1
             ) {
                 jsonMap.put("newPrice", jsonObject.get(key));
+            }
+            if (key.indexOf("收盘获利") > -1 && key.indexOf(dateStr) > -1
+            ) {
+                jsonMap.put("earnProfit", jsonObject.get(key));
+            }
+            if (key.indexOf("集中度90") > -1 && key.indexOf(dateStr) > -1
+            ) {
+                jsonMap.put("concentrationRatio", jsonObject.get(key));
+            }
+            if (key.indexOf("平均成本") > -1
+            ) {
+                jsonMap.put("jettonCost", jsonObject.get(key));
+            }
+            if (key.indexOf("所属同花顺行业") > -1
+            ) {
+                jsonMap.put("thsIndustry", jsonObject.get(key));
+            }
+            if (key.indexOf("所属概念") > -1
+            ) {
+                jsonMap.put("theirConcept", jsonObject.get(key));
             }
 
         }

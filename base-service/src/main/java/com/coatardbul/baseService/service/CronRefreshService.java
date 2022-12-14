@@ -180,7 +180,7 @@ public class CronRefreshService {
             return (String) redisTemplate.opsForValue().get(DATA_SOURCE);
         } else {
             //默认
-            return DataSourceEnum.XIN_LANG.getSign();
+            return DataSourceEnum.DONG_FANG.getSign();
         }
     }
 

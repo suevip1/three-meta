@@ -20,11 +20,16 @@
     <result column="market_value" jdbcType="DECIMAL" property="marketValue" />
     <result column="detail" jdbcType="LONGVARCHAR" property="detail" />
     <result column="turnover_rate" jdbcType="DECIMAL" property="turnoverRate" />
+    <result column="concentration_ratio" jdbcType="VARCHAR" property="concentrationRatio" />
+    <result column="earn_profit" jdbcType="VARCHAR" property="earnProfit" />
+    <result column="jetton_cost" jdbcType="DECIMAL" property="jettonCost" />
+    <result column="last_concentration_ratio" jdbcType="VARCHAR" property="lastConcentrationRatio" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, code, `name`, `date`, templated_id, templated_sign, buy_time, buy_price, buy_increase_rate, 
-    close_increase_rate, hold_day, sale_time, sale_price, market_value, detail, turnover_rate
+    close_increase_rate, hold_day, sale_time, sale_price, market_value, detail, turnover_rate, 
+    concentration_ratio, earn_profit, jetton_cost, last_concentration_ratio
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -45,13 +50,15 @@
       buy_time, buy_price, buy_increase_rate, 
       close_increase_rate, hold_day, sale_time, 
       sale_price, market_value, detail, 
-      turnover_rate)
+      turnover_rate, concentration_ratio, earn_profit, 
+      jetton_cost, last_concentration_ratio)
     values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{date,jdbcType=VARCHAR}, #{templatedId,jdbcType=VARCHAR}, #{templatedSign,jdbcType=VARCHAR}, 
       #{buyTime,jdbcType=VARCHAR}, #{buyPrice,jdbcType=DECIMAL}, #{buyIncreaseRate,jdbcType=DECIMAL}, 
       #{closeIncreaseRate,jdbcType=DECIMAL}, #{holdDay,jdbcType=INTEGER}, #{saleTime,jdbcType=VARCHAR}, 
       #{salePrice,jdbcType=DECIMAL}, #{marketValue,jdbcType=DECIMAL}, #{detail,jdbcType=LONGVARCHAR}, 
-      #{turnoverRate,jdbcType=DECIMAL})
+      #{turnoverRate,jdbcType=DECIMAL}, #{concentrationRatio,jdbcType=VARCHAR}, #{earnProfit,jdbcType=VARCHAR}, 
+      #{jettonCost,jdbcType=DECIMAL}, #{lastConcentrationRatio,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
     <!--@mbg.generated-->
@@ -105,6 +112,18 @@
       <if test="turnoverRate != null">
         turnover_rate,
       </if>
+      <if test="concentrationRatio != null and concentrationRatio != ''">
+        concentration_ratio,
+      </if>
+      <if test="earnProfit != null and earnProfit != ''">
+        earn_profit,
+      </if>
+      <if test="jettonCost != null">
+        jetton_cost,
+      </if>
+      <if test="lastConcentrationRatio != null and lastConcentrationRatio != ''">
+        last_concentration_ratio,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null and id != ''">
@@ -154,6 +173,18 @@
       </if>
       <if test="turnoverRate != null">
         #{turnoverRate,jdbcType=DECIMAL},
+      </if>
+      <if test="concentrationRatio != null and concentrationRatio != ''">
+        #{concentrationRatio,jdbcType=VARCHAR},
+      </if>
+      <if test="earnProfit != null and earnProfit != ''">
+        #{earnProfit,jdbcType=VARCHAR},
+      </if>
+      <if test="jettonCost != null">
+        #{jettonCost,jdbcType=DECIMAL},
+      </if>
+      <if test="lastConcentrationRatio != null and lastConcentrationRatio != ''">
+        #{lastConcentrationRatio,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -206,6 +237,18 @@
       <if test="turnoverRate != null">
         turnover_rate = #{turnoverRate,jdbcType=DECIMAL},
       </if>
+      <if test="concentrationRatio != null and concentrationRatio != ''">
+        concentration_ratio = #{concentrationRatio,jdbcType=VARCHAR},
+      </if>
+      <if test="earnProfit != null and earnProfit != ''">
+        earn_profit = #{earnProfit,jdbcType=VARCHAR},
+      </if>
+      <if test="jettonCost != null">
+        jetton_cost = #{jettonCost,jdbcType=DECIMAL},
+      </if>
+      <if test="lastConcentrationRatio != null and lastConcentrationRatio != ''">
+        last_concentration_ratio = #{lastConcentrationRatio,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
@@ -226,7 +269,11 @@
       sale_price = #{salePrice,jdbcType=DECIMAL},
       market_value = #{marketValue,jdbcType=DECIMAL},
       detail = #{detail,jdbcType=LONGVARCHAR},
-      turnover_rate = #{turnoverRate,jdbcType=DECIMAL}
+      turnover_rate = #{turnoverRate,jdbcType=DECIMAL},
+      concentration_ratio = #{concentrationRatio,jdbcType=VARCHAR},
+      earn_profit = #{earnProfit,jdbcType=VARCHAR},
+      jetton_cost = #{jettonCost,jdbcType=DECIMAL},
+      last_concentration_ratio = #{lastConcentrationRatio,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 
@@ -249,9 +296,9 @@
             <if test="templatedId != null and templatedId != ''">
                 and templated_id = #{templatedId,jdbcType=VARCHAR}
             </if>
-          <if test="templatedSign != null and templatedSign != ''">
-            and templated_sign = #{templatedSign,jdbcType=VARCHAR}
-          </if>
+            <if test="templatedSign != null and templatedSign != ''">
+                and templated_sign = #{templatedSign,jdbcType=VARCHAR}
+            </if>
             <if test="holdDay != null">
                 and hold_day = #{holdDay,jdbcType=INTEGER}
             </if>
@@ -264,7 +311,11 @@
     <delete id="deleteByTemplatedIdAndHoldDayAndDateBetweenEqual">
         delete
         from stock_template_predict
-        where templated_id = #{templatedId,jdbcType=VARCHAR}
+        where
+        2&gt;1
+        <if test="templatedId != null and templatedId != ''">
+            and  templated_id = #{templatedId,jdbcType=VARCHAR}
+        </if>
         <if test="holdDay != null">
             and hold_day = #{holdDay,jdbcType=INTEGER}
         </if>
@@ -273,28 +324,33 @@
         and date <![CDATA[<=]]> #{maxBuyTime,jdbcType=VARCHAR}
     </delete>
 
-<!--auto generated by MybatisCodeHelper on 2022-06-11-->
-  <select id="selectAllByDateAndTemplatedIdAndCode" resultMap="BaseResultMap">
+    <!--auto generated by MybatisCodeHelper on 2022-06-11-->
+    <select id="selectAllByDateAndTemplatedIdAndCode" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List" />
         from stock_template_predict
-        where `date`=#{date,jdbcType=VARCHAR} and templated_id=#{templatedId,jdbcType=VARCHAR} and
-        code=#{code,jdbcType=VARCHAR}
+        where `date` = #{date,jdbcType=VARCHAR}
+          and templated_id = #{templatedId,jdbcType=VARCHAR}
+          and code = #{code,jdbcType=VARCHAR}
     </select>
 
-<!--auto generated by MybatisCodeHelper on 2022-06-11-->
-  <select id="selectAllByDateAndTemplatedIdAndCodeAndBuyTimeGreaterThan" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from stock_template_predict
-    where `date`=#{date,jdbcType=VARCHAR} and templated_id=#{templatedId,jdbcType=VARCHAR} and
-    code=#{code,jdbcType=VARCHAR} and buy_time <![CDATA[>]]> #{minBuyTime,jdbcType=VARCHAR}
-  </select>
+    <!--auto generated by MybatisCodeHelper on 2022-06-11-->
+    <select id="selectAllByDateAndTemplatedIdAndCodeAndBuyTimeGreaterThan" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_template_predict
+        where `date` = #{date,jdbcType=VARCHAR}
+          and templated_id = #{templatedId,jdbcType=VARCHAR}
+          and code = #{code,jdbcType=VARCHAR}
+          and buy_time <![CDATA[>]]> #{minBuyTime,jdbcType=VARCHAR}
+    </select>
 
-<!--auto generated by MybatisCodeHelper on 2022-06-11-->
-  <delete id="deleteByDateAndTemplatedIdAndCode">
-    delete from stock_template_predict
-    where `date`=#{date,jdbcType=VARCHAR} and templated_id=#{templatedId,jdbcType=VARCHAR} and
-    code=#{code,jdbcType=VARCHAR}
-  </delete>
+    <!--auto generated by MybatisCodeHelper on 2022-06-11-->
+    <delete id="deleteByDateAndTemplatedIdAndCode">
+        delete
+        from stock_template_predict
+        where `date` = #{date,jdbcType=VARCHAR}
+          and templated_id = #{templatedId,jdbcType=VARCHAR}
+          and code = #{code,jdbcType=VARCHAR}
+    </delete>
 </mapper>

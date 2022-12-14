@@ -79,4 +79,24 @@ public class StockTemplatePredict {
      * 换手率
      */
     private BigDecimal turnoverRate;
+
+    /**
+     * 筹码集中度
+     */
+    private String concentrationRatio;
+
+    /**
+     * 获利比例
+     */
+    private String earnProfit;
+
+    /**
+     * 筹码成本
+     */
+    private BigDecimal jettonCost;
+
+    /**
+     * 上次集中度
+     */
+    private String lastConcentrationRatio;
 }

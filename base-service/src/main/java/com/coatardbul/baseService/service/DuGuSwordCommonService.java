@@ -164,6 +164,31 @@ public abstract class DuGuSwordCommonService {
      */
     public abstract void calcProcess(Map map, PreQuartzTradeDetail result, String code);
 
+
+    /**
+     * 计算首次预买价格
+     * @param map
+     * @param result
+     * @param code
+     */
+    public BigDecimal calcFirstPreBuyPrice(Map map) {
+
+        BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
+
+        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
+
+        BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.05));
+        //涨幅前五小于9 ,走大于9的策略，否则走涨停前五
+        BigDecimal upLimitFiveIncrease = upLimitFivePrice.subtract(lastClosePrice).multiply(new BigDecimal(100)).divide(lastClosePrice, 2, BigDecimal.ROUND_HALF_DOWN);
+        if(upLimitFiveIncrease.compareTo(new BigDecimal(9))<=0){
+            return lastClosePrice.multiply(new BigDecimal(1.09));
+        }else {
+           return upLimitFivePrice;
+        }
+    }
+
+
+
     /**
      * 计算合适的价格，通过tick
      *

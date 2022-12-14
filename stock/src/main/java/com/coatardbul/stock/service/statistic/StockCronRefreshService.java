@@ -421,23 +421,10 @@ public class StockCronRefreshService {
             codeArr = JsonUtil.readToValue(stockPool, new TypeReference<Set<String>>() {
             });
         }
-        //6天的数据，当天是否为交易日
-        for (int i = 0; i <= 6; i++) {
-            String specialDay = null;
-            if (i == 0) {
-                specialDay = dto.getDateStr();
-            } else {
-                specialDay = riverRemoteService.getSpecialDay(dto.getDateStr(), 0 - i);
-            }
-            List<String> stockCodeArr = getStockCodeArr(specialDay, StockTemplateEnum.XXX.getSign());
-            codeArr.addAll(stockCodeArr);
 
-        }
-        String specialDay = riverRemoteService.getSpecialDay(dto.getDateStr(), -1);
-        List<String> stockCodeArr = getStockCodeArr(specialDay, StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
-        for (String code : stockCodeArr) {
-            codeArr.remove(code);
-        }
+        List<String> stockCodeArr = getStockCodeArr(dto.getDateStr(), StockTemplateEnum.INCREASE_GREATE.getSign());
+        codeArr.addAll(stockCodeArr);
+
         redisTemplate.opsForValue().set(stockPoolKey, JsonUtil.toJson(codeArr), 24, TimeUnit.HOURS);
 
         //调用历史接口
@@ -489,7 +476,7 @@ public class StockCronRefreshService {
                 addStockPool(stockCronStrategyTabDTO);
                 Thread.sleep(60 * 1000);
             } catch (Exception e) {
-                log.error(currDateStr+"当日添加数据异常"+ e.getMessage());
+                log.error(currDateStr + "当日添加数据异常" + e.getMessage());
             }
         }
 
@@ -557,6 +544,21 @@ public class StockCronRefreshService {
 
     private void calcSaleInfo(StockTemplatePredict stockTemplatePredict) {
         String specialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), stockTemplatePredict.getHoldDay());
+
+        BigDecimal sum=BigDecimal.ZERO;
+        int num =5;
+        for(int i=1;i<=num;i++){
+            String lastSpecialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), 0-i);
+            Map lastStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), lastSpecialDay, null);
+            BigDecimal concentrationRatio = new BigDecimal(lastStockDetailMap.get("concentrationRatio").toString());
+           sum= sum.add(concentrationRatio);
+        }
+        stockTemplatePredict.setLastConcentrationRatio(sum.divide(new BigDecimal(num),2, BigDecimal.ROUND_HALF_DOWN).toString());
+        Map currStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), stockTemplatePredict.getDate(), null);
+        stockTemplatePredict.setConcentrationRatio(currStockDetailMap.get("concentrationRatio").toString());
+        stockTemplatePredict.setEarnProfit(currStockDetailMap.get("earnProfit").toString());
+        stockTemplatePredict.setJettonCost(new BigDecimal(currStockDetailMap.get("jettonCost").toString()));
+        stockTemplatePredict.setDetail(currStockDetailMap.get("thsIndustry").toString()+"\\n"+currStockDetailMap.get("theirConcept").toString());
         Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
         BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
         stockTemplatePredict.setSalePrice(newPrice);

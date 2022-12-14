@@ -254,8 +254,6 @@ public class StockPredictService {
     }
 
     public void deleteByQuery(StockPredictDto dto) {
-        Set keys = redisTemplate.keys("*" + dto.getId() + "*");
-        redisTemplate.delete(keys);
         stockTemplatePredictMapper.deleteByTemplatedIdAndHoldDayAndDateBetweenEqual(dto.getId(), dto.getHoleDay(), dto.getBeginDate(), dto.getEndDate());
     }
 }
