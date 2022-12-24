@@ -2,6 +2,7 @@ package com.coatardbul.baseService.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.model.bo.ChipPosition;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,10 +62,10 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         updateStockInfo(code, null, dateFormat);
         String key = RedisKeyUtils.getHisStockTickInfo(dateFormat, code);
         String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
-        if(StringUtils.isNotBlank(stockTickArrStr)){
+        if (StringUtils.isNotBlank(stockTickArrStr)) {
             List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
             });
-            updateStockBaseInfo(stockTickArr, code,dateFormat);
+            updateStockBaseInfo(stockTickArr, code, dateFormat);
         }
 
         //获取最新的对象
@@ -88,7 +90,75 @@ public class DongFangCommonService extends CommonService implements DataServiceB
 
     }
 
-    ;
+
+    public String getDayKlineChip(String code) {
+        List<Header> headerList = new ArrayList<>();
+        String codeUrl = getCodeUrl(code);
+        //东方财富 接口 地址
+        setHeadList(headerList);
+        long l = System.currentTimeMillis();
+        //返回信息
+        String response = null;
+        try {
+            response = httpService.doGet("http://push2his.eastmoney.com/api/qt/stock/kline/get?" +
+                    "cb=jQuery112406890249259307581_" + (l - 1) +
+                    "&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&" +
+                    "fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61" +
+                    "&ut=7eea3edcaed734bea9cbfc24409ed989" +
+                    "&klt=101" +
+                    "&fqt=1" +
+                    "&secid=" + codeUrl +
+                    "&beg=0" +
+                    "&end=20500000" +
+                    "&_=" + l, headerList, cronRefreshService.getProxyFlag());
+        } catch (ConnectTimeoutException e) {
+            log.error(e.getMessage(), e);
+        }
+        return response;
+
+    }
+
+    /**
+     * 重构日K信息
+     * @param response
+     * @return
+     */
+    public  ChipPosition rebuildDayKlineChip(String response)  {
+        ChipPosition result = new ChipPosition();
+        int beginIndex = response.indexOf("(");
+        int endIndex = response.lastIndexOf(")");
+        response = response.substring(beginIndex + 1, endIndex);
+        JSONObject jsonObject = JSONObject.parseObject(response);
+        JSONObject data = jsonObject.getJSONObject("data");
+        JSONArray klines = data.getJSONArray("klines");
+        List<List<String>> helloList = new ArrayList<List<String>>();
+
+        Map<String,Integer>map = new HashMap<>();
+        for (int i = 0; i < klines.size(); i++) {
+            Object o = klines.get(i);
+            if (o instanceof String) {
+                List<String> item = new ArrayList<String>();
+                String o1 = (String) o;
+                String[] split = o1.split(",");
+                map.put(split[0],i);
+                item.add(split[0]);
+                item.add(split[1]);
+                item.add(split[2]);
+                item.add(split[3]);
+                item.add(split[4]);
+                item.add(split[5]);
+                item.add(split[6]);
+                item.add(split[7] + "%");
+                item.add(split[10]);
+                item.add(split[8]);
+                item.add(split[9]);
+                helloList.add(item);
+            }
+        }
+        result.setDayKlineList(helloList);
+        result.setDatePositionMap(map);
+        return result;
+    }
 
 
     private void setHeadList(List<Header> headerList) {
@@ -197,7 +267,7 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         if (StringUtils.isNotBlank(response)) {
             List<TickInfo> list = updateStockTickInfo(code, response, null);
             try {
-                updateStockBaseInfo(list, code,null);
+                updateStockBaseInfo(list, code, null);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }

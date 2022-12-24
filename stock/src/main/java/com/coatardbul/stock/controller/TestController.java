@@ -1,8 +1,14 @@
 package com.coatardbul.stock.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.bo.Chip;
+import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.service.DongFangCommonService;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.statistic.RedisService;
@@ -27,7 +33,9 @@ import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.region.Region;
 import io.swagger.annotations.Api;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +48,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.FileReader;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,28 +90,97 @@ public class TestController {
 
     StockCronRefreshService stockCronRefreshService;
 
+    @Autowired
+    DongFangCommonService dongFangCommonService;
+
     @WebLog(value = "")
     @RequestMapping(path = "/test", method = RequestMethod.GET)
-    public String dayStatic() throws Exception {
+    public CommonResult dayStatic() throws Exception {
+        String response=null;
+        int retryNum = 10;
+        while (retryNum > 0) {
+             response = dongFangCommonService.getDayKlineChip("002579");
+            if (StringUtils.isNotBlank(response)) {
+                break;
+            } else {
+                retryNum--;
+            }
+        }
+        if (!StringUtils.isNotBlank(response)) {
+            return null;
+        }
+
+        int beginIndex = response.indexOf("(");
+        int endIndex = response.lastIndexOf(")");
+        response = response.substring(beginIndex + 1, endIndex);
+        JSONObject jsonObject = JSONObject.parseObject(response);
+        JSONObject data = jsonObject.getJSONObject("data");
+        JSONArray klines = data.getJSONArray("klines");
+//        return CommonResult.success(klines);
+
+        List<List<String>> helloList = new ArrayList<List<String>>();
+
+
+        for (int i = 0; i < klines.size(); i++) {
+            Object o = klines.get(i);
+            if (o instanceof String) {
+                List<String> item = new ArrayList<String>();
+                String o1 = (String) o;
+                String[] split = o1.split(",");
+                item.add(split[0]);
+                item.add(split[1]);
+                item.add(split[2]);
+                item.add(split[3]);
+                item.add(split[4]);
+                item.add(split[5]);
+                item.add(split[6]);
+                item.add(split[7] + "%");
+                item.add(split[10]);
+                item.add(split[8]);
+                item.add(split[9]);
+                helloList.add(item);
+            }
+        }
+
+//        List<Object> collect = klines.stream().collect(Collectors.toList());
         String result = "";
         // 获取JS执行引擎
         ScriptEngine se = new ScriptEngineManager().getEngineByName("javascript");
         String userPath = System.getProperty("user.dir");
-        FileReader fileReader = new FileReader(userPath + "/stock/js/bbb.js");
+        FileReader fileReader = new FileReader(userPath + "/stock/js/chip.js");
 
         se.eval(fileReader);
         // 是否可调用
         if (se instanceof Invocable) {
             Invocable in = (Invocable) se;
-            //timestamp
-            long l = System.currentTimeMillis();
-            Object ccc = in.invokeFunction("ccc", "Uu0KfOB8iUP69d3c:" + l);
-            Object wordsToBytes = in.invokeFunction("wordsToBytes", ccc);
-            //token
-            result = (String) in.invokeFunction("bytesToHex", wordsToBytes);
+
+            String s = JsonUtil.toJson(helloList);
+
+            Object ccc = in.invokeFunction("calcChip", helloList.size() - 1, 150, 120, s);
+            //获利比例
+            BigDecimal benefitPart = new BigDecimal(((ScriptObjectMirror) ccc).get("benefitPart").toString()).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+            //平均成本
+            BigDecimal avgCost = new BigDecimal(((ScriptObjectMirror) ccc).get("avgCost").toString()).setScale(2, BigDecimal.ROUND_HALF_UP);
+            //集中度
+            Object percentChips = ((ScriptObjectMirror) ccc).get("percentChips");
+            Object ninePrecent = ((ScriptObjectMirror) percentChips).get("90");
+            String concentration = ((ScriptObjectMirror) ninePrecent).get("concentration").toString();
+            BigDecimal bigDecimal = new BigDecimal(concentration).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+            List<Double> x = getCoordArr("x", ccc);
+            List<Double> y = getCoordArr("y", ccc);
+
+            ((ScriptObjectMirror) ccc).get("x");
+            Chip reslult = new Chip();
+            reslult.setBenefitPart(benefitPart);
+            reslult.setAvgCost(avgCost);
+            reslult.setConcentration(bigDecimal);
+            reslult.setXcoord(x);
+            reslult.setYcoord(y);
+            return CommonResult.success(reslult);
         }
 
-        return result;
+        return CommonResult.success(null);
 
 //        stockQuartzService.xxx();
 //        List<Header> headerList = new ArrayList<>();
@@ -110,6 +189,17 @@ public class TestController {
 //
 //        String s = httpService.doGet("https://hq.sinajs.cn/rn=1666375012860&list=sz002866,sz002866_i,bk_new_qtxy", headerList, false);
 //        System.out.println(s);
+    }
+
+
+    private List<Double> getCoordArr(String key, Object ccc) {
+        List<Double> result = new ArrayList<Double>();
+        Object x = ((ScriptObjectMirror) ccc).get(key);
+        for (int i = 0; i < 150; i++) {
+            Object o = ((ScriptObjectMirror) x).get(String.valueOf(i));
+            result.add((Double) o);
+        }
+        return result;
     }
 
     @RequestMapping(path = "/test1", method = RequestMethod.POST)

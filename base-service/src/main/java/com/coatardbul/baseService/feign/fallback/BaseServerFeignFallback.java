@@ -1,8 +1,8 @@
 
-package com.coatardbul.stock.feign.fallback;
+package com.coatardbul.baseService.feign.fallback;
 
 
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

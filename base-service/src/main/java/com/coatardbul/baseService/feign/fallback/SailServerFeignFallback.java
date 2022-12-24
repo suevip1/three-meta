@@ -1,10 +1,10 @@
 
-package com.coatardbul.stock.feign.fallback;
+package com.coatardbul.baseService.feign.fallback;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
-import com.coatardbul.stock.feign.SailServerFeign;
+import com.coatardbul.baseService.entity.dto.StockCronRefreshDTO;
+import com.coatardbul.baseService.feign.SailServerFeign;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,8 @@
-package com.coatardbul.stock.model.entity;
+package com.coatardbul.baseService.entity.bo;
+
+import lombok.Data;
 
 import java.math.BigDecimal;
-import lombok.Data;
 
 /**
  * 股票模型预测表

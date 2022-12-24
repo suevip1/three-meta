@@ -1,9 +1,10 @@
 package com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart;
 
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.constants.Constant;
-import com.coatardbul.stock.feign.BaseServerFeign;
-import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
@@ -14,7 +15,6 @@ import com.coatardbul.stock.model.dto.StockEmotionRangeDayDTO;
 import com.coatardbul.stock.model.entity.StockDayEmotion;
 import com.coatardbul.stock.model.entity.StockStaticTemplate;
 import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.dayStatic.DayService;
 import lombok.extern.slf4j.Slf4j;

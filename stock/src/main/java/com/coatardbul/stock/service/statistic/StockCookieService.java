@@ -1,10 +1,10 @@
 package com.coatardbul.stock.service.statistic;
 
-import com.coatardbul.stock.model.entity.StockCookie;
-import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockCookieMapper;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
+import com.coatardbul.stock.model.entity.StockCookie;
+import com.coatardbul.stock.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

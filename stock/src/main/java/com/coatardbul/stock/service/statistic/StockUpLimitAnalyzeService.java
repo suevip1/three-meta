@@ -7,28 +7,25 @@ import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseCommon.util.ReflexUtil;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.constants.Constant;
-import com.coatardbul.stock.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockUplimitAnalyzeMapper;
 import com.coatardbul.stock.model.dto.StockDefineStaticDTO;
 import com.coatardbul.stock.model.dto.StockUplimitAnalyzeDTO;
 import com.coatardbul.stock.model.entity.StockUplimitAnalyze;
-import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**

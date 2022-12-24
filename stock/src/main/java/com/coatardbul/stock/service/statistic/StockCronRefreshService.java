@@ -5,15 +5,21 @@ import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.constants.BuySellQuartzStrategySignEnum;
 import com.coatardbul.baseCommon.constants.StockTemplateEnum;
-import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.model.bo.Chip;
+import com.coatardbul.baseCommon.model.bo.ChipPosition;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
+import com.coatardbul.baseCommon.util.DongCaiUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
+import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.baseService.entity.bo.TickInfo;
+import com.coatardbul.baseService.entity.dto.StockCronRefreshDTO;
+import com.coatardbul.baseService.feign.SailServerFeign;
+import com.coatardbul.baseService.feign.TickServerFeign;
 import com.coatardbul.baseService.service.AiStrategyService;
-import com.coatardbul.baseService.service.CommonService;
+import com.coatardbul.baseService.service.ChipService;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.DongFangCommonService;
@@ -21,20 +27,15 @@ import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
-import com.coatardbul.stock.feign.SailServerFeign;
-import com.coatardbul.stock.feign.TickServerFeign;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.mapper.StockWarnLogMapper;
-import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
-import com.coatardbul.stock.model.entity.StockTemplatePredict;
 import com.coatardbul.stock.model.entity.StockWarnLog;
 import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.fasterxml.jackson.core.type.TypeReference;
-import gnu.trove.set.hash.THashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.script.Invocable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,10 +67,17 @@ import java.util.stream.Collectors;
 public class StockCronRefreshService {
     @Resource
     DataFactory dataFactory;
+
+
+    @Autowired
+    ChipService  chipService;
     @Resource
     public CronRefreshService cronRefreshService;
     @Autowired
     RedisTemplate redisTemplate;
+
+    @Autowired
+    DongFangCommonService dongFangCommonService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -85,8 +94,7 @@ public class StockCronRefreshService {
     StockWarnLogMapper stockWarnLogMapper;
     @Resource
     TickServerFeign tickServerFeign;
-    @Autowired
-    DongFangCommonService dongFangCommonService;
+
     @Autowired
     StockTemplatePredictMapper stockTemplatePredictMapper;
     @Autowired
@@ -542,8 +550,23 @@ public class StockCronRefreshService {
      * @param stockTemplatePredict
      */
 
-    private void calcSaleInfo(StockTemplatePredict stockTemplatePredict) {
+    public void calcSaleInfo(StockTemplatePredict stockTemplatePredict) {
+        chipService.calcDongCaiSaleInfo(stockTemplatePredict);
         String specialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), stockTemplatePredict.getHoldDay());
+        try {
+            Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
+            BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
+            stockTemplatePredict.setSalePrice(newPrice);
+            stockTemplatePredict.setSaleTime("11:29");
+            stockTemplatePredict.setDetail(stockDetailMap.get("thsIndustry").toString()+"\\n"+stockDetailMap.get("theirConcept").toString());
+
+        }catch (Exception e){
+            log.error("获取当前11.29分数据出错"+e.getMessage());
+        }
+        stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
+    }
+
+    private void calcTongHuaSaleInfo(StockTemplatePredict stockTemplatePredict) {
 
         BigDecimal sum=BigDecimal.ZERO;
         int num =5;
@@ -551,7 +574,7 @@ public class StockCronRefreshService {
             String lastSpecialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), 0-i);
             Map lastStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), lastSpecialDay, null);
             BigDecimal concentrationRatio = new BigDecimal(lastStockDetailMap.get("concentrationRatio").toString());
-           sum= sum.add(concentrationRatio);
+            sum= sum.add(concentrationRatio);
         }
         stockTemplatePredict.setLastConcentrationRatio(sum.divide(new BigDecimal(num),2, BigDecimal.ROUND_HALF_DOWN).toString());
         Map currStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), stockTemplatePredict.getDate(), null);
@@ -559,13 +582,11 @@ public class StockCronRefreshService {
         stockTemplatePredict.setEarnProfit(currStockDetailMap.get("earnProfit").toString());
         stockTemplatePredict.setJettonCost(new BigDecimal(currStockDetailMap.get("jettonCost").toString()));
         stockTemplatePredict.setDetail(currStockDetailMap.get("thsIndustry").toString()+"\\n"+currStockDetailMap.get("theirConcept").toString());
-        Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
-        BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
-        stockTemplatePredict.setSalePrice(newPrice);
-        stockTemplatePredict.setSaleTime("11:29");
-        stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
-
     }
+
+
+
+
 
     public void strategyMonthBackTest(StockCronStrategyTabDTO dto) {
         String dateStr = dto.getDateStr();
@@ -578,5 +599,56 @@ public class StockCronRefreshService {
             stockCronStrategyTabDTO.setStrategySign(dto.getStrategySign());
             strategyBackTest(stockCronStrategyTabDTO);
         }
+    }
+
+    public Chip queryChipDispatcher(StockTemplatePredict stockTemplatePredict) {
+        String response=null;
+        int retryNum = 10;
+        while (retryNum>0){
+            response = dongFangCommonService.getDayKlineChip(stockTemplatePredict.getCode());
+            if(StringUtils.isNotBlank(response)){
+                break;
+            }else {
+                retryNum--;
+            }
+        }
+        if(!StringUtils.isNotBlank(response)){
+            return null;
+        }
+        ChipPosition chipPosition = dongFangCommonService.rebuildDayKlineChip(response);
+        List<List<String>> dayKlineList = chipPosition.getDayKlineList();
+        String toJson = JsonUtil.toJson(dayKlineList);
+
+        Invocable chipInvocable=null;
+        try {
+            chipInvocable = DongCaiUtil.getChipInvocable();
+        } catch (Exception e) {
+            log.error("获取东财筹码js异常"+e.getMessage());
+            return  null;
+        }
+        Integer position = chipPosition.getDatePositionMap().get(stockTemplatePredict.getDate());
+        Object calcChip = null;
+        try {
+            calcChip = chipInvocable.invokeFunction("calcChip", position, 150, 120, toJson);
+
+        }catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        Chip convert = DongCaiUtil.convert(calcChip);
+        return convert;
+
+    }
+
+
+    public Object getStockDetail(StockTemplatePredict dto) {
+
+        String hisStockInfoKey = RedisKeyUtils.getHisStockInfo(dto.getDate(), dto.getCode());
+
+        if(redisTemplate.hasKey(hisStockInfoKey)){
+            String stockDetailStr = (String) redisTemplate.opsForValue().get(hisStockInfoKey);
+            Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
+            return stockMap;
+        }
+        return null;
     }
 }

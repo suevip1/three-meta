@@ -55,6 +55,11 @@ public class AiStrategyParamBo {
      */
     private Integer maxContinueMinuter;
 
+    /**
+     * 最大二封时间
+     */
+    private Integer maxOpenMinuter;
+
 
     /**
      * 最大间隔时间，第一次预买入和最后买入时间间隔不能太大

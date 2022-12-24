@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic;
 
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockDefineStaticMapper;
 import com.coatardbul.stock.model.dto.StockDefineStaticDTO;
 import com.coatardbul.stock.model.entity.StockDefineStatic;

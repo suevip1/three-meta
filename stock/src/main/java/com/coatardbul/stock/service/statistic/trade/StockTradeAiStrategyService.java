@@ -1,17 +1,14 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.mapper.StockTradeAiStrategyMapper;
 import com.coatardbul.stock.model.entity.StockTradeAiStrategy;
-import com.coatardbul.stock.feign.BaseServerFeign;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>

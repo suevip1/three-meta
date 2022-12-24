@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coatardbul.stock.mapper.StockTemplatePredictMapper">
-  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockTemplatePredict">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseService.entity.bo.StockTemplatePredict">
     <!--@mbg.generated-->
     <!--@Table stock_template_predict-->
     <id column="id" jdbcType="VARCHAR" property="id" />
@@ -43,7 +43,7 @@
     delete from stock_template_predict
     where id = #{id,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
+  <insert id="insert" parameterType="com.coatardbul.baseService.entity.bo.StockTemplatePredict">
     <!--@mbg.generated-->
     insert into stock_template_predict (id, code, `name`, 
       `date`, templated_id, templated_sign, 
@@ -60,7 +60,7 @@
       #{turnoverRate,jdbcType=DECIMAL}, #{concentrationRatio,jdbcType=VARCHAR}, #{earnProfit,jdbcType=VARCHAR}, 
       #{jettonCost,jdbcType=DECIMAL}, #{lastConcentrationRatio,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
+  <insert id="insertSelective" parameterType="com.coatardbul.baseService.entity.bo.StockTemplatePredict">
     <!--@mbg.generated-->
     insert into stock_template_predict
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -188,7 +188,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseService.entity.bo.StockTemplatePredict">
     <!--@mbg.generated-->
     update stock_template_predict
     <set>
@@ -252,7 +252,7 @@
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockTemplatePredict">
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseService.entity.bo.StockTemplatePredict">
     <!--@mbg.generated-->
     update stock_template_predict
     set code = #{code,jdbcType=VARCHAR},

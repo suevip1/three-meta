@@ -1,8 +1,8 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.stock.model.entity.StockTradeUrl;
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
+import com.coatardbul.stock.model.entity.StockTradeUrl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

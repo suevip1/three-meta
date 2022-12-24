@@ -8,20 +8,20 @@ import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
+import com.coatardbul.baseService.entity.feign.StockTemplateQueryDTO;
+import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.constants.Constant;
-import com.coatardbul.stock.feign.BaseServerFeign;
-import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.model.dto.StockPredictDto;
-import com.coatardbul.stock.model.entity.StockTemplatePredict;
-import com.coatardbul.stock.model.feign.StockTemplateQueryDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +54,8 @@ public class StockPredictService {
     RiverRemoteService riverRemoteService;
     @Autowired
     StockStrategyService stockStrategyService;
+    @Autowired
+    StockCronRefreshService stockCronRefreshService;
     @Autowired
     RiverServerFeign riverServerFeign;
     @Autowired
@@ -182,6 +184,7 @@ public class StockPredictService {
         addInfo.setDate(dateStr);
         addInfo.setTemplatedId(dto.getId());
         addInfo.setHoldDay(dto.getHoleDay());
+        addInfo.setTemplatedSign(dto.getStrategySign());
         addInfo.setSaleTime(dto.getSaleTime());
         addInfo.setBuyTime(dto.getBuyTime());
         addInfo.setCode((String) ((JSONObject) jo).get("code"));
@@ -255,5 +258,10 @@ public class StockPredictService {
 
     public void deleteByQuery(StockPredictDto dto) {
         stockTemplatePredictMapper.deleteByTemplatedIdAndHoldDayAndDateBetweenEqual(dto.getId(), dto.getHoleDay(), dto.getBeginDate(), dto.getEndDate());
+    }
+
+    public void updateById(StockPredictDto dto) {
+        StockTemplatePredict stockTemplatePredict = stockTemplatePredictMapper.selectByPrimaryKey(dto.getId());
+        stockCronRefreshService.calcSaleInfo(stockTemplatePredict);
     }
 }

@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.stock.model.entity.StockTradeConfig;
 import com.coatardbul.stock.mapper.StockTradeConfigMapper;
+import com.coatardbul.stock.model.entity.StockTradeConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

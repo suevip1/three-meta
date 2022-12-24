@@ -2,9 +2,9 @@ package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.constants.StaticLatitudeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
-import com.coatardbul.stock.feign.BaseServerFeign;
-import com.coatardbul.stock.feign.RiverServerFeign;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.model.dto.StockStaticTemplateBaseDTO;
 import com.coatardbul.stock.model.entity.StockStaticTemplate;

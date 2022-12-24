@@ -50,6 +50,12 @@ public class StockTemplatedPredictController {
         return CommonResult.success(null);
     }
     @WebLog(value = "")
+    @RequestMapping(path = "/updateById", method = RequestMethod.POST)
+    public CommonResult updateById(@Validated @RequestBody StockPredictDto dto) {
+        stockPredictService.updateById(dto);
+        return CommonResult.success(null);
+    }
+    @WebLog(value = "")
     @RequestMapping(path = "/deleteByQuery", method = RequestMethod.POST)
     public CommonResult deleteByQuery(@Validated @RequestBody StockPredictDto dto) {
         stockPredictService.deleteByQuery(dto);

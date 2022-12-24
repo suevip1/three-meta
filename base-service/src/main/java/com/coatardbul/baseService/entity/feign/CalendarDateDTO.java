@@ -1,4 +1,4 @@
-package com.coatardbul.stock.model.feign;
+package com.coatardbul.baseService.entity.feign;
 
 import lombok.Data;
 

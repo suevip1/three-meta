@@ -3,8 +3,6 @@ package com.coatardbul.stock.service.statistic;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseCommon.util.JsonUtil;
-import com.coatardbul.baseService.service.HttpCommonService;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.model.dto.DongFangPlateDTO;
@@ -15,10 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

@@ -1,6 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockTemplatePredict;import org.apache.ibatis.annotations.Param;import java.util.List;
+import com.coatardbul.baseService.entity.bo.StockTemplatePredict;import org.apache.ibatis.annotations.Param;import java.util.List;
 
 public interface StockTemplatePredictMapper {
     int deleteByPrimaryKey(String id);

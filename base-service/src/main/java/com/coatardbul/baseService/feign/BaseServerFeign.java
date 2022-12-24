@@ -1,5 +1,5 @@
 
-package com.coatardbul.stock.feign;
+package com.coatardbul.baseService.feign;
 
 
 import com.coatardbul.baseService.config.FeignLogConfig;

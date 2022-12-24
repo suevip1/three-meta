@@ -1,10 +1,10 @@
 
-package com.coatardbul.stock.feign;
+package com.coatardbul.baseService.feign;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.config.FeignLogConfig;
-import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
+import com.coatardbul.baseService.entity.dto.StockCronRefreshDTO;
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;

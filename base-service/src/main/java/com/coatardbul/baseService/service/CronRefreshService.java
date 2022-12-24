@@ -144,7 +144,7 @@ public class CronRefreshService {
             return Integer.valueOf(codeExistHourStr);
         } else {
             //默认
-            return 3;
+            return 24;
         }
     }
 

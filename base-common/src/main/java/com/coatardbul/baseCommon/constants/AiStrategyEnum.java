@@ -3,7 +3,11 @@ package com.coatardbul.baseCommon.constants;
 public enum AiStrategyEnum {
 
     DU_GU_SWORD_DELAY("DU_GU_SWORD_DELAY","独孤一剑延迟"),
+    RED_BLACK_CROSS("RED_BLACK_CROSS","红黑交叉"),
+    FINE_OPEN("FINE_OPEN","灵性封板"),
+
     DU_GU_SWORD("DU_GU_SWORD","独孤一剑");
+
 
     private String code;
 

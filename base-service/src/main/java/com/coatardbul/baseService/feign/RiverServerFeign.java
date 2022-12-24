@@ -1,14 +1,15 @@
 
-package com.coatardbul.stock.feign;
+package com.coatardbul.baseService.feign;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.config.FeignLogConfig;
-import com.coatardbul.stock.model.feign.CalendarDateDTO;
-import com.coatardbul.stock.model.feign.CalendarSpecialDTO;
-import com.coatardbul.stock.model.feign.StockTemplateDto;
-import com.coatardbul.stock.model.feign.StockTemplateQueryDTO;
-import com.coatardbul.stock.model.feign.StockTimeInterval;
+
+import com.coatardbul.baseService.entity.feign.CalendarDateDTO;
+import com.coatardbul.baseService.entity.feign.CalendarSpecialDTO;
+import com.coatardbul.baseService.entity.feign.StockTemplateDto;
+import com.coatardbul.baseService.entity.feign.StockTemplateQueryDTO;
+import com.coatardbul.baseService.entity.feign.StockTimeInterval;
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;

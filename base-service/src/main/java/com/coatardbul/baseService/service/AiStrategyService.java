@@ -2,17 +2,12 @@ package com.coatardbul.baseService.service;
 
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.constants.BuySellQuartzStrategySignEnum;
-import com.coatardbul.baseCommon.constants.IsNotEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.AiStrategyParamBo;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
-import com.coatardbul.baseService.entity.bo.PreTradeDetail;
-import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -20,10 +15,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -42,6 +35,12 @@ public class AiStrategyService {
     StockParseAndConvertService stockParseAndConvertService;
     @Autowired
     DuGuSwordDelayService duGuSwordDelayService;
+
+    @Autowired
+    DuGuRedBlackService duGuRedBlackService;
+
+    @Autowired
+    DuGuFineOpenService duGuFineOpenService;
     @Autowired
     DuGuSwordService duGuSwordService;
 
@@ -95,6 +94,12 @@ public class AiStrategyService {
         }
         if (AiStrategyEnum.DU_GU_SWORD_DELAY.getCode().equals(aiStrategySig)) {
             return duGuSwordDelayService.getPreQuartzTradeDetail(code, aiStrategySig, dateStr);
+        }
+        if (AiStrategyEnum.RED_BLACK_CROSS.getCode().equals(aiStrategySig)) {
+            return duGuRedBlackService.getPreQuartzTradeDetail(code, aiStrategySig, dateStr);
+        }
+        if (AiStrategyEnum.FINE_OPEN.getCode().equals(aiStrategySig)) {
+            return duGuFineOpenService.getPreQuartzTradeDetail(code, aiStrategySig, dateStr);
         }
         return new PreQuartzTradeDetail();
 

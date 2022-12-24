@@ -3,8 +3,9 @@ package com.coatardbul.stock.controller.strategy;
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseService.service.CronRefreshService;
-import com.coatardbul.stock.model.dto.StockCronRefreshDTO;
+import com.coatardbul.baseService.entity.dto.StockCronRefreshDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
+import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -67,11 +68,19 @@ public class StockCronRefreshController {
         return CommonResult.success(stockCronRefreshService.getStockInfo(dto));
     }
 
+    @ApiOperation("获取单个的股票信息")
+    @RequestMapping(path = "/getStockDetail", method = RequestMethod.POST)
+    public CommonResult getStockDetail(@RequestBody StockTemplatePredict dto) {
+        return CommonResult.success(stockCronRefreshService.getStockDetail(dto));
+    }
+
     @ApiOperation("获取所有的股票信息")
     @RequestMapping(path = "/getSimpleStockInfo", method = RequestMethod.POST)
     public CommonResult getSimpleStockInfo(@RequestBody StockCronRefreshDTO dto) {
         return CommonResult.success(stockCronRefreshService.getSimpleStockInfo(dto));
     }
+
+
     @ApiOperation("获取所有的股票信息")
     @RequestMapping(path = "/addStrategyTab", method = RequestMethod.POST)
     public CommonResult addStrategyTab(@RequestBody StockCronStrategyTabDTO dto) {
@@ -197,5 +206,13 @@ public class StockCronRefreshController {
         stockCronRefreshService.strategyMonthBackTest(dto);
         return CommonResult.success(null);
     }
+
+    @ApiOperation("根据日期，股票查看筹码分布")
+    @RequestMapping(path = "/queryChipDispatcher", method = RequestMethod.POST)
+    public CommonResult queryChipDispatcher(@RequestBody StockTemplatePredict dto) {
+        return CommonResult.success( stockCronRefreshService.queryChipDispatcher(dto));
+    }
+
+
 
 }

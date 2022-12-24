@@ -1,12 +1,12 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.stock.feign.BaseServerFeign;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
+import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockTradeBuyTaskMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
-import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.stock.model.entity.StockTradeStrategy;
-import com.coatardbul.stock.service.romote.RiverRemoteService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
