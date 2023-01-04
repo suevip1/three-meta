@@ -90,6 +90,23 @@ public class RedisKeyUtils {
     }
 
 
+    /**
+     *
+     * @param code
+     * @return
+     */
+    public static String getNowPreTradeStockInfo(String code ) {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        return getHisPreTradeStockInfo(dateFormat, code);
+    }
+    public static String getHisPreTradeStockInfo(String dateFormat,  String code ) {
+        String key = dateFormat + "_pre_trade_" + code;
+        return key;
+    }
+    public static String getPreTradeStockInfoPattern(String dateFormat) {
+        String key = dateFormat + "_pre_trade_*" ;
+        return key;
+    }
 
     public static String getStockPool(String dateStr){
         return dateStr+"_pool";

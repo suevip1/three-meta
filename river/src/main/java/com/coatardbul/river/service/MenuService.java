@@ -1,6 +1,6 @@
 package com.coatardbul.river.service;
 
-import com.coatardbul.river.common.constants.CommonStatusEnum;
+import com.coatardbul.baseCommon.constants.CommonStatusEnum;
 import com.coatardbul.river.feign.BaseServerFeign;
 import com.coatardbul.river.mapper.AuthMenuMapper;
 import com.coatardbul.river.model.dto.UserDto;

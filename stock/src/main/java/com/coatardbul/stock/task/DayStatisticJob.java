@@ -5,6 +5,7 @@ import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;
@@ -50,7 +51,8 @@ public class DayStatisticJob {
     @Autowired
     StockTradeUserService stockTradeUserService;
 
-
+    @Autowired
+    StockCronRefreshService stockCronRefreshService;
 
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
@@ -113,13 +115,38 @@ public class DayStatisticJob {
 
     /**
      * 自动登陆
+     *
      * @throws IllegalAccessException
      * @throws ParseException
      */
     @XxlJob("dayAutoLoginJobHandler")
-    public void dayAutoLoginJobHandler()  {
+    public void dayAutoLoginJobHandler() {
         stockTradeUserService.autoLogin();
     }
 
+
+    /**
+     * 自动刷新池,每日添加股票信息
+     *
+     * @throws IllegalAccessException
+     * @throws ParseException
+     */
+    @XxlJob("dayAddStockJobHandle")
+    public void dayAddStockJobHandle() {
+        String param = XxlJobHelper.getJobParam();
+
+        String dateStr="";
+        if (StringUtils.isNotBlank(param)) {
+            StockEmotionDayDTO dto = JsonUtil.readToValue(param, StockEmotionDayDTO.class);
+            dateStr=dto.getDateStr();
+            if(!StringUtils.isNotBlank(dateStr)){
+                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            }
+        }
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+        if(timeStr.compareTo("09:20")>=0 &&timeStr.compareTo("10:35")<=0){
+            stockCronRefreshService.dayAddStockJob(dateStr);
+        }
+    }
 
 }

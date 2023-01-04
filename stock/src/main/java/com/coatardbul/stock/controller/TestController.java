@@ -3,12 +3,22 @@ package com.coatardbul.stock.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.constants.AiStrategyEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.DongFangCommonService;
 import com.coatardbul.baseService.service.HttpPoolService;
+import com.coatardbul.baseService.service.SnowFlakeService;
+import com.coatardbul.baseService.service.StockStrategyCommonService;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.annotation.WebLog;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.statistic.RedisService;
@@ -52,6 +62,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -69,6 +80,12 @@ public class TestController {
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
     @Autowired
+    SnowFlakeService snowFlakeService;
+    @Autowired
+    StockTemplatePredictMapper stockTemplatePredictMapper;
+    @Autowired
+    StockStrategyCommonService stockStrategyCommonService;
+    @Autowired
     RedisService redisService;
     @Autowired
     EmailService emailService;
@@ -76,6 +93,10 @@ public class TestController {
     CosService cosService;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    RiverRemoteService riverRemoteService;
+    @Autowired
+    StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
 
     @Autowired
     StockTradeService stockTradeService;
@@ -96,10 +117,10 @@ public class TestController {
     @WebLog(value = "")
     @RequestMapping(path = "/test", method = RequestMethod.GET)
     public CommonResult dayStatic() throws Exception {
-        String response=null;
+        String response = null;
         int retryNum = 10;
         while (retryNum > 0) {
-             response = dongFangCommonService.getDayKlineChip("002579");
+            response = dongFangCommonService.getDayKlineChip("002579");
             if (StringUtils.isNotBlank(response)) {
                 break;
             } else {
@@ -294,6 +315,97 @@ public class TestController {
 
     }
 
+
+    @RequestMapping(path = "/test2", method = RequestMethod.POST)
+    public String cosUpload() throws Exception {
+
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList("2022-12-01", "2023-01-03");
+        for (String dateFormat : dateIntervalList) {
+            sfdfd(dateFormat);
+        }
+
+
+        return null;
+
+    }
+
+
+    private void sfdfd(String dateFormat) {
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.FIRST_UP_LIMIT.getSign());
+        dto.setDateStr(dateFormat);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyCommonService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            return;
+        }
+        for(int jsonLen=0;jsonLen<strategy.getTotalNum();jsonLen++){
+            JSONObject jsonObject = strategy.getData().getJSONObject(jsonLen);
+            Map convert = stockUpLimitAnalyzeCommonService.convertFirstUpLimit(jsonObject, dateFormat);
+            BigDecimal lastClosePrice = new BigDecimal(convert.get("lastClosePrice").toString());
+            BigDecimal multiply = lastClosePrice.multiply(new BigDecimal(1.02));
+            for (int i = 1; i < 4; i++) {
+                Map nextInfo = getNextInfo(dateFormat, i, (String) convert.get("code"));
+                if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(multiply) < 0&&new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(multiply) > 0) {
+                    //todo
+                    StockTemplatePredict stockTemplatePredict = new StockTemplatePredict();
+                    stockTemplatePredict.setId(snowFlakeService.getSnowId());
+                    stockTemplatePredict.setDate(nextInfo.get("dateStr").toString());
+                    stockTemplatePredict.setTemplatedSign(AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+                    stockTemplatePredict.setTemplatedName(AiStrategyEnum.getDescByCode(stockTemplatePredict.getTemplatedSign()));
+                    stockTemplatePredict.setHoldDay(2);
+                    stockTemplatePredict.setCode(nextInfo.get("code").toString());
+                    stockTemplatePredict.setName(nextInfo.get("name").toString());
+                    stockTemplatePredict.setBuyPrice(multiply);
+//                stockTemplatePredict.setBuyTime(preQuartzTradeDetail.getTime());
+//                stockTemplatePredict.setBuyIncreaseRate(preQuartzTradeDetail.getIncreaseRate());
+//                stockTemplatePredict.setCloseIncreaseRate(preQuartzTradeDetail.getCloseIncreaseRate());
+                    stockTemplatePredictMapper.insert(stockTemplatePredict);
+                    String specialDay = riverRemoteService.getSpecialDay(dateFormat, i+2);
+                    try {
+                        Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
+                        BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
+                        stockTemplatePredict.setSalePrice(newPrice);
+                        stockTemplatePredict.setSaleTime("11:29");
+                        stockTemplatePredict.setDetail(stockDetailMap.get("thsIndustry").toString() + "\\n" + stockDetailMap.get("theirConcept").toString());
+                    } catch (Exception e) {
+                        log.error("获取当前11.29分数据出错" + e.getMessage());
+                    }
+                    stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
+                    break;
+                }
+            }
+        }
+
+
+    }
+
+
+    private Map getNextInfo(String dateFormat, Integer num, String code) {
+
+        String specialDay = riverRemoteService.getSpecialDay(dateFormat, num);
+
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
+        dto.setDateStr(specialDay);
+        dto.setStockCode(code);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyCommonService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            return null;
+        }
+        JSONObject jsonObject = strategy.getData().getJSONObject(0);
+        Map convert = stockUpLimitAnalyzeCommonService.convert(jsonObject, specialDay);
+        return convert;
+    }
 
 }
 

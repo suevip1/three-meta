@@ -22,9 +22,8 @@ public class UnifiedExceptionHandler {
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseBody
-    public String constraintViolation(ConstraintViolationException e) {
-        log.info(e.getMessage(),e);
-        return "11111";
+    public CommonResult constraintViolation(ConstraintViolationException e) {
+        return CommonResult.failed(e.getMessage());
     }
 
     @ExceptionHandler({BusinessException.class})

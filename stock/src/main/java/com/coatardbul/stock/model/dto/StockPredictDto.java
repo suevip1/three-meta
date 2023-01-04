@@ -17,6 +17,10 @@ public class StockPredictDto {
 
 
     private String strategySign;
+
+
+    private String aiStrategySign;
+
     /**
      * 买入时间HH:mm
      */

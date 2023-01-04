@@ -1,5 +1,6 @@
 package com.coatardbul.stock.service.statistic;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
@@ -32,6 +33,7 @@ import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.mapper.StockWarnLogMapper;
+import com.coatardbul.stock.model.dto.DongFangPlateDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
 import com.coatardbul.stock.model.entity.StockWarnLog;
 import com.coatardbul.stock.service.base.StockStrategyService;
@@ -67,10 +69,11 @@ import java.util.stream.Collectors;
 public class StockCronRefreshService {
     @Resource
     DataFactory dataFactory;
-
+    @Resource
+    DongFangPlateService dongFangPlateService;
 
     @Autowired
-    ChipService  chipService;
+    ChipService chipService;
     @Resource
     public CronRefreshService cronRefreshService;
     @Autowired
@@ -173,22 +176,6 @@ public class StockCronRefreshService {
         return result;
     }
 
-    public void addStrategyTab(StockCronStrategyTabDTO dto) {
-        if (!StringUtils.isNotBlank(dto.getDateStr())) {
-            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-        }
-        for (String code : dto.getCodeArr()) {
-            if (code instanceof String) {
-                String codeKey = RedisKeyUtils.getHisStockInfo(dto.getDateStr(), code);
-                String stockDetailStr = (String) redisTemplate.opsForValue().get(codeKey.toString());
-                Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
-                stockMap.put("aiStrategySign", dto.getStrategySign());
-                redisTemplate.opsForValue().set(codeKey, JsonUtil.toJson(stockMap), cronRefreshService.getCodeExistHour(), TimeUnit.HOURS);
-            }
-
-        }
-
-    }
 
     /**
      * 获取刷新redis上股票信息
@@ -558,34 +545,31 @@ public class StockCronRefreshService {
             BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
             stockTemplatePredict.setSalePrice(newPrice);
             stockTemplatePredict.setSaleTime("11:29");
-            stockTemplatePredict.setDetail(stockDetailMap.get("thsIndustry").toString()+"\\n"+stockDetailMap.get("theirConcept").toString());
+            stockTemplatePredict.setDetail(stockDetailMap.get("thsIndustry").toString() + "\\n" + stockDetailMap.get("theirConcept").toString());
 
-        }catch (Exception e){
-            log.error("获取当前11.29分数据出错"+e.getMessage());
+        } catch (Exception e) {
+            log.error("获取当前11.29分数据出错" + e.getMessage());
         }
         stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
     }
 
     private void calcTongHuaSaleInfo(StockTemplatePredict stockTemplatePredict) {
 
-        BigDecimal sum=BigDecimal.ZERO;
-        int num =5;
-        for(int i=1;i<=num;i++){
-            String lastSpecialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), 0-i);
+        BigDecimal sum = BigDecimal.ZERO;
+        int num = 5;
+        for (int i = 1; i <= num; i++) {
+            String lastSpecialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), 0 - i);
             Map lastStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), lastSpecialDay, null);
             BigDecimal concentrationRatio = new BigDecimal(lastStockDetailMap.get("concentrationRatio").toString());
-            sum= sum.add(concentrationRatio);
+            sum = sum.add(concentrationRatio);
         }
-        stockTemplatePredict.setLastConcentrationRatio(sum.divide(new BigDecimal(num),2, BigDecimal.ROUND_HALF_DOWN).toString());
+        stockTemplatePredict.setLastConcentrationRatio(sum.divide(new BigDecimal(num), 2, BigDecimal.ROUND_HALF_DOWN).toString());
         Map currStockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), stockTemplatePredict.getDate(), null);
         stockTemplatePredict.setConcentrationRatio(currStockDetailMap.get("concentrationRatio").toString());
         stockTemplatePredict.setEarnProfit(currStockDetailMap.get("earnProfit").toString());
         stockTemplatePredict.setJettonCost(new BigDecimal(currStockDetailMap.get("jettonCost").toString()));
-        stockTemplatePredict.setDetail(currStockDetailMap.get("thsIndustry").toString()+"\\n"+currStockDetailMap.get("theirConcept").toString());
+        stockTemplatePredict.setDetail(currStockDetailMap.get("thsIndustry").toString() + "\\n" + currStockDetailMap.get("theirConcept").toString());
     }
-
-
-
 
 
     public void strategyMonthBackTest(StockCronStrategyTabDTO dto) {
@@ -602,36 +586,36 @@ public class StockCronRefreshService {
     }
 
     public Chip queryChipDispatcher(StockTemplatePredict stockTemplatePredict) {
-        String response=null;
+        String response = null;
         int retryNum = 10;
-        while (retryNum>0){
+        while (retryNum > 0) {
             response = dongFangCommonService.getDayKlineChip(stockTemplatePredict.getCode());
-            if(StringUtils.isNotBlank(response)){
+            if (StringUtils.isNotBlank(response)) {
                 break;
-            }else {
+            } else {
                 retryNum--;
             }
         }
-        if(!StringUtils.isNotBlank(response)){
+        if (!StringUtils.isNotBlank(response)) {
             return null;
         }
         ChipPosition chipPosition = dongFangCommonService.rebuildDayKlineChip(response);
         List<List<String>> dayKlineList = chipPosition.getDayKlineList();
         String toJson = JsonUtil.toJson(dayKlineList);
 
-        Invocable chipInvocable=null;
+        Invocable chipInvocable = null;
         try {
             chipInvocable = DongCaiUtil.getChipInvocable();
         } catch (Exception e) {
-            log.error("获取东财筹码js异常"+e.getMessage());
-            return  null;
+            log.error("获取东财筹码js异常" + e.getMessage());
+            return null;
         }
         Integer position = chipPosition.getDatePositionMap().get(stockTemplatePredict.getDate());
         Object calcChip = null;
         try {
             calcChip = chipInvocable.invokeFunction("calcChip", position, 150, 120, toJson);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
         Chip convert = DongCaiUtil.convert(calcChip);
@@ -644,11 +628,45 @@ public class StockCronRefreshService {
 
         String hisStockInfoKey = RedisKeyUtils.getHisStockInfo(dto.getDate(), dto.getCode());
 
-        if(redisTemplate.hasKey(hisStockInfoKey)){
+        if (redisTemplate.hasKey(hisStockInfoKey)) {
             String stockDetailStr = (String) redisTemplate.opsForValue().get(hisStockInfoKey);
             Map stockMap = JsonUtil.readToValue(stockDetailStr, Map.class);
             return stockMap;
         }
         return null;
+    }
+
+    public void dayAddStockJob(String dateStr) {
+
+        List<String> stockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.INCREASE_GREATE.getSign());
+
+        StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
+        stockCronRefreshDTO.setDateStr(dateStr);
+        stockCronRefreshDTO.setCodeArr(stockCodeArr);
+
+        stockRefreshprocess(stockCronRefreshDTO);
+
+        //将涨幅大于7的放到自选,去下重
+        Object allPlate = dongFangPlateService.getAllPlate();
+        DongFangPlateDTO dto = new DongFangPlateDTO();
+        dto.setDateStr(dateStr);
+        if (allPlate instanceof JSONArray) {
+            JSONArray allPlateTemp = (JSONArray) allPlate;
+            for (int i = 0; i < allPlateTemp.size(); i++) {
+                String gname = allPlateTemp.getJSONObject(i).getString("gname");
+                if (gname.contains("涨幅大于")) {
+                    String gid = allPlateTemp.getJSONObject(i).getString("gid");
+                    dto.setGid(gid);
+                }
+            }
+        }
+        List<String> codeList = dongFangPlateService.getCodeUrlList(dto);
+        for(String code:codeList){
+            stockCodeArr.remove(code);
+        }
+        if(stockCodeArr.size()>0){
+            dto.setCodeArr(stockCodeArr);
+            dongFangPlateService.addPlateInfo(dto);
+        }
     }
 }

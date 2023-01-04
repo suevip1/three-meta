@@ -55,33 +55,31 @@ public class AiStrategyService {
         String key = RedisKeyUtils.getNowStockInfo(code);
         String stockDetailStr = (String) redisTemplate.opsForValue().get(key);
         Map map = JsonUtil.readToValue(stockDetailStr, Map.class);
-        if (map.get("aiStrategySign") == null) {
-            return result;
-        }
-        if (AiStrategyEnum.DU_GU_SWORD.getCode().equals(map.get("aiStrategySign"))) {
-            String strategyParam = (String) redisTemplate.opsForValue().get(RedisKeyUtils.getAiStrategyParam(AiStrategyEnum.DU_GU_SWORD.getCode()));
-            AiStrategyParamBo aiStrategyParamBo = JsonUtil.readToValue(strategyParam, AiStrategyParamBo.class);
-            //判断当前是否已经观察，交易中
-            String preTradeCodeKey = RedisKeyUtils.getPreTradeCode();
-            if (redisTemplate.hasKey(preTradeCodeKey)) {
-                String preTradeCode = (String) redisTemplate.opsForValue().get(preTradeCodeKey);
-                Map preTradeCodeMap = JsonUtil.readToValue(preTradeCode, Map.class);
-                if (preTradeCodeMap.containsKey(code)) {
-                    return result;
-                }
-            }
-            //时间是否符合,当前时间小于结束时间
-            if (DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM).compareTo(aiStrategyParamBo.getEndStr()) <= 0
-                    && DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM).compareTo(aiStrategyParamBo.getBeginStr()) >= 0) {
-                //条件是否复合
-                conditionProcess(map, aiStrategyParamBo, result, code);
+
+        String strategyParam = (String) redisTemplate.opsForValue().get(RedisKeyUtils.getAiStrategyParam(AiStrategyEnum.DU_GU_SWORD.getCode()));
+        AiStrategyParamBo aiStrategyParamBo = JsonUtil.readToValue(strategyParam, AiStrategyParamBo.class);
+        //判断当前是否已经观察，交易中
+        String preTradeCodeKey = RedisKeyUtils.getPreTradeCode();
+        if (redisTemplate.hasKey(preTradeCodeKey)) {
+            String preTradeCode = (String) redisTemplate.opsForValue().get(preTradeCodeKey);
+            Map preTradeCodeMap = JsonUtil.readToValue(preTradeCode, Map.class);
+            if (preTradeCodeMap.containsKey(code)) {
+                return result;
             }
         }
+        //时间是否符合,当前时间小于结束时间
+        if (DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM).compareTo(aiStrategyParamBo.getEndStr()) <= 0
+                && DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM).compareTo(aiStrategyParamBo.getBeginStr()) >= 0) {
+            //条件是否复合
+            conditionProcess(map, aiStrategyParamBo, result, code);
+        }
+
         return result;
     }
 
     /**
      * 历史模拟，将历史的基础信息和tick进行计算
+     *
      * @param code
      * @param aiStrategySig
      * @param dateStr

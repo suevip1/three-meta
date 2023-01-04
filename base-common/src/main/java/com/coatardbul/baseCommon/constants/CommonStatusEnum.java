@@ -1,4 +1,4 @@
-package com.coatardbul.river.common.constants;
+package com.coatardbul.baseCommon.constants;
 
 /**
  * <p>

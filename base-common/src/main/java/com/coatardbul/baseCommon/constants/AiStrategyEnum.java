@@ -5,6 +5,11 @@ public enum AiStrategyEnum {
     DU_GU_SWORD_DELAY("DU_GU_SWORD_DELAY","独孤一剑延迟"),
     RED_BLACK_CROSS("RED_BLACK_CROSS","红黑交叉"),
     FINE_OPEN("FINE_OPEN","灵性封板"),
+    UPLIMIT_AMBUSH("UPLIMIT_AMBUSH","涨停伏击"),
+
+    TWO_ABOVE_UPLIMIT_AMBUSH("TWO_ABOVE_UPLIMIT_AMBUSH","两板以上涨停伏击"),
+
+    HAVE_UPLIMIT_AMBUSH("HAVE_UPLIMIT_AMBUSH","昨曾涨停伏击"),
 
     DU_GU_SWORD("DU_GU_SWORD","独孤一剑");
 

@@ -81,12 +81,7 @@ public class StockCronRefreshController {
     }
 
 
-    @ApiOperation("获取所有的股票信息")
-    @RequestMapping(path = "/addStrategyTab", method = RequestMethod.POST)
-    public CommonResult addStrategyTab(@RequestBody StockCronStrategyTabDTO dto) {
-        stockCronRefreshService.addStrategyTab(dto);
-        return CommonResult.success(null);
-    }
+
 
 
     /**

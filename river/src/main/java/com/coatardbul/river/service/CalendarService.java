@@ -2,7 +2,7 @@ package com.coatardbul.river.service;
 
 
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.river.common.constants.CommonStatusEnum;
+import com.coatardbul.baseCommon.constants.CommonStatusEnum;
 import com.coatardbul.river.common.constants.DateTypeEnum;
 import com.coatardbul.river.feign.BaseServerFeign;
 import com.coatardbul.river.mapper.AuthCalendarMapper;

@@ -1,27 +1,19 @@
 package com.coatardbul.sail.service;
 
 import com.coatardbul.baseCommon.constants.Constant;
-import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.baseService.service.AiStrategyService;
-import com.coatardbul.baseService.utils.RedisKeyUtils;
+import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.sail.feign.StockServerFeign;
 import com.coatardbul.sail.model.dto.StockCronRefreshDTO;
 import com.coatardbul.sail.service.stockData.DataFactory;
-import com.coatardbul.baseService.service.DataServiceBridge;
-
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
-import org.aspectj.apache.bcel.Constants;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -56,6 +48,8 @@ public class StockCronRefreshService {
         for (String code : codes) {
             try {
                 dataServiceBridge.getAndRefreshStockInfo(code);
+                dataServiceBridge.refreshStockTickInfo(code);
+
                 //嵌入交易模块
                 Constant.strategyThreadPool.submit(() -> {
                     try {
@@ -65,7 +59,6 @@ public class StockCronRefreshService {
                     }
                 });
 
-                dataServiceBridge.refreshStockTickInfo(code);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }

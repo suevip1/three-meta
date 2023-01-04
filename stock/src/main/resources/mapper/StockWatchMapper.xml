@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.stock.mapper.StockWatchMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockWatch">
+    <!--@mbg.generated-->
+    <!--@Table stock_watch-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="template_sign" jdbcType="VARCHAR" property="templateSign" />
+    <result column="trade_num" jdbcType="VARCHAR" property="tradeNum" />
+    <result column="trade_price" jdbcType="VARCHAR" property="tradePrice" />
+    <result column="trade_all_amount" jdbcType="VARCHAR" property="tradeAllAmount" />
+    <result column="msg" jdbcType="VARCHAR" property="msg" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, code, `name`, template_sign, trade_num, trade_price, trade_all_amount, msg
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from stock_watch
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from stock_watch
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockWatch">
+    <!--@mbg.generated-->
+    insert into stock_watch (id, code, `name`, 
+      template_sign, trade_num, trade_price, 
+      trade_all_amount, msg)
+    values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{templateSign,jdbcType=VARCHAR}, #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR}, 
+      #{tradeAllAmount,jdbcType=VARCHAR}, #{msg,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockWatch">
+    <!--@mbg.generated-->
+    insert into stock_watch
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        id,
+      </if>
+      <if test="code != null and code != ''">
+        code,
+      </if>
+      <if test="name != null and name != ''">
+        `name`,
+      </if>
+      <if test="templateSign != null and templateSign != ''">
+        template_sign,
+      </if>
+      <if test="tradeNum != null and tradeNum != ''">
+        trade_num,
+      </if>
+      <if test="tradePrice != null and tradePrice != ''">
+        trade_price,
+      </if>
+      <if test="tradeAllAmount != null and tradeAllAmount != ''">
+        trade_all_amount,
+      </if>
+      <if test="msg != null and msg != ''">
+        msg,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null and code != ''">
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="templateSign != null and templateSign != ''">
+        #{templateSign,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeNum != null and tradeNum != ''">
+        #{tradeNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePrice != null and tradePrice != ''">
+        #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeAllAmount != null and tradeAllAmount != ''">
+        #{tradeAllAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="msg != null and msg != ''">
+        #{msg,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockWatch">
+    <!--@mbg.generated-->
+    update stock_watch
+    <set>
+      <if test="code != null and code != ''">
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="templateSign != null and templateSign != ''">
+        template_sign = #{templateSign,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeNum != null and tradeNum != ''">
+        trade_num = #{tradeNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePrice != null and tradePrice != ''">
+        trade_price = #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeAllAmount != null and tradeAllAmount != ''">
+        trade_all_amount = #{tradeAllAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="msg != null and msg != ''">
+        msg = #{msg,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockWatch">
+    <!--@mbg.generated-->
+    update stock_watch
+    set code = #{code,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      template_sign = #{templateSign,jdbcType=VARCHAR},
+      trade_num = #{tradeNum,jdbcType=VARCHAR},
+      trade_price = #{tradePrice,jdbcType=VARCHAR},
+      trade_all_amount = #{tradeAllAmount,jdbcType=VARCHAR},
+      msg = #{msg,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2022-12-27-->
+  <select id="selectAllByCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from stock_watch
+        where code=#{code,jdbcType=VARCHAR}
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2022-12-27-->
+  <select id="selectByAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from stock_watch
+
+  </select>
+</mapper>
