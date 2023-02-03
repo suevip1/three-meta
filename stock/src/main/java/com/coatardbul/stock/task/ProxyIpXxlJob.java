@@ -36,7 +36,6 @@ public class ProxyIpXxlJob {
         log.info("代理ip定时任务开始,传递参数为：" + param);
         if (StringUtils.isNotBlank(param)) {
             ProxyIpQueryDTO proxyIpQueryDTO = JsonUtil.readToValue(param, ProxyIpQueryDTO.class);
-            log.info(",传递参数为：" + proxyIpQueryDTO.toString());
             //删除两分钟之前的数据
             proxyIpMapper.deleteByCreateTimeLessThanEqual(DateTimeUtil.getBeforeDate(2, Calendar.MINUTE));
             proxyIpService.addIpProcess(proxyIpQueryDTO);

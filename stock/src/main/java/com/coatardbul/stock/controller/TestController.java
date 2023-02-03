@@ -8,6 +8,7 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.baseService.feign.BaseServerFeign;
@@ -21,6 +22,7 @@ import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
+import com.coatardbul.stock.service.statistic.DongFangPlateService;
 import com.coatardbul.stock.service.statistic.RedisService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;
@@ -53,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -61,6 +64,7 @@ import java.io.FileReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +83,9 @@ import java.util.Map;
 public class TestController {
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
+
+    @Resource
+    DongFangPlateService dongFangPlateService;
     @Autowired
     SnowFlakeService snowFlakeService;
     @Autowired
@@ -324,6 +331,15 @@ public class TestController {
             sfdfd(dateFormat);
         }
 
+
+        return null;
+
+    }
+
+    @RequestMapping(path = "/test3", method = RequestMethod.POST)
+    public String cosUpload111() throws Exception {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        stockCronRefreshService.dayAddUpLimitStockJob(dateFormat);
 
         return null;
 

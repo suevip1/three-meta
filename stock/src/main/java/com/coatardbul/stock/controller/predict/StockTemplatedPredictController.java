@@ -44,6 +44,12 @@ public class StockTemplatedPredictController {
     }
 
     @WebLog(value = "")
+    @RequestMapping(path = "/updateByQuery", method = RequestMethod.POST)
+    public CommonResult updateByQuery(@Validated @RequestBody StockPredictDto dto) {
+        stockPredictService.updateByQuery(dto);
+        return CommonResult.success(null);
+    }
+    @WebLog(value = "")
     @RequestMapping(path = "/deleteById", method = RequestMethod.POST)
     public CommonResult deleteById(@Validated @RequestBody StockPredictDto dto) {
         stockPredictService.deleteById(dto);
@@ -53,6 +59,18 @@ public class StockTemplatedPredictController {
     @RequestMapping(path = "/updateById", method = RequestMethod.POST)
     public CommonResult updateById(@Validated @RequestBody StockPredictDto dto) {
         stockPredictService.updateById(dto);
+        return CommonResult.success(null);
+    }
+    @WebLog(value = "")
+    @RequestMapping(path = "/updateStatus", method = RequestMethod.POST)
+    public CommonResult updateStatus(@Validated @RequestBody StockPredictDto dto) {
+        stockPredictService.updateStatus(dto);
+        return CommonResult.success(null);
+    }
+    @WebLog(value = "")
+    @RequestMapping(path = "/cancelStatus", method = RequestMethod.POST)
+    public CommonResult cancelStatus(@Validated @RequestBody StockPredictDto dto) {
+        stockPredictService.cancelStatus(dto);
         return CommonResult.success(null);
     }
     @WebLog(value = "")

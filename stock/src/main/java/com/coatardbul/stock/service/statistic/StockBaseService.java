@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.TongHuaShunUtil;
 import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.model.dto.StockBaseDTO;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -38,7 +41,7 @@ public class StockBaseService {
             dto.setRiverStockTemplateId("1567739221362475008");
             dto.setPageSize(100);
             dto.setPage(i);
-            dto.setDateStr("2022-11-03");
+            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD));
             StrategyBO strategy = null;
             try {
                 strategy = stockStrategyService.strategy(dto);

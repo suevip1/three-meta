@@ -19,6 +19,21 @@ public class StockTemplatePredict {
     private String name;
 
     /**
+     * 市值
+     */
+    private BigDecimal buyMarketValue;
+
+    /**
+     * 换手率
+     */
+    private BigDecimal buyTurnoverRate;
+
+    /**
+     * 买入时交易金额
+     */
+    private BigDecimal buyTradeAmount;
+
+    /**
      * YYYY-MM-DD日期
      */
     private String date;
@@ -29,6 +44,9 @@ public class StockTemplatePredict {
     private String templatedId;
     private String templatedName;
 
+    /**
+     * 模板标识
+     */
     private String templatedSign;
 
     /**
@@ -42,6 +60,11 @@ public class StockTemplatePredict {
     private BigDecimal buyPrice;
 
     /**
+     * 买入集合竞价涨幅
+     */
+    private BigDecimal buyAuctionIncreaseRate;
+
+    /**
      * 买入涨幅比例
      */
     private BigDecimal buyIncreaseRate;
@@ -49,7 +72,7 @@ public class StockTemplatePredict {
     /**
      * 收盘涨幅
      */
-    private BigDecimal closeIncreaseRate;
+    private BigDecimal buyCloseIncreaseRate;
 
     /**
      * 持有天数
@@ -62,24 +85,39 @@ public class StockTemplatePredict {
     private String saleTime;
 
     /**
+     * 卖出集合竞价涨幅
+     */
+    private BigDecimal saleAuctionIncreaseRate;
+
+    /**
+     * 卖出时涨幅
+     */
+    private BigDecimal saleIncreaseRate;
+
+    /**
+     * 卖出时收盘涨幅
+     */
+    private BigDecimal saleCloseIncreaseRate;
+
+    /**
      * 卖出价格
      */
     private BigDecimal salePrice;
 
     /**
-     * 市值
-     */
-    private BigDecimal marketValue;
-
-    /**
-     * 具体详情
+     * 具体详情，保留字段
      */
     private String detail;
 
     /**
-     * 换手率
+     * 行业
      */
-    private BigDecimal turnoverRate;
+    private String industry;
+
+    /**
+     * 概念
+     */
+    private String concept;
 
     /**
      * 筹码集中度
@@ -100,4 +138,9 @@ public class StockTemplatePredict {
      * 上次集中度
      */
     private String lastConcentrationRatio;
+
+    /**
+     * 标记状态：目前只做标记使用
+     */
+    private Integer status;
 }

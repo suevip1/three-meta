@@ -54,6 +54,8 @@ public class DayStatisticJob {
     @Autowired
     StockCronRefreshService stockCronRefreshService;
 
+
+
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
 
@@ -125,28 +127,26 @@ public class DayStatisticJob {
     }
 
 
+
+
+
+
+
     /**
-     * 自动刷新池,每日添加股票信息
+     * 历史埋伏，历史二板以上，一次操作
      *
      * @throws IllegalAccessException
      * @throws ParseException
      */
-    @XxlJob("dayAddStockJobHandle")
-    public void dayAddStockJobHandle() {
-        String param = XxlJobHelper.getJobParam();
+    @XxlJob("hisStrategyScanPlateAddJobHandle")
+    public void hisStrategyScanPlateAddJobHandle() {
 
         String dateStr="";
-        if (StringUtils.isNotBlank(param)) {
-            StockEmotionDayDTO dto = JsonUtil.readToValue(param, StockEmotionDayDTO.class);
-            dateStr=dto.getDateStr();
-            if(!StringUtils.isNotBlank(dateStr)){
-                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-            }
-        }
-        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
-        if(timeStr.compareTo("09:20")>=0 &&timeStr.compareTo("10:35")<=0){
-            stockCronRefreshService.dayAddStockJob(dateStr);
-        }
+        dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+
+        stockCronRefreshService.addMultiDayAmbushPlateInfo(dateStr);
+        stockCronRefreshService.addHisTwoUpLimitAbovePlateInfo(dateStr);
+
     }
 
 }

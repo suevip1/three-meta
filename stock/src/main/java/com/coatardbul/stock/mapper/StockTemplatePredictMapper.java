@@ -17,11 +17,16 @@ public interface StockTemplatePredictMapper {
 
     List<StockTemplatePredict> selectAllByDateAndTemplatedIdAndCode(@Param("date") String date, @Param("templatedId") String templatedId, @Param("code") String code);
 
+    List<StockTemplatePredict> selectAllByCodeAndTemplatedSignAndDate(@Param("code") String code, @Param("templatedSign") String templatedSign, @Param("date") String date);
+
     List<StockTemplatePredict> selectAllByDateAndTemplatedIdAndCodeAndBuyTimeGreaterThan(@Param("date") String date, @Param("templatedId") String templatedId, @Param("code") String code, @Param("minBuyTime") String minBuyTime);
 
     int deleteByDateAndTemplatedIdAndCode(@Param("date") String date, @Param("templatedId") String templatedId, @Param("code") String code);
 
     List<StockTemplatePredict> selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(@Param("minDate") String minDate, @Param("maxDate") String maxDate, @Param("templatedId") String templatedId, @Param("templatedSign") String templatedSign, @Param("holdDay") Integer holdDay);
+
+    List<StockTemplatePredict> selectAllByDateBetweenEqualAndTemplatedSign(@Param("minDate")String minDate,@Param("maxDate")String maxDate,@Param("templatedSign")String templatedSign);
+
 
     int deleteByDateAndTempatedId(@Param("date") String date, @Param("tempatedId") String tempatedId);
 

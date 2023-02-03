@@ -52,6 +52,8 @@ public enum StockTemplateEnum {
     STOCK_DETAIL("STOCK_DETAIL", "股票详情", "1515522893696598016"),
     STOCK_DETAIL_SUP("STOCK_DETAIL_SUP", "股票详情补充", "1591742776444321792"),
     STOCK_DOWN_LIMIT("STOCK_DOWN_LIMIT", "股票跌停信息", "1515527745369669632"),
+    LOW_AUCTION_UP_SHADOW("LOW_AUCTION_UP_SHADOW", "低开上影线", "1617067872272646144"),
+
     strategwwy("strategy", "同花顺问财", "12312312");
 
     private String sign;

@@ -1,8 +1,14 @@
 package com.coatardbul.stock.task;
 
+import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
+import com.coatardbul.stock.model.bo.UpLimitScanStrategyBo;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
+import com.coatardbul.stock.model.dto.StockPredictDto;
+import com.coatardbul.stock.service.statistic.StockCronRefreshService;
+import com.coatardbul.stock.service.statistic.StockPredictService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.minuteStatic.StockMinuteEmotinStaticService;
@@ -10,9 +16,11 @@ import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -32,8 +40,15 @@ public class MinuterEmotionXxlJob {
     StockSpecialStrategyService stockSpecialStrategyService;
 
     @Autowired
-    StockVerifyService stockVerifyService;
+    StockCronRefreshService stockCronRefreshService;
 
+
+    @Autowired
+    RiverRemoteService riverRemoteService;
+    @Autowired
+    StockVerifyService stockVerifyService;
+    @Autowired
+    StockPredictService stockPredictService;
     @XxlJob("minuterEmotionJobHandler")
     public void minuterEmotionJobHandler() throws Exception {
         String param = XxlJobHelper.getJobParam();
@@ -47,6 +62,118 @@ public class MinuterEmotionXxlJob {
         }
         log.info("分钟情绪定时任务结束");
 
+    }
+
+
+    /**
+     * 自动刷新池,每日添加股票信息
+     *
+     * @throws IllegalAccessException
+     * @throws ParseException
+     */
+    @XxlJob("dayAddStockJobHandle")
+    public void dayAddStockJobHandle() {
+        String param = XxlJobHelper.getJobParam();
+        log.info("涨幅大于几数据开始" + param);
+
+        String dateStr="";
+        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        if (StringUtils.isNotBlank(param)) {
+            dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
+            dateStr=dto.getDateStr();
+            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+                dto.setTimeBeginStr("10:40");
+                dto.setTimeEndStr("14:40");
+            }
+            if(!StringUtils.isNotBlank(dateStr)){
+                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            }
+        }
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
+            stockCronRefreshService.dayAddStockJob(dateStr);
+        }
+
+        log.info("涨幅大于几数据结束" + param);
+
+    }
+
+
+    /**
+     * 昨日涨停，涨停
+     */
+    @XxlJob("aiStrategyJobHandle")
+    public void aiStrategyJobHandle() {
+        String param = XxlJobHelper.getJobParam();
+        log.info("涨停，昨曾，埋伏开始" + param);
+        String dateStr="";
+        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        if (StringUtils.isNotBlank(param)) {
+            dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
+            dateStr=dto.getDateStr();
+            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+                dto.setTimeBeginStr("10:40");
+                dto.setTimeEndStr("14:40");
+            }
+            if(!StringUtils.isNotBlank(dateStr)){
+                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            }
+        }
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
+            log.info("涨停，昨曾，埋伏开始执行"+dateStr+"  "+timeStr);
+            String specialDay = riverRemoteService.getSpecialDay(dateStr, -3);
+            StockPredictDto sdp = new StockPredictDto();
+            sdp.setBeginDate(specialDay);
+            sdp.setEndDate(dateStr);
+            sdp.setHoleDay(2);
+            sdp.setSaleTime("11:29");
+            sdp.setStrategySign(AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+            stockPredictService.execute(sdp);
+
+
+            StockPredictDto temp = new StockPredictDto();
+            BeanUtils.copyProperties(sdp,temp);
+            temp.setStrategySign(AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
+            stockPredictService.execute(temp);
+
+        }
+        log.info("涨停，昨曾，埋伏结束");
+
+    }
+
+    /**
+     * 低开下影线，低开短下长上影，其他
+     *
+     * @throws IllegalAccessException
+     * @throws ParseException
+     */
+    @XxlJob("minuterStrategyScanPlateAddJobHandle")
+    public void minuterStrategyScanPlateAddJobHandle() {
+        String param = XxlJobHelper.getJobParam();
+        log.info("低开下影线，低开短下长上影，其他开始" + param);
+        String dateStr="";
+        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        if (StringUtils.isNotBlank(param)) {
+            dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
+            dateStr=dto.getDateStr();
+            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+                dto.setTimeBeginStr("10:40");
+                dto.setTimeEndStr("14:40");
+            }
+            if(!StringUtils.isNotBlank(dateStr)){
+                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            }
+        }
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
+            log.info("低开下影线，低开短下长上影，其他开始执行"+dateStr+"  "+timeStr);
+
+            stockCronRefreshService.addDksyxPlateInfo(dateStr);
+
+
+        }
+        log.info("低开下影线，低开短下长上影，其他结束");
     }
 
 }

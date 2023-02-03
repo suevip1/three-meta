@@ -35,6 +35,7 @@ import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.mapper.StockWarnLogMapper;
 import com.coatardbul.stock.model.dto.DongFangPlateDTO;
 import com.coatardbul.stock.model.dto.StockCronStrategyTabDTO;
+import com.coatardbul.stock.model.dto.StockPredictDto;
 import com.coatardbul.stock.model.entity.StockWarnLog;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -69,6 +70,9 @@ import java.util.stream.Collectors;
 public class StockCronRefreshService {
     @Resource
     DataFactory dataFactory;
+
+    @Autowired
+    StockPredictService stockPredictService;
     @Resource
     DongFangPlateService dongFangPlateService;
 
@@ -520,7 +524,11 @@ public class StockCronRefreshService {
                         stockTemplatePredict.setBuyPrice(preQuartzTradeDetail.getPrice());
                         stockTemplatePredict.setBuyTime(preQuartzTradeDetail.getTime());
                         stockTemplatePredict.setBuyIncreaseRate(preQuartzTradeDetail.getIncreaseRate());
-                        stockTemplatePredict.setCloseIncreaseRate(preQuartzTradeDetail.getCloseIncreaseRate());
+                        stockTemplatePredict.setBuyCloseIncreaseRate(preQuartzTradeDetail.getCloseIncreaseRate());
+                        List<StockTemplatePredict> stockTemplatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(stockTemplatePredict.getCode(), stockTemplatePredict.getTemplatedSign(), stockTemplatePredict.getDate());
+                        if (stockTemplatePredicts.size() > 0) {
+                            continue;
+                        }
                         stockTemplatePredictMapper.insert(stockTemplatePredict);
                         calcSaleInfo(stockTemplatePredict);
                     }
@@ -539,17 +547,14 @@ public class StockCronRefreshService {
 
     public void calcSaleInfo(StockTemplatePredict stockTemplatePredict) {
         chipService.calcDongCaiSaleInfo(stockTemplatePredict);
-        String specialDay = riverRemoteService.getSpecialDay(stockTemplatePredict.getDate(), stockTemplatePredict.getHoldDay());
-        try {
-            Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
-            BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());
-            stockTemplatePredict.setSalePrice(newPrice);
+        if (!StringUtils.isNotBlank(stockTemplatePredict.getSaleTime())) {
             stockTemplatePredict.setSaleTime("11:29");
-            stockTemplatePredict.setDetail(stockDetailMap.get("thsIndustry").toString() + "\\n" + stockDetailMap.get("theirConcept").toString());
-
-        } catch (Exception e) {
-            log.error("获取当前11.29分数据出错" + e.getMessage());
         }
+        StockPredictDto dto = new StockPredictDto();
+        dto.setHoleDay(stockTemplatePredict.getHoldDay());
+        dto.setSaleTime(stockTemplatePredict.getSaleTime());
+        stockPredictService.calcSaleInfo(dto, stockTemplatePredict.getDate(), stockTemplatePredict.getCode(), stockTemplatePredict);
+
         stockTemplatePredictMapper.updateByPrimaryKey(stockTemplatePredict);
     }
 
@@ -636,6 +641,11 @@ public class StockCronRefreshService {
         return null;
     }
 
+    /**
+     * 涨幅大于几
+     *
+     * @param dateStr
+     */
     public void dayAddStockJob(String dateStr) {
 
         List<String> stockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.INCREASE_GREATE.getSign());
@@ -661,12 +671,125 @@ public class StockCronRefreshService {
             }
         }
         List<String> codeList = dongFangPlateService.getCodeUrlList(dto);
-        for(String code:codeList){
+        for (String code : codeList) {
             stockCodeArr.remove(code);
         }
-        if(stockCodeArr.size()>0){
+        dongFangPlateService.clearPlateStock(dto);
+        if (stockCodeArr.size() > 0) {
             dto.setCodeArr(stockCodeArr);
             dongFangPlateService.addPlateInfo(dto);
         }
+    }
+
+
+    /**
+     * 每日添加涨停信息，一进二，二板以上
+     *
+     * @param dateStr
+     */
+    public void dayAddUpLimitStockJob(String dateStr) {
+
+        List<String> firstUpLimitStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.FIRST_UP_LIMIT.getSign());
+
+        List<String> twoAboveUpLimitStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
+
+        //将涨幅大于7的放到自选,去下重
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String firstGid = getGid("一进二", allPlate);
+        String twoGid = getGid("二板以上", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(firstGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+        firstDto.setCodeArr(firstUpLimitStockCodeArr);
+        dongFangPlateService.addPlateInfo(firstDto);
+
+        DongFangPlateDTO twoDto = new DongFangPlateDTO();
+        twoDto.setGid(twoGid);
+        dongFangPlateService.clearPlateStock(twoDto);
+        twoDto.setCodeArr(twoAboveUpLimitStockCodeArr);
+        dongFangPlateService.addPlateInfo(twoDto);
+
+
+    }
+
+    public String getGid(String name, Object allPlate) {
+        if (allPlate instanceof JSONArray) {
+            JSONArray allPlateTemp = (JSONArray) allPlate;
+            for (int i = 0; i < allPlateTemp.size(); i++) {
+                String gname = allPlateTemp.getJSONObject(i).getString("gname");
+                if (gname.contains(name)) {
+                    String gid = allPlateTemp.getJSONObject(i).getString("gid");
+                    return gid;
+                }
+            }
+        }
+        return "";
+    }
+
+    public void addDksyxPlateInfo(String dateStr) {
+
+        List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.LOW_AUCTION_UP_SHADOW.getSign());
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("低开上影线", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
+        dongFangPlateService.addPlateInfo(firstDto);
+
+
+    }
+
+    public void addHisTwoUpLimitAbovePlateInfo(String specialDateStr) {
+
+        //历史两板以上，先五天
+        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -5);
+        String endDateStr = riverRemoteService.getSpecialDay(specialDateStr, -1);
+
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, endDateStr);
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String firstGid = getGid("历史两板以上", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(firstGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+        for(String dateStr:dateIntervalList){
+            List<String> twoUpLimitAboveStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
+            firstDto.setCodeArr(twoUpLimitAboveStockCodeArr);
+            dongFangPlateService.addPlateInfo(firstDto);
+        }
+    }
+
+    public void addMultiDayAmbushPlateInfo(String specialDateStr) {
+        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -5);
+        String endDateStr = riverRemoteService.getSpecialDay(specialDateStr, -1);
+
+
+        List<StockTemplatePredict> uplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+
+        List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
+
+        List<String>codeArr=new ArrayList<String>();
+        if(uplimitAmbushTemplatePredicts.size()>0){
+            Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+        if(haveUplimitAmbushTemplatePredicts.size()>0){
+            Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("历史5日埋伏", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        firstDto.setCodeArr(codeArr);
+
+        dongFangPlateService.clearPlateStock(firstDto);
+        dongFangPlateService.addPlateInfo(firstDto);
+
     }
 }

@@ -2,9 +2,10 @@ package com.coatardbul.stock.service.statistic.trade;
 
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
-import com.coatardbul.baseService.service.SnowFlakeService;
+import com.coatardbul.baseService.service.StockStrategyCommonService;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.coatardbul.stock.mapper.StockPreTradeMapper;
 import com.coatardbul.stock.model.entity.StockPreTrade;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -30,11 +31,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class StockPreTradeService {
     @Autowired
-    StockPreTradeService stockPreTradeService;
+    StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
     @Autowired
-    StockPreTradeMapper stockPreTradeMapper;
+    RiverRemoteService riverRemoteService;
     @Autowired
-    SnowFlakeService snowFlakeService;
+    StockStrategyCommonService stockStrategyCommonService;
 
     @Autowired
     RedisTemplate redisTemplate;
@@ -75,5 +76,10 @@ public class StockPreTradeService {
         }
         return result;
     }
+
+
+
+
+
 
 }
