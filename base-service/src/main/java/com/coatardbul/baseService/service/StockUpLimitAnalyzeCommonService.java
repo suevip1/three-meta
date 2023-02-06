@@ -310,19 +310,24 @@ public class StockUpLimitAnalyzeCommonService {
             }
 
         }
-        BigDecimal subtract =convert(jsonMap.get("newIncreaseRate"))
-                .subtract(convert(jsonMap.get("auctionIncreaseRate")));
-        jsonMap.put("subIncreaseRate", subtract);
-        //昨日换手/昨日量比  是否埋伏
-        BigDecimal divide = convert(jsonMap.get("lastTurnOverRate"))
-                .divide(convert(jsonMap.get("lastVolRate")), 2, BigDecimal.ROUND_HALF_UP);
-        jsonMap.put("compressionDivision", divide);
-        //竞价动能比例，今日竞价金额/昨日成交额
-        BigDecimal divide1 = convert(jsonMap.get("auctionTradeAmount")).multiply(new BigDecimal(100))
-                .divide(convert(jsonMap.get("lasttradeAmount")), 2, BigDecimal.ROUND_HALF_UP);
-        jsonMap.put("auctionPowerRate", divide1);
-        jsonMap.put("objectSign", StockTemplateEnum.FIRST_UP_LIMIT_WATCH_TWO.getSign());
-        BigDecimal bigDecimal = convert(jsonMap.get("lastAuctionIncreaseRate"));
+        try {
+            BigDecimal subtract =convert(jsonMap.get("newIncreaseRate"))
+                    .subtract(convert(jsonMap.get("auctionIncreaseRate")));
+            jsonMap.put("subIncreaseRate", subtract);
+            //昨日换手/昨日量比  是否埋伏
+            BigDecimal divide = convert(jsonMap.get("lastTurnOverRate"))
+                    .divide(convert(jsonMap.get("lastVolRate")), 2, BigDecimal.ROUND_HALF_UP);
+            jsonMap.put("compressionDivision", divide);
+            //竞价动能比例，今日竞价金额/昨日成交额
+            BigDecimal divide1 = convert(jsonMap.get("auctionTradeAmount")).multiply(new BigDecimal(100))
+                    .divide(convert(jsonMap.get("lasttradeAmount")), 2, BigDecimal.ROUND_HALF_UP);
+            jsonMap.put("auctionPowerRate", divide1);
+            jsonMap.put("objectSign", StockTemplateEnum.FIRST_UP_LIMIT_WATCH_TWO.getSign());
+            BigDecimal bigDecimal = convert(jsonMap.get("lastAuctionIncreaseRate"));
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+        }
+
         return jsonMap;
 //        if(bigDecimal.compareTo(new BigDecimal(-5))>0&&bigDecimal.compareTo(new BigDecimal(3))<0){
 //            return jsonMap;

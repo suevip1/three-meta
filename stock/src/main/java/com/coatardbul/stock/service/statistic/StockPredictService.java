@@ -93,12 +93,20 @@ public class StockPredictService {
 
     public void execute(StockPredictDto dto) {
         Assert.notNull(dto.getHoleDay(), "天数不不能为空");
-        if (StringUtils.isNotBlank(dto.getStrategySign()) && dto.getStrategySign().contains(",")) {
-            String[] split = dto.getStrategySign().split(",");
+        if (StringUtils.isNotBlank(dto.getAiStrategySign()) && dto.getAiStrategySign().contains(",")) {
+            String[] split = dto.getAiStrategySign().split(",");
             for (String aiStrategySign : split) {
                 StockPredictDto temp = new StockPredictDto();
                 BeanUtils.copyProperties(dto, temp);
-                temp.setStrategySign(aiStrategySign);
+                temp.setAiStrategySign(aiStrategySign);
+                executeSingle(temp);
+            }
+        } else if (StringUtils.isNotBlank(dto.getId()) && dto.getId().contains(",")) {
+            String[] split = dto.getId().split(",");
+            for (String id : split) {
+                StockPredictDto temp = new StockPredictDto();
+                BeanUtils.copyProperties(dto, temp);
+                temp.setId(id);
                 executeSingle(temp);
             }
         } else {
@@ -227,7 +235,23 @@ public class StockPredictService {
 //        if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH_BUY_ONE.getCode().equals(stockPredictDto.getAiStrategySign())) {
 //            allNum=2;
 //        }
+        if (new BigDecimal(currInfo.get("newPrice").toString()).compareTo(buyPrice) < 0) {
+            StockPredictDto dto = new StockPredictDto();
+            String dateStr = currInfo.get("dateStr").toString();
+            StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, currInfo.get("code").toString());
+            addInfo.setTemplatedSign(stockPredictDto.getAiStrategySign());
+            addInfo.setTemplatedName(AiStrategyEnum.getDescByCode(addInfo.getTemplatedSign()));
+//            String key = addInfo.getDate() + "_" + addInfo.getTemplatedId() + "_" + addInfo.getCode();
+//            redisTemplate.opsForValue().set(key, JsonUtil.toJson(addInfo), 10, TimeUnit.MINUTES);
+            List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
+            if (templatePredicts==null ||templatePredicts.size() == 0) {
+                stockTemplatePredictMapper.insertSelective(addInfo);
+                //计算卖出信息
+                calcSaleInfo(dto, dateStr, currInfo.get("code").toString(), addInfo);
+                stockTemplatePredictMapper.updateByPrimaryKeySelective(addInfo);
+            }
 
+        }
         for (int i = 1; i < allNum; i++) {
             Map nextInfo = getNextInfo(dateFormat, i, (String) jsonObject.get("code"));
 //            try {
@@ -248,7 +272,9 @@ public class StockPredictService {
 //                }
 //            }
 
-            if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0 && new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(buyPrice) > 0) {
+            //最低价小于买入价即可
+            if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0&&
+                    new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(lastClosePrice) > 0) {
                 StockPredictDto dto = new StockPredictDto();
                 String dateStr = nextInfo.get("dateStr").toString();
                 StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, nextInfo.get("code").toString());
@@ -402,7 +428,7 @@ public class StockPredictService {
     public void calcSaleInfo(StockPredictDto dto, String dateStr, String code, StockTemplatePredict addInfo) {
         try {
             //有卖出时间的
-            if(!StringUtils.isNotBlank( dto.getSaleTime())){
+            if (!StringUtils.isNotBlank(dto.getSaleTime())) {
                 dto.setSaleTime("11:29");
             }
             Map timeSaleInfoMap = getNextInfo(dateStr, dto.getSaleTime(), dto.getHoleDay(), code);
@@ -419,14 +445,13 @@ public class StockPredictService {
             addInfo.setIndustry(timeSaleInfoMap.get("thsIndustry").toString());
             addInfo.setConcept(timeSaleInfoMap.get("theirConcept").toString());
         } catch (Exception e) {
-            log.error("获取当前"+dto.getSaleTime()+"数据出错" + e.getMessage());
+            log.error("获取当前" + dto.getSaleTime() + "数据出错" + e.getMessage());
         }
     }
 
 
     public List<StockTemplatePredict> getAll(StockPredictDto dto) {
-
-        List<StockTemplatePredict> stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(), dto.getStrategySign(), dto.getHoleDay());
+        List<StockTemplatePredict> stockTemplatePredicts =null;
         if (StringUtils.isNotBlank(dto.getStrategySign()) && dto.getStrategySign().contains(",")) {
             stockTemplatePredicts = new ArrayList<>();
             String[] split = dto.getStrategySign().split(",");
@@ -437,6 +462,20 @@ public class StockPredictService {
             if (stockTemplatePredicts.size() > 0) {
                 stockTemplatePredicts = stockTemplatePredicts.stream().sorted(Comparator.comparing(StockTemplatePredict::getDate)).collect(Collectors.toList());
             }
+        }
+        else if (StringUtils.isNotBlank(dto.getId()) && dto.getId().contains(",")) {
+            stockTemplatePredicts = new ArrayList<>();
+            String[] split = dto.getId().split(",");
+            for (String id : split) {
+                List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), id, null, dto.getHoleDay());
+                stockTemplatePredicts.addAll(templatePredicts);
+            }
+            if (stockTemplatePredicts.size() > 0) {
+                stockTemplatePredicts = stockTemplatePredicts.stream().sorted(Comparator.comparing(StockTemplatePredict::getDate)).collect(Collectors.toList());
+            }
+        }else {
+           stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(), dto.getStrategySign(), dto.getHoleDay());
+
         }
 
 

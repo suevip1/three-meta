@@ -792,4 +792,29 @@ public class StockCronRefreshService {
         dongFangPlateService.addPlateInfo(firstDto);
 
     }
+
+    public void addDkdxcsyPlateInfo(String dateStr) {
+        List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.LOW_AUCTION_SHORT_DOWN_LONG_UP_SHADOW.getSign());
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("低开短下长上影", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
+        dongFangPlateService.addPlateInfo(firstDto);
+    }
+
+    public void addXlPlateInfo(String dateStr) {
+        List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.WASH_PULL.getSign());
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("洗拉", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
+        dongFangPlateService.clearPlateStock(firstDto);
+        dongFangPlateService.addPlateInfo(firstDto);
+    }
 }

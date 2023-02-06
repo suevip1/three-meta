@@ -72,6 +72,12 @@ public class DongFangController {
         stockCronRefreshService.addDksyxPlateInfo(dto.getDateStr());
         return CommonResult.success(null);
     }
+    @ApiOperation("将低开短下上影添加到板块中")
+    @RequestMapping(path = "/addDkdxcsyPlateInfo", method = RequestMethod.POST)
+    public CommonResult addDkdxcsyPlateInfo(@RequestBody DongFangPlateDTO dto) {
+        stockCronRefreshService.addDkdxcsyPlateInfo(dto.getDateStr());
+        return CommonResult.success(null);
+    }
 
     @ApiOperation("将历史两板以上添加到板块中")
     @RequestMapping(path = "/addHisTwoUpLimitAbovePlateInfo", method = RequestMethod.POST)
@@ -84,6 +90,13 @@ public class DongFangController {
     @RequestMapping(path = "/addMultiDayAmbushPlateInfo", method = RequestMethod.POST)
     public CommonResult addMultiDayAmbushPlateInfo(@RequestBody DongFangPlateDTO dto) {
         stockCronRefreshService.addMultiDayAmbushPlateInfo(dto.getDateStr());
+        return CommonResult.success(null);
+    }
+
+    @ApiOperation("将洗拉添加到板块中")
+    @RequestMapping(path = "/addXlPlateInfo", method = RequestMethod.POST)
+    public CommonResult addXlPlateInfo(@RequestBody DongFangPlateDTO dto) {
+        stockCronRefreshService.addXlPlateInfo(dto.getDateStr());
         return CommonResult.success(null);
     }
 

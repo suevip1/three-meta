@@ -128,13 +128,13 @@ public class MinuterEmotionXxlJob {
             sdp.setEndDate(dateStr);
             sdp.setHoleDay(2);
             sdp.setSaleTime("11:29");
-            sdp.setStrategySign(AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+            sdp.setAiStrategySign(AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
             stockPredictService.execute(sdp);
 
 
             StockPredictDto temp = new StockPredictDto();
             BeanUtils.copyProperties(sdp,temp);
-            temp.setStrategySign(AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
+            temp.setAiStrategySign(AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
             stockPredictService.execute(temp);
 
         }
@@ -170,6 +170,8 @@ public class MinuterEmotionXxlJob {
             log.info("低开下影线，低开短下长上影，其他开始执行"+dateStr+"  "+timeStr);
 
             stockCronRefreshService.addDksyxPlateInfo(dateStr);
+            stockCronRefreshService.addDkdxcsyPlateInfo(dateStr);
+            stockCronRefreshService.addXlPlateInfo(dateStr);
 
 
         }
