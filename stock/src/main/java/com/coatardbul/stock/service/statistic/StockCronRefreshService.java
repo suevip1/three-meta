@@ -771,6 +771,8 @@ public class StockCronRefreshService {
 
         List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
 
+        List<StockTemplatePredict> increaseGreaterAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode());
+
         List<String>codeArr=new ArrayList<String>();
         if(uplimitAmbushTemplatePredicts.size()>0){
             Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
@@ -780,7 +782,10 @@ public class StockCronRefreshService {
             Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
-
+        if(increaseGreaterAmbushTemplatePredicts.size()>0){
+            Set<String> collect = increaseGreaterAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
         Object allPlate = dongFangPlateService.getAllPlate();
         String lowAuctionUpShadowGid = getGid("历史5日埋伏", allPlate);
 
@@ -797,7 +802,7 @@ public class StockCronRefreshService {
         List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.LOW_AUCTION_SHORT_DOWN_LONG_UP_SHADOW.getSign());
 
         Object allPlate = dongFangPlateService.getAllPlate();
-        String lowAuctionUpShadowGid = getGid("低开短下长上影", allPlate);
+        String lowAuctionUpShadowGid = getGid("低开上下影", allPlate);
 
         DongFangPlateDTO firstDto = new DongFangPlateDTO();
         firstDto.setGid(lowAuctionUpShadowGid);
