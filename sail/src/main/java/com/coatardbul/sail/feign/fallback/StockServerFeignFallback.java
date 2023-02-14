@@ -3,9 +3,7 @@ package com.coatardbul.sail.feign.fallback;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.baseCommon.model.dto.StockTemplateQueryDTO;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
-import com.coatardbul.sail.feign.RiverServerFeign;
 import com.coatardbul.sail.feign.StockServerFeign;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;

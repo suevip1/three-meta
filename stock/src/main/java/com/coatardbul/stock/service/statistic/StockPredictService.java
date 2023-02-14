@@ -124,7 +124,6 @@ public class StockPredictService {
             if (AiStrategyEnum.UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
                     || AiStrategyEnum.TWO_ABOVE_UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
                     || AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
-                    || AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
 
             ) {
                 //ai策略
@@ -165,9 +164,9 @@ public class StockPredictService {
         if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
             dto.setRiverStockTemplateSign(StockTemplateEnum.HAVE_UP_LIMIT.getSign());
         }
-        if (AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-            dto.setRiverStockTemplateSign(StockTemplateEnum.INCREASE_GREATE_NO_UPLIMIT.getSign());
-        }
+//        if (AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
+//            dto.setRiverStockTemplateSign(StockTemplateEnum.INCREASE_GREATE_NO_UPLIMIT.getSign());
+//        }
 
         dto.setDateStr(dateFormat);
         StrategyBO strategy = null;

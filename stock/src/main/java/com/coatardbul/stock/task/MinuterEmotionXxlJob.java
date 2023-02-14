@@ -138,10 +138,7 @@ public class MinuterEmotionXxlJob {
             stockPredictService.execute(temp);
 
 
-            StockPredictDto temp1 = new StockPredictDto();
-            BeanUtils.copyProperties(sdp,temp1);
-            temp1.setAiStrategySign(AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode());
-            stockPredictService.execute(temp1);
+
 
         }
         log.info("涨停，昨曾，埋伏结束");

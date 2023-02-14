@@ -158,6 +158,7 @@ public abstract class CommonService {
         }
     }
 
+
     public void rebuildStockDetailMap(String response, Map map) {
 
     }

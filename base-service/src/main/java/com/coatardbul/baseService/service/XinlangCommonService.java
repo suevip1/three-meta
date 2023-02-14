@@ -3,8 +3,8 @@ package com.coatardbul.baseService.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
-import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseCommon.util.XinLangUtil;
 import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,9 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.script.ScriptException;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,7 @@ public abstract class XinlangCommonService extends CommonService
         return codeUrl;
     }
 
+
     @Override
     public void refreshStockTickInfo(String code) {
         String response = getStockTickInfo(code);
@@ -143,6 +145,37 @@ public abstract class XinlangCommonService extends CommonService
     }
 
     @Override
+    public void refreshStockMinuterInfo(String code,String dateFormat) {
+        String response = getStockMinuterInfo(code,dateFormat);
+
+        if(!StringUtils.isNotBlank(response)){
+            return;
+        }
+        try {
+            updateStockMinuterInfo(code,dateFormat, response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+    }
+
+    @Override
+    public String getStockMinuterInfo(String code,String dateFormat){
+        List<Header> headerList = new ArrayList<>();
+        String codeUrl = getCodeUrl(code);
+
+        setHeadList(headerList, codeUrl);
+        //返回信息
+        String response = null;
+        try {
+            response = httpService.doGet("https://finance.sina.com.cn/realstock/company/"+codeUrl+"/hisdata/"+dateFormat.substring(0,4)+"/"+dateFormat.substring(5,7)+".js?d=" +dateFormat , headerList, cronRefreshService.getProxyFlag());
+        } catch (ConnectTimeoutException e) {
+        }
+        return response;
+    }
+
+
+    @Override
     public String getStockMinuterInfo(String code){
         List<Header> headerList = new ArrayList<>();
         String codeUrl = getCodeUrl(code);
@@ -171,6 +204,18 @@ public abstract class XinlangCommonService extends CommonService
             redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
         }
     }
+    private void updateStockMinuterInfo(String code, String dateformat,String response) throws ScriptException, FileNotFoundException, NoSuchMethodException {
+        CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
+        String key = RedisKeyUtils.getHisStockMinuterInfo(code,dateformat);
+        //先进行解密
+        String[] split = response.split("\"");
+        Object heXinDecode = XinLangUtil.getHeXinDecode(split[1]);
+        String jsonStr = JsonUtil.toJson(heXinDecode);
+        List stockTickDetail = getStockMinuterDetail(code,dateformat, jsonStr);
+        if (stockTickDetail != null && stockTickDetail.size() > 0) {
+            redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
+        }
+    }
 
 
     private List<TickInfo> updateStockTickInfo(String code, String response) {
@@ -185,6 +230,23 @@ public abstract class XinlangCommonService extends CommonService
 
     @Override
     public List getStockMinuterDetail(String code, String response) {
+        JSONObject jsonObject = JSONObject.parseObject(response);
+        JSONArray jsonArray = jsonObject.getJSONObject("result").getJSONArray("data");
+        List<Map> result = new ArrayList<Map>();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            JSONObject item = jsonArray.getJSONObject(i);
+            map.put("price", item.get("p"));
+            map.put("vol", item.get("v"));
+            map.put("minuter", item.get("m"));
+            map.put("avgPrice", item.get("avg_p"));
+            result.add(map);
+        }
+        return result;
+    }
+
+    @Override
+    public List getStockMinuterDetail(String code,String dateFormat, String response) {
         JSONObject jsonObject = JSONObject.parseObject(response);
         JSONArray jsonArray = jsonObject.getJSONObject("result").getJSONArray("data");
         List<Map> result = new ArrayList<Map>();

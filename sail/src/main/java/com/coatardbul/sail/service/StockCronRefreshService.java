@@ -1,6 +1,7 @@
 package com.coatardbul.sail.service;
 
 import com.coatardbul.baseCommon.constants.Constant;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.baseService.service.AiStrategyService;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -101,12 +103,19 @@ public class StockCronRefreshService {
         }
     }
 
-    public void refreshStockMinuterInfo(List<String> codeArr) {
+    public void refreshStockMinuterInfo( StockCronRefreshDTO dto) {
         DataServiceBridge dataServiceBridge = dataFactory.build();
 
-        for (String code : codeArr) {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+
+        for (String code : dto.getCodeArr()) {
             try {
-                dataServiceBridge.refreshStockMinuterInfo(code);
+                if(dateFormat.equals(dto.getDateStr())){
+                    dataServiceBridge.refreshStockMinuterInfo(code);
+                }else {
+                    dataServiceBridge.refreshStockMinuterInfo(code,dto.getDateStr());
+
+                }
 
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

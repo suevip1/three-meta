@@ -1,7 +1,7 @@
 package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.river.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.river.mapper.StockTimeIntervalMapper;
 import com.coatardbul.river.model.bo.IntervalStaticBo;
 import com.coatardbul.river.model.entity.StockTimeInterval;

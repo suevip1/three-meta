@@ -45,6 +45,12 @@ public class SailServerFeignFallback implements FallbackFactory<SailServerFeign>
 
                 return null;
             }
+
+            @Override
+            public CommonResult refreshCookie() {
+                log.error(throwable.getMessage(), throwable);
+
+                return null;            }
         };
     }
 }

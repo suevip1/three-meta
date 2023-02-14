@@ -217,14 +217,31 @@ public class StockCronRefreshService {
 
         }
 
-//        return result;
     }
 
-    public void refreshStockMinuterInfo(List<String> codeArr) {
-        stockMinuterRefreshprocess(codeArr);
+
+    public void refreshStockMinuterInfo(StockCronRefreshDTO dto) {
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        if(dateFormat.equals(dto.getDateStr())){
+            stockMinuterRefreshprocess(dto.getCodeArr());
+        }else {
+            stockMinuterRefreshprocess(dto.getCodeArr(),dto.getDateStr());
+
+        }
     }
+
 
     private void stockMinuterRefreshprocess(List<String> codes) {
+        stockMinuterRefreshprocess(codes,null);
+    }
+
+    private void stockMinuterRefreshprocess(List<String> codes,String dateStr) {
+
+        if(!StringUtils.isNotBlank(dateStr)){
+            dateStr=DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD);
+        }
+        String finalDateStr = dateStr;
+
         List<String> codeArr = new ArrayList<>();
         for (String code : codes) {
             codeArr.add(code);
@@ -233,6 +250,7 @@ public class StockCronRefreshService {
                 Constant.minuterThreadPool.submit(() -> {
                     StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
                     stockCronRefreshDTO.setCodeArr(finalCodeArr);
+                    stockCronRefreshDTO.setDateStr(finalDateStr);
                     sailServerFeign.refreshStockMinuterInfo(stockCronRefreshDTO);
                 });
                 codeArr = new ArrayList<>();
@@ -243,6 +261,7 @@ public class StockCronRefreshService {
             Constant.minuterThreadPool.submit(() -> {
                 StockCronRefreshDTO stockCronRefreshDTO = new StockCronRefreshDTO();
                 stockCronRefreshDTO.setCodeArr(finalCodeArr);
+                stockCronRefreshDTO.setDateStr(finalDateStr);
                 sailServerFeign.refreshStockMinuterInfo(stockCronRefreshDTO);
             });
         }
@@ -771,7 +790,6 @@ public class StockCronRefreshService {
 
         List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
 
-        List<StockTemplatePredict> increaseGreaterAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode());
 
         List<String>codeArr=new ArrayList<String>();
         if(uplimitAmbushTemplatePredicts.size()>0){
@@ -782,10 +800,7 @@ public class StockCronRefreshService {
             Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
-        if(increaseGreaterAmbushTemplatePredicts.size()>0){
-            Set<String> collect = increaseGreaterAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
-            codeArr.addAll(collect);
-        }
+
         Object allPlate = dongFangPlateService.getAllPlate();
         String lowAuctionUpShadowGid = getGid("历史5日埋伏", allPlate);
 

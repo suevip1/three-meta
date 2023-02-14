@@ -1,6 +1,7 @@
 package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.feign.SailServerFeign;
 import com.coatardbul.stock.mapper.StockCookieMapper;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
 import com.coatardbul.stock.model.entity.StockCookie;
@@ -32,6 +33,8 @@ public class StockCookieService {
     @Autowired
     StockStrategyService stockStrategyService;
 
+    @Autowired
+    SailServerFeign sailServerFeign;
     public void add(StockCookieDTO dto) {
         StockCookie convert = convert(dto);
         convert.setId(baseServerFeign.getSnowflakeId());
@@ -74,6 +77,10 @@ public class StockCookieService {
     public void simpleModify(StockCookieDTO dto) {
         stockCookieMapper.updateCookieValue(dto.getCookie());
         stockStrategyService.setCookieValue(dto.getCookie());
+        //调用sail，刷新sailcookie
+        for(int i=1;i<10;i++){
+            sailServerFeign.refreshCookie();
+        }
     }
 
     public void refreshCache() {

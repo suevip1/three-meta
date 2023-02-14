@@ -8,7 +8,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @MapperScan("com.coatardbul.sail.mapper")
-@EnableFeignClients(basePackages = "com.coatardbul.sail.feign")
+@EnableFeignClients(basePackages = {"com.coatardbul.sail.feign","com.coatardbul.baseService.feign"})
 @SpringBootApplication(scanBasePackages = {"com.coatardbul.sail","com.coatardbul.baseService"})
 public class SailApplication {
 

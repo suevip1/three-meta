@@ -120,10 +120,11 @@ public class DongFangCommonService extends CommonService implements DataServiceB
 
     /**
      * 重构日K信息
+     *
      * @param response
      * @return
      */
-    public  ChipPosition rebuildDayKlineChip(String response)  {
+    public ChipPosition rebuildDayKlineChip(String response) {
         ChipPosition result = new ChipPosition();
         int beginIndex = response.indexOf("(");
         int endIndex = response.lastIndexOf(")");
@@ -133,14 +134,14 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         JSONArray klines = data.getJSONArray("klines");
         List<List<String>> helloList = new ArrayList<List<String>>();
 
-        Map<String,Integer>map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>();
         for (int i = 0; i < klines.size(); i++) {
             Object o = klines.get(i);
             if (o instanceof String) {
                 List<String> item = new ArrayList<String>();
                 String o1 = (String) o;
                 String[] split = o1.split(",");
-                map.put(split[0],i);
+                map.put(split[0], i);
                 item.add(split[0]);
                 item.add(split[1]);
                 item.add(split[2]);
@@ -361,12 +362,29 @@ public class DongFangCommonService extends CommonService implements DataServiceB
     }
 
     @Override
+    public void refreshStockMinuterInfo(String code, String dateFormat) {
+        xinlangService.refreshStockMinuterInfo(code, dateFormat);
+
+    }
+
+    @Override
     public String getStockMinuterInfo(String code) {
         return xinlangService.getStockMinuterInfo(code);
     }
 
     @Override
+    public String getStockMinuterInfo(String code, String dateFormat) {
+        return xinlangService.getStockMinuterInfo(code, dateFormat);
+
+    }
+
+    @Override
     public List getStockMinuterDetail(String code, String response) {
         return xinlangService.getStockMinuterDetail(code, response);
+    }
+
+    @Override
+    public List getStockMinuterDetail(String code, String dateformat, String response) {
+        return xinlangService.getStockMinuterDetail(code, dateformat, response);
     }
 }

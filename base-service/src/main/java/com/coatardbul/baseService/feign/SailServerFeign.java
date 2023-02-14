@@ -42,4 +42,8 @@ public interface SailServerFeign {
     public CommonResult getThreadPoolConfig();
 
 
+    @RequestMapping(value = "sail/cookie/refreshCookie", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult refreshCookie();
+
 }

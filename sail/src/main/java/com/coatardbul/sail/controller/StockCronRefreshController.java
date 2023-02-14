@@ -60,7 +60,7 @@ public class StockCronRefreshController {
     @ApiOperation("获取股票分钟信息")
     @RequestMapping(path = "/refreshStockMinuterInfo", method = RequestMethod.POST)
     public CommonResult refreshStockMinuterInfo(@RequestBody StockCronRefreshDTO dto) {
-        stockCronRefreshService.refreshStockMinuterInfo(dto.getCodeArr());
+        stockCronRefreshService.refreshStockMinuterInfo(dto);
         return CommonResult.success(null);
     }
 

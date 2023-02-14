@@ -46,8 +46,18 @@ public interface DataServiceBridge {
          */
 
     void refreshStockMinuterInfo(String code);
+
+
+
+    void refreshStockMinuterInfo(String code,String dateFormat);
+
     String getStockMinuterInfo(String code);
+
+    String getStockMinuterInfo(String code,String dateFormat);
+
     List getStockMinuterDetail(String code, String response);
+
+    List getStockMinuterDetail(String code,String dateformat, String response);
 
 
 }
