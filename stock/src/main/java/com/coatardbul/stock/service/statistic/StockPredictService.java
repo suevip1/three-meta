@@ -162,7 +162,7 @@ public class StockPredictService {
             dto.setRiverStockTemplateSign(StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
         }
         if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-            dto.setRiverStockTemplateSign(StockTemplateEnum.HAVE_UP_LIMIT.getSign());
+            dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT.getSign());
         }
 //        if (AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
 //            dto.setRiverStockTemplateSign(StockTemplateEnum.INCREASE_GREATE_NO_UPLIMIT.getSign());

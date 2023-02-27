@@ -46,7 +46,8 @@ public enum StockTemplateEnum {
 
     HAVE_UP_LIMIT("HAVE_UP_LIMIT", "昨曾涨停",
             "1501584345410961408"),
-
+    SIMILAR_HAVE_UP_LIMIT("SIMILAR_HAVE_UP_LIMIT", "类似昨曾模式",
+            "1630271102188126208"),
     a35("ssssssssss", "5日10日均线上扬", "1508081049291325440"),
     STOCK_UP_LIMIT("STOCK_UP_LIMIT", "股票涨停信息", "1509349533765730304"),
     a37("ssssssssss", "明日涨停", "1510610979782787072"),

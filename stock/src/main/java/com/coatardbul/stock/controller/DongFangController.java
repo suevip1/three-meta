@@ -92,6 +92,12 @@ public class DongFangController {
         stockCronRefreshService.addMultiDayAmbushPlateInfo(dto.getDateStr());
         return CommonResult.success(null);
     }
+    @RequestMapping(path = "/addDayAmbushPlateInfo", method = RequestMethod.POST)
+    public CommonResult addDayAmbushPlateInfo(@RequestBody DongFangPlateDTO dto) {
+        stockCronRefreshService.addDayAmbushPlateInfo(dto.getDateStr());
+        return CommonResult.success(null);
+    }
+
 
     @ApiOperation("将洗拉添加到板块中")
     @RequestMapping(path = "/addXlPlateInfo", method = RequestMethod.POST)

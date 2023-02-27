@@ -1,11 +1,17 @@
 package com.coatardbul.stock.service.statistic.tradeQuartz;
 
+import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.SimulateTypeEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.entity.bo.PreTradeDetail;
 import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.DataServiceBridge;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
+import com.coatardbul.baseService.service.StockStrategyCommonService;
+import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTradeBuyConfigMapper;
@@ -57,6 +63,8 @@ public class TradeBaseService {
     @Autowired
     StockStrategyWatchMapper stockStrategyWatchMapper;
     @Autowired
+    StockStrategyCommonService stockStrategyCommonService;
+    @Autowired
     StockTradeConfigService stockTradeConfigService;
     @Autowired
     StockTradeBuyConfigMapper stockTradeBuyConfigMapper;
@@ -65,7 +73,8 @@ public class TradeBaseService {
 
     @Autowired
     StockVerifyService stockVerifyService;
-
+    @Autowired
+    StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
     @Autowired
     StockTradeDateSwitchService stockTradeDateSwitchService;
 
@@ -214,12 +223,42 @@ public class TradeBaseService {
             return result;
         }
 //        result.setName(map.get("name").toString());
-        result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
-        result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
-        result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
-        result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
+        try {
+            result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
+            result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
+            result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
+            result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+        }
+      if(result.getLastClosePrice()==null ||result.getCurrPrice()==null ||result.getMaxPrice()==null){
+          Map stockInfoByStrategy = getStockInfoByStrategy(code, date);
+          result.setLastClosePrice(new BigDecimal(stockInfoByStrategy.get("lastClosePrice").toString()));
+          result.setCurrPrice(new BigDecimal(stockInfoByStrategy.get("newPrice").toString()));
+          result.setMaxPrice(new BigDecimal(stockInfoByStrategy.get("maxPrice").toString()));
+          result.setMinPrice(new BigDecimal(stockInfoByStrategy.get("minPrice").toString()));
+      }
+        //上述方式失效
         rebuild(result);
         return result;
+    }
+    private Map getStockInfoByStrategy(String code, String specialDay){
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
+        dto.setDateStr(specialDay);
+        dto.setStockCode(code);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyCommonService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            return null;
+        }
+        JSONObject jsonObject = strategy.getData().getJSONObject(0);
+        Map convert = stockUpLimitAnalyzeCommonService.convert(jsonObject, specialDay);
+        return convert;
     }
 
 
