@@ -755,6 +755,8 @@ public class StockCronRefreshService {
 
         DongFangPlateDTO firstDto = new DongFangPlateDTO();
         firstDto.setGid(lowAuctionUpShadowGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+
         firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
         dongFangPlateService.addPlateInfo(firstDto);
 
@@ -782,7 +784,7 @@ public class StockCronRefreshService {
     }
 
     public void addMultiDayAmbushPlateInfo(String specialDateStr) {
-        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -5);
+        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -7);
         String endDateStr = riverRemoteService.getSpecialDay(specialDateStr, -1);
 
 
@@ -802,7 +804,7 @@ public class StockCronRefreshService {
         }
 
         Object allPlate = dongFangPlateService.getAllPlate();
-        String lowAuctionUpShadowGid = getGid("历史5日埋伏", allPlate);
+        String lowAuctionUpShadowGid = getGid("历史埋伏", allPlate);
 
         DongFangPlateDTO firstDto = new DongFangPlateDTO();
         firstDto.setGid(lowAuctionUpShadowGid);
@@ -851,6 +853,8 @@ public class StockCronRefreshService {
 
         DongFangPlateDTO firstDto = new DongFangPlateDTO();
         firstDto.setGid(lowAuctionUpShadowGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+
         firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
         dongFangPlateService.addPlateInfo(firstDto);
     }
@@ -870,4 +874,17 @@ public class StockCronRefreshService {
     }
 
 
+    public void addZcPlateInfo(String dateStr) {
+        List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.HAVE_UP_LIMIT.getSign());
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("昨曾", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+
+        firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
+        dongFangPlateService.addPlateInfo(firstDto);
+    }
 }

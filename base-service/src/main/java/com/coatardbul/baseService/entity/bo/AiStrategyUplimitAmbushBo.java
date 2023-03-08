@@ -43,4 +43,7 @@ public class AiStrategyUplimitAmbushBo {
     private BigDecimal tradeMinAmount;
 
 
+    private BigDecimal firstRateSub;
+
+
 }

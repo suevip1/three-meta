@@ -173,6 +173,7 @@ public class MinuterEmotionXxlJob {
             log.info("低开下影线，低开短下长上影，其他开始执行"+dateStr+"  "+timeStr);
 
             stockCronRefreshService.addDksyxPlateInfo(dateStr);
+            stockCronRefreshService.addZcPlateInfo(dateStr);
             stockCronRefreshService.addDkdxcsyPlateInfo(dateStr);
             stockCronRefreshService.addXlPlateInfo(dateStr);
 

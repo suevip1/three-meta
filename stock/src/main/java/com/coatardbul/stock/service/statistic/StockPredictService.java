@@ -237,6 +237,7 @@ public class StockPredictService {
 //        if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH_BUY_ONE.getCode().equals(stockPredictDto.getAiStrategySign())) {
 //            allNum=2;
 //        }
+        //昨曾模式，当天复合也可以买入
         if (new BigDecimal(currInfo.get("newPrice").toString()).compareTo(buyPrice) < 0) {
             StockPredictDto dto = new StockPredictDto();
             String dateStr = currInfo.get("dateStr").toString();
@@ -247,6 +248,8 @@ public class StockPredictService {
 //            redisTemplate.opsForValue().set(key, JsonUtil.toJson(addInfo), 10, TimeUnit.MINUTES);
             List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
             if (templatePredicts==null ||templatePredicts.size() == 0) {
+                //重构信息，市值和换手率应改为涨停时的
+                rebuildInsertInfo(addInfo,currInfo);
                 stockTemplatePredictMapper.insertSelective(addInfo);
                 //计算卖出信息
                 calcSaleInfo(dto, dateStr, currInfo.get("code").toString(), addInfo);
@@ -256,27 +259,27 @@ public class StockPredictService {
         }
         for (int i = 1; i < allNum; i++) {
             Map nextInfo = getNextInfo(dateFormat, i, (String) jsonObject.get("code"));
-//            try {
-//                if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0 && new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(buyPrice) > 0) {
-//                    int num = 1232;
-//                    int num2 = 1232;
-//
-//                }
-//            }catch (Exception e){
-//                log.error(e.getMessage(),e);
-//            }
 
-//            if(i==1){
-//                BigDecimal lastClosePriceTemp = new BigDecimal(nextInfo.get("lastClosePrice").toString());
-//                BigDecimal maxIncreaseTemp = new BigDecimal(nextInfo.get("maxPrice").toString()).subtract(lastClosePriceTemp).divide(lastClosePrice, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100));
-//                if (maxIncreaseTemp.compareTo(aiStrategyParamBo.getNextMaxIncreaseMaxRate()) > 0) {
-//                    throw new BusinessException("不符合条件");
-//                }
-//            }
-
+            Boolean yesFlag=false;
+            //最大价格涨幅
+            BigDecimal maxIncrease = new BigDecimal(nextInfo.get("maxPrice").toString()).subtract(new BigDecimal(currInfo.get("newPrice").toString())).divide(new BigDecimal(currInfo.get("newPrice").toString()), 4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal minIncrease = new BigDecimal(nextInfo.get("minPrice").toString()).subtract(new BigDecimal(currInfo.get("newPrice").toString())).divide(new BigDecimal(currInfo.get("newPrice").toString()), 4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal subtract = maxIncrease.subtract(minIncrease);
+            if(aiStrategyParamBo.getFirstRateSub()==null){
+                aiStrategyParamBo.setFirstRateSub(new BigDecimal("0.05"));
+            }
+            //首次振幅小于5
+            if(subtract.compareTo(aiStrategyParamBo.getFirstRateSub())<=0&&i==1){
+                if(maxIncrease.compareTo(new BigDecimal(0.06))<0){
+                    yesFlag=true;
+                }
+            }
             //最低价小于买入价即可
             if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0&&
                     new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(lastClosePrice) > 0) {
+                yesFlag=true;
+            }
+            if (yesFlag) {
                 StockPredictDto dto = new StockPredictDto();
                 String dateStr = nextInfo.get("dateStr").toString();
                 StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, nextInfo.get("code").toString());
@@ -288,6 +291,7 @@ public class StockPredictService {
                 if (templatePredicts.size() > 0) {
                     continue;
                 }
+                rebuildInsertInfo(addInfo,currInfo);
                 stockTemplatePredictMapper.insertSelective(addInfo);
                 //计算卖出信息
                 calcSaleInfo(dto, dateStr, nextInfo.get("code").toString(), addInfo);
@@ -395,6 +399,14 @@ public class StockPredictService {
 
     }
 
+
+    private void rebuildInsertInfo(StockTemplatePredict addInfo, Map currInfo){
+        StockDetail dateBuyInfoDetail = convert(currInfo);
+        addInfo.setBuyMarketValue(dateBuyInfoDetail.getMarketValue());
+        addInfo.setBuyTurnoverRate(dateBuyInfoDetail.getTurnOverRate());
+        addInfo.setBuyTradeAmount(dateBuyInfoDetail.getTradeAmount());
+    }
+
     private StockTemplatePredict getStockTemplatePredict(StockPredictDto dto, String dateStr, String code) {
         //有买入时间的
         Map timeBuyInfoMap = getNextInfo(dateStr, dto.getBuyTime(), 0, code);
@@ -432,6 +444,9 @@ public class StockPredictService {
             //有卖出时间的
             if (!StringUtils.isNotBlank(dto.getSaleTime())) {
                 dto.setSaleTime("11:29");
+            }
+            if (dto.getHoleDay()==null) {
+                dto.setHoleDay(addInfo.getHoldDay());
             }
             Map timeSaleInfoMap = getNextInfo(dateStr, dto.getSaleTime(), dto.getHoleDay(), code);
             StockDetail timeSaleInfoDetail = convert(timeSaleInfoMap);
