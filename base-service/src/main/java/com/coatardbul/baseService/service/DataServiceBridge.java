@@ -23,6 +23,9 @@ public interface DataServiceBridge {
     void getAndRefreshStockInfo(String code,String dateFormat);
 
     String getStockInfo(String code);
+
+
+
     void rebuildStockDetailMap(String response, Map map);
 
     /**

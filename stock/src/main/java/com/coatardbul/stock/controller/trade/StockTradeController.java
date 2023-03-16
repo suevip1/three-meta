@@ -105,8 +105,17 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
     @RequestMapping(path = "/quickBuy", method = RequestMethod.POST)
     public CommonResult quickBuy(@RequestBody Map map) {
         stockTradeService.directBuy(
-                new BigDecimal((String)map.get("buyAmount")),
+                new BigDecimal(map.get("buyAmount").toString()),
                 null,
+                (String)map.get("code"),
+                (String) map.get("name"));
+        return CommonResult.success(null);
+    }
+    @RequestMapping(path = "/quickSell", method = RequestMethod.POST)
+    public CommonResult quickSell(@RequestBody Map map) {
+        stockTradeService.directSell(
+                map.get("sellPrice")!=null? new BigDecimal(map.get("sellPrice").toString()):null,
+                 new BigDecimal(map.get("sellNum").toString()),
                 (String)map.get("code"),
                 (String) map.get("name"));
         return CommonResult.success(null);

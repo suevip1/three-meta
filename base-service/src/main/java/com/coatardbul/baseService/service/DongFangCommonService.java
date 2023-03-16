@@ -87,9 +87,34 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         } catch (ConnectTimeoutException e) {
         }
         return response;
-
     }
 
+    /**
+     * 获取异动信息
+     *
+     * @param code
+     * @param dateFormat
+     * @return
+     */
+    public String getStockAbnormalMovement(String code, String dateFormat) {
+        List<Header> headerList = new ArrayList<>();
+        //东方财富 接口 地址
+        setHeadList(headerList);
+        long l = System.currentTimeMillis();
+        //返回信息
+        String response = null;
+        try {
+            response = httpService.doGet("http://push2ex.eastmoney.com/getStockChanges?cb=jQuery35105455289533473615_" + (l - 1)
+                    + "&ut=7eea3edcaed734bea9cbfc24409ed989"
+                    +"&date="+dateFormat.replaceAll("-","")
+                    +"&dpt=wzchanges&code="+code
+                    +"&market=1&_="+(l - 11)
+                    , headerList, cronRefreshService.getProxyFlag());
+        } catch (ConnectTimeoutException e) {
+        }
+        return response;
+
+    }
 
     public String getDayKlineChip(String code) {
         List<Header> headerList = new ArrayList<>();

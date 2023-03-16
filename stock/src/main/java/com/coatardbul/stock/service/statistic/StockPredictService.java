@@ -155,7 +155,7 @@ public class StockPredictService {
     private void jointAiStrategyQueryAndParse(StockPredictDto stockPredictDto, AiStrategyUplimitAmbushBo aiStrategyParamBo, String dateFormat) {
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
         if (AiStrategyEnum.UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-            dto.setRiverStockTemplateSign(StockTemplateEnum.FIRST_UP_LIMIT.getSign());
+            dto.setRiverStockTemplateSign(StockTemplateEnum.FIRST_UP_LIMIT_EQUAL_ABOVE.getSign());
         }
 
         if (AiStrategyEnum.TWO_ABOVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
@@ -178,6 +178,25 @@ public class StockPredictService {
         if (strategy == null || strategy.getTotalNum() == 0) {
             return;
         }
+        //大价格补充
+        if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
+            dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT_SUPPLEMENT.getSign());
+            StrategyBO strategyTemp = null;
+            try {
+                strategyTemp = stockStrategyCommonService.strategy(dto);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            if (strategyTemp != null && strategyTemp.getTotalNum() > 0) {
+                strategy.setTotalNum(strategy.getTotalNum()+strategyTemp.getTotalNum());
+                JSONArray data = strategy.getData();
+                data.addAll(strategyTemp.getData());
+                strategy.setData(data);
+            }
+            dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT.getSign());
+        }
+
+
         //当日涨停
         for (int jsonLen = 0; jsonLen < strategy.getTotalNum(); jsonLen++) {
             StrategyBO finalStrategy = strategy;

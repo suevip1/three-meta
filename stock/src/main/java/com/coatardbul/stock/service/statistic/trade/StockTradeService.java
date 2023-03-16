@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.baseService.feign.BaseServerFeign;
@@ -17,6 +18,7 @@ import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
+import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
@@ -27,6 +29,7 @@ import com.coatardbul.stock.model.entity.StockTradeUrl;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TimeBuyTradeService;
+import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -53,6 +56,9 @@ public class StockTradeService {
 
     @Autowired
     StockTradeUrlMapper stockTradeUrlMapper;
+
+    @Autowired
+    TradeBaseService tradeBaseService;
     @Autowired
     StockTradeBaseService stockTradeBaseService;
     @Autowired
@@ -111,7 +117,7 @@ public class StockTradeService {
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
                 return jsonObject.getString("Data");
-            }else {
+            } else {
                 throw new BusinessException("登陆异常");
             }
         } catch (ConnectTimeoutException e) {
@@ -131,7 +137,7 @@ public class StockTradeService {
 
         try {
             String result = stockTradeBaseService.trade(url, dto);
-            log.info("交易对象"+ JsonUtil.toJson(dto) +"交易返回信息"+result);
+            log.info("交易对象" + JsonUtil.toJson(dto) + "交易返回信息" + result);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
@@ -213,13 +219,12 @@ public class StockTradeService {
     }
 
 
-
     /**
      * 直接买入
      */
     public Boolean directBuy(BigDecimal userMoney, BigDecimal buyNum, String code, String name) {
 
-       return timeBuyTradeService.tradeProcess(userMoney, buyNum, code);
+        return timeBuyTradeService.tradeProcess(userMoney, buyNum, code);
     }
 
 
@@ -262,4 +267,20 @@ public class StockTradeService {
     }
 
 
+    public void directSell(BigDecimal sellPrice, BigDecimal sellNum, String code, String name) {
+        StockTradeBO stockTradeBO = new StockTradeBO();
+        stockTradeBO.setStockCode(code);
+        if (sellPrice != null && sellPrice.compareTo(BigDecimal.ZERO) > 0) {
+            stockTradeBO.setPrice(sellPrice.toString());
+        } else {
+            Date currenDate = new Date();
+            String date = DateTimeUtil.getDateFormat(currenDate, DateTimeUtil.YYYY_MM_DD);
+            //涨跌停价
+            StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(code, date);
+            stockTradeBO.setPrice(upLimitPrice.getDownLimitPrice().toString());
+        }
+        stockTradeBO.setAmount(sellNum.toString());
+        stockTradeBO.setZqmc(name);
+        sell(stockTradeBO);
+    }
 }
