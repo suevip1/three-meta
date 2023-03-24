@@ -270,15 +270,13 @@ public class StockTradeService {
     public void directSell(BigDecimal sellPrice, BigDecimal sellNum, String code, String name) {
         StockTradeBO stockTradeBO = new StockTradeBO();
         stockTradeBO.setStockCode(code);
-        if (sellPrice != null && sellPrice.compareTo(BigDecimal.ZERO) > 0) {
-            stockTradeBO.setPrice(sellPrice.toString());
-        } else {
-            Date currenDate = new Date();
-            String date = DateTimeUtil.getDateFormat(currenDate, DateTimeUtil.YYYY_MM_DD);
-            //涨跌停价
-            StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(code, date);
-            stockTradeBO.setPrice(upLimitPrice.getDownLimitPrice().toString());
-        }
+
+        Date currenDate = new Date();
+        String date = DateTimeUtil.getDateFormat(currenDate, DateTimeUtil.YYYY_MM_DD);
+        //涨跌停价
+        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(code, date);
+        stockTradeBO.setPrice(upLimitPrice.getDownLimitPrice().toString());
+
         stockTradeBO.setAmount(sellNum.toString());
         stockTradeBO.setZqmc(name);
         sell(stockTradeBO);

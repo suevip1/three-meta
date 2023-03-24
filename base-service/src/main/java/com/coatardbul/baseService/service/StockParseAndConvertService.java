@@ -81,13 +81,31 @@ public class StockParseAndConvertService {
         return (BigDecimal) value;
     }
 
-    public BigDecimal getUpLimit(BigDecimal price){
-        BigDecimal multiply = price.multiply(new BigDecimal(1.1)).setScale(2,BigDecimal.ROUND_HALF_UP);
-        return  multiply;
+
+    public BigDecimal getUpLimit(String code,BigDecimal price){
+        BigDecimal multiply = null;
+        if(code.substring(0,2).equals("30") ||code.substring(0,2).equals("68")){
+            multiply=new BigDecimal(1.2);
+        }else if(code.substring(0,2).equals("60") ||code.substring(0,2).equals("00")){
+            multiply=new BigDecimal(1.1);
+        }else {
+            multiply=new BigDecimal(1.3);
+        }
+        BigDecimal result = price.multiply(multiply).setScale(2,BigDecimal.ROUND_HALF_UP);
+        return  result;
     }
-    public BigDecimal getDownLimit(BigDecimal price){
-        BigDecimal multiply = price.multiply(new BigDecimal(0.9)).setScale(2,BigDecimal.ROUND_HALF_UP);
-        return  multiply;
+
+    public BigDecimal getDownLimit(String code ,BigDecimal price){
+        BigDecimal multiply = null;
+        if(code.substring(0,2).equals("30") ||code.substring(0,2).equals("68")){
+            multiply=new BigDecimal(0.8);
+        }else if(code.substring(0,2).equals("60") ||code.substring(0,2).equals("00")){
+            multiply=new BigDecimal(0.9);
+        }else {
+            multiply=new BigDecimal(0.7);
+        }
+        BigDecimal result = price.multiply(multiply).setScale(2,BigDecimal.ROUND_HALF_UP);
+        return  result;
     }
 
 

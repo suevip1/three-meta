@@ -202,7 +202,7 @@ public class StockStrategyWatchService {
         }
         if (closePrice != null) {
             //涨停价
-            BigDecimal upLimit = stockParseAndConvertService.getUpLimit(closePrice);
+            BigDecimal upLimit = stockParseAndConvertService.getUpLimit(code,closePrice);
             //每次可使用的金额
             BigDecimal userMoney = stockTradeBuyConfig.getSubMoney().divide(new BigDecimal(stockTradeBuyConfig.getSubNum()), 2, BigDecimal.ROUND_HALF_UP);
             //可买的多少,1 ,2,

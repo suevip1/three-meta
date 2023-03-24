@@ -257,7 +257,7 @@ public class StockPredictService {
 //            allNum=2;
 //        }
         //昨曾模式，当天复合也可以买入
-        if (new BigDecimal(currInfo.get("newPrice").toString()).compareTo(buyPrice) < 0) {
+        if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
             StockPredictDto dto = new StockPredictDto();
             String dateStr = currInfo.get("dateStr").toString();
             StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, currInfo.get("code").toString());

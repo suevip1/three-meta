@@ -887,4 +887,26 @@ public class StockCronRefreshService {
         firstDto.setCodeArr(lowAuctionUpShadowStockCodeArr);
         dongFangPlateService.addPlateInfo(firstDto);
     }
+
+    public void addMultiDayCyAmbushPlateInfo(String specialDateStr) {
+        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -5);
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, specialDateStr);
+
+        List<String>codeArray = new ArrayList<String>();
+        for(String dateStr:dateIntervalList){
+            List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.CY_BIG_INCREASE_RATE.getSign());
+
+            codeArray.addAll(lowAuctionUpShadowStockCodeArr);
+        }
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("创业板埋伏", allPlate);
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+
+        firstDto.setCodeArr(codeArray);
+        dongFangPlateService.addPlateInfo(firstDto);
+    }
 }

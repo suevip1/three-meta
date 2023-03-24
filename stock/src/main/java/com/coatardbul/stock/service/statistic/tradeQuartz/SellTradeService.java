@@ -49,11 +49,11 @@ public class SellTradeService extends TradeBaseService{
         PreTradeDetail result = super.computedTradeInfo(userMoney, buyNum, commonTradeInfo);
         result.setUserMoney(userMoney);
         if (userMoney != null) {
-            buyNum = userMoney.divide(commonTradeInfo.getStockBaseDetail().getDownLimitPrice().multiply(new BigDecimal(100)), 0, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(100));
+            buyNum = userMoney.divide(commonTradeInfo.getStockBaseDetail().getSugSellPrice().multiply(new BigDecimal(100)), 0, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(100));
         }
         result.setTradeNum(buyNum);
-        result.setPrice(commonTradeInfo.getStockBaseDetail().getDownLimitPrice());
-        result.setTradeType(TradeTypeEnum.BUY.getSign());
+        result.setPrice(commonTradeInfo.getStockBaseDetail().getSugSellPrice());
+        result.setTradeType(TradeTypeEnum.SELL.getSign());
         return result;
     }
 }

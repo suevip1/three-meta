@@ -6,11 +6,8 @@ import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.AiStrategyParamBo;
 import com.coatardbul.baseService.entity.bo.PreQuartzTradeDetail;
-import com.coatardbul.baseService.entity.bo.TickInfo;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,10 +15,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -165,27 +160,7 @@ public abstract class DuGuSwordCommonService {
     public abstract void calcProcess(Map map, PreQuartzTradeDetail result, String code);
 
 
-    /**
-     * 计算首次预买价格
-     * @param map
-     * @param result
-     * @param code
-     */
-    public BigDecimal calcFirstPreBuyPrice(Map map) {
 
-        BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
-
-        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
-
-        BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.05));
-        //涨幅前五小于9 ,走大于9的策略，否则走涨停前五
-        BigDecimal upLimitFiveIncrease = upLimitFivePrice.subtract(lastClosePrice).multiply(new BigDecimal(100)).divide(lastClosePrice, 2, BigDecimal.ROUND_HALF_DOWN);
-        if(upLimitFiveIncrease.compareTo(new BigDecimal(9))<=0){
-            return lastClosePrice.multiply(new BigDecimal(1.09));
-        }else {
-           return upLimitFivePrice;
-        }
-    }
 
 
 
@@ -204,7 +179,7 @@ public abstract class DuGuSwordCommonService {
         result.setName(name);
         BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
 
-        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
+        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(code,lastClosePrice);
 
         BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.01));
         //涨幅前五小于9 ,走大于9的策略，否则走涨停前五

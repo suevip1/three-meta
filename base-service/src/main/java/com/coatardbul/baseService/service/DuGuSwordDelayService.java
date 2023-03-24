@@ -46,7 +46,7 @@ public   class DuGuSwordDelayService extends DuGuSwordCommonService {
         result.setName(name);
         BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
 
-        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
+        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(code,lastClosePrice);
 
 
         BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.05));

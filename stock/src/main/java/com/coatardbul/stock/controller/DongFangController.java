@@ -91,6 +91,12 @@ public class DongFangController {
         stockCronRefreshService.addHisTwoUpLimitAbovePlateInfo(dto.getDateStr());
         return CommonResult.success(null);
     }
+    @ApiOperation("将创业板埋伏添加到板块中")
+    @RequestMapping(path = "/addMultiDayCyAmbushPlateInfo", method = RequestMethod.POST)
+    public CommonResult addMultiDayCyAmbushPlateInfo(@RequestBody DongFangPlateDTO dto) {
+        stockCronRefreshService.addMultiDayCyAmbushPlateInfo(dto.getDateStr());
+        return CommonResult.success(null);
+    }
 
     @ApiOperation("将历史5日埋伏添加到板块中")
     @RequestMapping(path = "/addMultiDayAmbushPlateInfo", method = RequestMethod.POST)

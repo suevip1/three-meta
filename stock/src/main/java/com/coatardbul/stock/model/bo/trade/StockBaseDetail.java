@@ -52,6 +52,26 @@ public class StockBaseDetail {
      * 目前价格
      */
     private BigDecimal currPrice;
+
+    /**
+     * 建议买入涨幅
+     */
+    private BigDecimal sugBuyRate;
+
+    /**
+     * 建议买入价格
+     */
+    private BigDecimal sugBuyPrice;
+    /**
+     * 建议卖出涨幅
+     */
+    private BigDecimal sugSellRate;
+
+    /**
+     * 建议卖出价格
+     */
+    private BigDecimal sugSellPrice;
+
     /**
      * 最大涨幅
      */

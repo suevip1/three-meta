@@ -32,6 +32,7 @@ import com.coatardbul.stock.service.statistic.trade.StockTradeBaseService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeConfigService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeDateSwitchService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -127,20 +128,20 @@ public class TradeBaseService {
     /**
      * 后缀处理
      */
-    public   void suffixHandle(TradeAllConfigDetail commonTradeInfo , PreTradeDetail preTradeDetail, Boolean flag){
+    public void suffixHandle(TradeAllConfigDetail commonTradeInfo, PreTradeDetail preTradeDetail, Boolean flag) {
 
-        if(flag){
+        if (flag) {
             // todo 添加仓位  注意买卖
 //        stockTradeAssetPositionService.addAssetInfo(preTradeDetail.getBuyNum(), upLimitPrice.getUpLimitPrice(), code, name, date);
 
 
-            saveStockTradeDetail(commonTradeInfo,preTradeDetail);
+            saveStockTradeDetail(commonTradeInfo, preTradeDetail);
         }
 
     }
 
 
-    private void saveStockTradeDetail( TradeAllConfigDetail commonTradeInfo ,  PreTradeDetail preTradeDetail ){
+    private void saveStockTradeDetail(TradeAllConfigDetail commonTradeInfo, PreTradeDetail preTradeDetail) {
         // 记录详情
         StockTradeDetail stockTradeDetail = new StockTradeDetail();
         stockTradeDetail.setId(baseServerFeign.getSnowflakeId());
@@ -208,6 +209,7 @@ public class TradeBaseService {
 
     /**
      * 通过tick数据获取
+     *
      * @param code
      * @param date
      * @return
@@ -218,9 +220,8 @@ public class TradeBaseService {
         DataServiceBridge build = dataFactory.build();
         String response = build.getStockInfo(code);
         Map map = new HashMap();
-        build.rebuildStockDetailMap(response,map);
-        if (map.size()==0) {
-            return result;
+        if (StringUtils.isNotBlank(response)) {
+            build.rebuildStockDetailMap(response, map);
         }
 //        result.setName(map.get("name").toString());
         try {
@@ -228,21 +229,21 @@ public class TradeBaseService {
             result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
             result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
             result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
-        }catch (Exception e){
-            log.error(e.getMessage(),e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-      if(result.getLastClosePrice()==null ||result.getCurrPrice()==null ||result.getMaxPrice()==null){
-          Map stockInfoByStrategy = getStockInfoByStrategy(code, date);
-          result.setLastClosePrice(new BigDecimal(stockInfoByStrategy.get("lastClosePrice").toString()));
-          result.setCurrPrice(new BigDecimal(stockInfoByStrategy.get("newPrice").toString()));
-          result.setMaxPrice(new BigDecimal(stockInfoByStrategy.get("maxPrice").toString()));
-          result.setMinPrice(new BigDecimal(stockInfoByStrategy.get("minPrice").toString()));
-      }
-        //上述方式失效
+        if (result.getLastClosePrice() == null || result.getCurrPrice() == null || result.getMaxPrice() == null) {
+            Map stockInfoByStrategy = getStockInfoByStrategy(code, date);
+            result.setLastClosePrice(new BigDecimal(stockInfoByStrategy.get("lastClosePrice").toString()));
+            result.setCurrPrice(new BigDecimal(stockInfoByStrategy.get("newPrice").toString()));
+            result.setMaxPrice(new BigDecimal(stockInfoByStrategy.get("maxPrice").toString()));
+            result.setMinPrice(new BigDecimal(stockInfoByStrategy.get("minPrice").toString()));
+        }
         rebuild(result);
         return result;
     }
-    private Map getStockInfoByStrategy(String code, String specialDay){
+
+    private Map getStockInfoByStrategy(String code, String specialDay) {
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
         dto.setRiverStockTemplateSign(StockTemplateEnum.STOCK_DETAIL.getSign());
         dto.setDateStr(specialDay);
@@ -260,7 +261,6 @@ public class TradeBaseService {
         Map convert = stockUpLimitAnalyzeCommonService.convert(jsonObject, specialDay);
         return convert;
     }
-
 
 
 //    /**
@@ -322,18 +322,34 @@ public class TradeBaseService {
     private void rebuild(StockBaseDetail result) {
         if (result.getLastClosePrice() != null) {
             //涨停价
-            result.setUpLimitPrice(stockParseAndConvertService.getUpLimit(result.getLastClosePrice()));
+            result.setUpLimitPrice(stockParseAndConvertService.getUpLimit(result.getCode(), result.getLastClosePrice()));
             //跌停价
-            result.setDownLimitPrice(stockParseAndConvertService.getDownLimit(result.getLastClosePrice()));
+            result.setDownLimitPrice(stockParseAndConvertService.getDownLimit(result.getCode(), result.getLastClosePrice()));
             //最高价涨幅
             BigDecimal maxPriceSubtract = result.getMaxPrice().subtract(result.getLastClosePrice());
-            result.setMaxUpRate(maxPriceSubtract.divide(result.getLastClosePrice(), 2, BigDecimal.ROUND_HALF_UP));
+            result.setMaxUpRate(maxPriceSubtract.divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
             //最低价涨幅
             BigDecimal minPriceSubtract = result.getMinPrice().subtract(result.getLastClosePrice());
-            result.setMinUpRate(minPriceSubtract.divide(result.getLastClosePrice(), 2, BigDecimal.ROUND_HALF_UP));
+            result.setMinUpRate(minPriceSubtract.divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
             //目前涨幅
             BigDecimal currPriceSubtract = result.getCurrPrice().subtract(result.getLastClosePrice());
-            result.setCurrUpRate(currPriceSubtract.divide(result.getLastClosePrice(), 2, BigDecimal.ROUND_HALF_UP));
+            result.setCurrUpRate(currPriceSubtract.divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
+
+            //建议买入价格和比例,价格笼子
+            BigDecimal rateCageLimit = new BigDecimal(0.019);
+            BigDecimal sugBuyRate = result.getCurrUpRate().add(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
+            result.setSugBuyRate(sugBuyRate);
+            result.setSugBuyPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugBuyRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
+            if(result.getSugBuyPrice().compareTo(result.getUpLimitPrice())>=0){
+                result.setSugBuyPrice(result.getUpLimitPrice());
+            }
+            //建议卖出价格和比例
+            BigDecimal sugSellRate =  result.getCurrUpRate().subtract(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
+            result.setSugSellRate(sugSellRate);
+            result.setSugSellPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugSellRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
+            if(result.getSugSellPrice().compareTo(result.getDownLimitPrice())<=0){
+                result.setSugSellPrice(result.getDownLimitPrice());
+            }
         }
     }
 

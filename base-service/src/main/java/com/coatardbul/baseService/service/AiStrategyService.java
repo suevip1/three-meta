@@ -151,7 +151,7 @@ public class AiStrategyService {
         result.setName(name);
         BigDecimal lastClosePrice = new BigDecimal(map.get("lastClosePrice").toString());
 
-        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(lastClosePrice);
+        BigDecimal upLimitPrice = stockParseAndConvertService.getUpLimit(code,lastClosePrice);
 
         BigDecimal upLimitFivePrice = upLimitPrice.subtract(new BigDecimal(0.01));
         //涨幅前五小于9 ,走大于9的策略，否则走涨停前五
