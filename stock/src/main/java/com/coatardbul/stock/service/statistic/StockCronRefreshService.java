@@ -222,23 +222,23 @@ public class StockCronRefreshService {
 
     public void refreshStockMinuterInfo(StockCronRefreshDTO dto) {
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        if(dateFormat.equals(dto.getDateStr())){
+        if (dateFormat.equals(dto.getDateStr())) {
             stockMinuterRefreshprocess(dto.getCodeArr());
-        }else {
-            stockMinuterRefreshprocess(dto.getCodeArr(),dto.getDateStr());
+        } else {
+            stockMinuterRefreshprocess(dto.getCodeArr(), dto.getDateStr());
 
         }
     }
 
 
     private void stockMinuterRefreshprocess(List<String> codes) {
-        stockMinuterRefreshprocess(codes,null);
+        stockMinuterRefreshprocess(codes, null);
     }
 
-    private void stockMinuterRefreshprocess(List<String> codes,String dateStr) {
+    private void stockMinuterRefreshprocess(List<String> codes, String dateStr) {
 
-        if(!StringUtils.isNotBlank(dateStr)){
-            dateStr=DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD);
+        if (!StringUtils.isNotBlank(dateStr)) {
+            dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         }
         String finalDateStr = dateStr;
 
@@ -776,7 +776,7 @@ public class StockCronRefreshService {
         DongFangPlateDTO firstDto = new DongFangPlateDTO();
         firstDto.setGid(firstGid);
         dongFangPlateService.clearPlateStock(firstDto);
-        for(String dateStr:dateIntervalList){
+        for (String dateStr : dateIntervalList) {
             List<String> twoUpLimitAboveStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.TWO_UP_LIMIT_ABOVE.getSign());
             firstDto.setCodeArr(twoUpLimitAboveStockCodeArr);
             dongFangPlateService.addPlateInfo(firstDto);
@@ -793,12 +793,12 @@ public class StockCronRefreshService {
         List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
 
 
-        List<String>codeArr=new ArrayList<String>();
-        if(uplimitAmbushTemplatePredicts.size()>0){
+        List<String> codeArr = new ArrayList<String>();
+        if (uplimitAmbushTemplatePredicts.size() > 0) {
             Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
-        if(haveUplimitAmbushTemplatePredicts.size()>0){
+        if (haveUplimitAmbushTemplatePredicts.size() > 0) {
             Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
@@ -823,12 +823,12 @@ public class StockCronRefreshService {
         List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(dateStr, dateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
 
 
-        List<String>codeArr=new ArrayList<String>();
-        if(uplimitAmbushTemplatePredicts.size()>0){
+        List<String> codeArr = new ArrayList<String>();
+        if (uplimitAmbushTemplatePredicts.size() > 0) {
             Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
-        if(haveUplimitAmbushTemplatePredicts.size()>0){
+        if (haveUplimitAmbushTemplatePredicts.size() > 0) {
             Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
             codeArr.addAll(collect);
         }
@@ -892,8 +892,8 @@ public class StockCronRefreshService {
         String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -5);
         List<String> dateIntervalList = riverRemoteService.getDateIntervalList(beginDateStr, specialDateStr);
 
-        List<String>codeArray = new ArrayList<String>();
-        for(String dateStr:dateIntervalList){
+        List<String> codeArray = new ArrayList<String>();
+        for (String dateStr : dateIntervalList) {
             List<String> lowAuctionUpShadowStockCodeArr = getStockCodeArr(dateStr, StockTemplateEnum.CY_BIG_INCREASE_RATE.getSign());
 
             codeArray.addAll(lowAuctionUpShadowStockCodeArr);
@@ -907,6 +907,103 @@ public class StockCronRefreshService {
         dongFangPlateService.clearPlateStock(firstDto);
 
         firstDto.setCodeArr(codeArray);
+        dongFangPlateService.addPlateInfo(firstDto);
+    }
+
+
+    public Set<String> his(String specialDateStr) {
+        String beginDateStr = riverRemoteService.getSpecialDay(specialDateStr, -7);
+        String endDateStr = riverRemoteService.getSpecialDay(specialDateStr, -1);
+
+
+        List<StockTemplatePredict> uplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+
+        List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(beginDateStr, endDateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
+
+
+        Set<String> codeArr = new HashSet<>();
+        if (uplimitAmbushTemplatePredicts.size() > 0) {
+            Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+        if (haveUplimitAmbushTemplatePredicts.size() > 0) {
+            Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+        return codeArr;
+    }
+
+    public Set<String> day(String dateStr) {
+        List<StockTemplatePredict> uplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(dateStr, dateStr, AiStrategyEnum.UPLIMIT_AMBUSH.getCode());
+
+        List<StockTemplatePredict> haveUplimitAmbushTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedSign(dateStr, dateStr, AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
+
+
+        Set<String> codeArr = new HashSet<>();
+        if (uplimitAmbushTemplatePredicts.size() > 0) {
+            Set<String> collect = uplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+        if (haveUplimitAmbushTemplatePredicts.size() > 0) {
+            Set<String> collect = haveUplimitAmbushTemplatePredicts.stream().map(StockTemplatePredict::getCode).collect(Collectors.toSet());
+            codeArr.addAll(collect);
+        }
+        return codeArr;
+
+    }
+
+    /**
+     * 历史埋伏和当日埋伏竞价抢筹，
+     *
+     * @param specialDateStr
+     */
+    public void ambushCallauctionRob(String specialDateStr) {
+
+
+        String endDateStr = riverRemoteService.getSpecialDay(specialDateStr, -1);
+        Set<String> codeArr = new HashSet<>();
+
+        Set<String> his = his(endDateStr);
+        Set<String> day = day(endDateStr);
+        codeArr.addAll(his);
+        codeArr.addAll(day);
+
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.AMBUSH_CALLAUCTION_ROB.getSign());
+        dto.setDateStr(specialDateStr);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyCommonService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            return;
+        }
+        if (strategy.getData().size() == 0) {
+            return;
+        }
+        List<String>codeAll=new ArrayList<>();
+        for (int i = 0; i < strategy.getData().size(); i++) {
+            JSONObject jsonObject = strategy.getData().getJSONObject(i);
+            codeAll.add(jsonObject.getString("code"));
+        }
+        List<String>newCodeArr=new ArrayList<>();
+        for(String code:codeAll){
+            if(codeArr.contains(code)){
+                newCodeArr.add(code);
+            }
+        }
+
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String lowAuctionUpShadowGid = getGid("埋伏竞价", allPlate);
+
+
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(lowAuctionUpShadowGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+
+        firstDto.setCodeArr(newCodeArr);
         dongFangPlateService.addPlateInfo(firstDto);
     }
 }

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * @author: suxiaolei
@@ -20,6 +19,8 @@ public class DateTimeUtil {
     public static final String MONTH_BEGIN_STRING = "0";
     public static final int MAX_MONTH = 12;
     public static final int MAX_MINUTE = 59;
+
+    public static final int MINUTE = 60;
 
 
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
@@ -196,6 +197,44 @@ public class DateTimeUtil {
         }
         return result;
     }
+
+    /**
+     * 获取提前或后面的分钟时间
+     *
+     * @param minutesStr HH:mm
+     * @param addMinutes  间隔的分钟数，可以为正负
+     * @return  HH:mm
+     */
+    public static String getMinute(String minutesStr, int addMinutes) {
+        Integer beginHour = Integer.valueOf(minutesStr.substring(0, 2));
+        Integer finalMinute = Integer.valueOf(minutesStr.substring(3, 5));
+
+        int addHour = addMinutes / MINUTE;
+        int addMinute=addMinutes - (addHour * MINUTE);
+        if(addMinutes>0){
+            if(addMinute+finalMinute>MAX_MINUTE){
+                int tempAddHour = (addMinute + finalMinute) / MINUTE;
+                int tempAddMinute = (addMinute + finalMinute) - (tempAddHour * MINUTE);
+                addHour+=1;
+                finalMinute=tempAddMinute;
+            }else {
+                finalMinute+=addMinute;
+            }
+        }else {
+            if(addMinute+finalMinute<0){
+                addHour-=1;
+                finalMinute=addMinute + finalMinute+MINUTE;
+            }else {
+                finalMinute+=addMinute;
+            }
+        }
+
+      return   getTime(beginHour+addHour, finalMinute);
+
+    }
+
+
+
 
     /**
      * 分钟跳过，不支持跳过超过60分钟的   64 转换成4秒

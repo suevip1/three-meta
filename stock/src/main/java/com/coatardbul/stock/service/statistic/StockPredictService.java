@@ -40,8 +40,10 @@ import org.springframework.util.Assert;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -124,6 +126,7 @@ public class StockPredictService {
             if (AiStrategyEnum.UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
                     || AiStrategyEnum.TWO_ABOVE_UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
                     || AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
+                    || AiStrategyEnum.AMBUSH_CALLAUCTION_ROB.getCode().equals(dto.getAiStrategySign())
 
             ) {
                 //ai策略
@@ -164,9 +167,9 @@ public class StockPredictService {
         if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
             dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT.getSign());
         }
-//        if (AiStrategyEnum.INCREASE_GREATE_NO_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-//            dto.setRiverStockTemplateSign(StockTemplateEnum.INCREASE_GREATE_NO_UPLIMIT.getSign());
-//        }
+        if (AiStrategyEnum.AMBUSH_CALLAUCTION_ROB.getCode().equals(stockPredictDto.getAiStrategySign())) {
+            dto.setRiverStockTemplateSign(StockTemplateEnum.AMBUSH_CALLAUCTION_ROB.getSign());
+        }
 
         dto.setDateStr(dateFormat);
         StrategyBO strategy = null;
@@ -188,28 +191,85 @@ public class StockPredictService {
                 log.error(e.getMessage(), e);
             }
             if (strategyTemp != null && strategyTemp.getTotalNum() > 0) {
-                strategy.setTotalNum(strategy.getTotalNum()+strategyTemp.getTotalNum());
+                strategy.setTotalNum(strategy.getTotalNum() + strategyTemp.getTotalNum());
                 JSONArray data = strategy.getData();
                 data.addAll(strategyTemp.getData());
                 strategy.setData(data);
             }
             dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT.getSign());
         }
+        //埋伏竞价抢筹
+        if (AiStrategyEnum.AMBUSH_CALLAUCTION_ROB.getCode().equals(stockPredictDto.getAiStrategySign())) {
 
 
-        //当日涨停
-        for (int jsonLen = 0; jsonLen < strategy.getTotalNum(); jsonLen++) {
-            StrategyBO finalStrategy = strategy;
-            int finalJsonLen = jsonLen;
-            Constant.emotionByDateRangeThreadPool.execute(() -> {
-                try {
-                    //根据日期，股票，插入股票预测数据
-                    insertStockPredict(stockPredictDto, aiStrategyParamBo, dateFormat, finalStrategy, finalJsonLen);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+
+            String endDateStr = riverRemoteService.getSpecialDay(dateFormat, -1);
+            Set<String> codeArr = new HashSet<>();
+
+            Set<String> his = stockCronRefreshService.his(endDateStr);
+            Set<String> day = stockCronRefreshService.day(endDateStr);
+            codeArr.addAll(his);
+            codeArr.addAll(day);
+            List<String> codeAll = new ArrayList<>();
+            for (int i = 0; i < strategy.getData().size(); i++) {
+                JSONObject jsonObject = strategy.getData().getJSONObject(i);
+                codeAll.add(jsonObject.getString("code"));
+            }
+            List<String> newCodeArr = new ArrayList<>();
+            for (String code : codeAll) {
+                if (codeArr.contains(code)) {
+                    newCodeArr.add(code);
                 }
-            });
+            }
+
+            for(String code:newCodeArr){
+                //验证数据有效性
+                Map currInfo = getNextInfo(dateFormat,"09:40", 0, code);
+                //目前设置10分钟后涨幅大于竞价涨幅
+                if (new BigDecimal(currInfo.get("newIncreaseRate").toString()).compareTo(new BigDecimal(currInfo.get("auctionIncreaseRate").toString())) < 0) {
+                   continue;
+                }
+                String buyTime="09:40";
+                if(StringUtils.isNotBlank(stockPredictDto.getBuyTime())){
+                    buyTime=stockPredictDto.getBuyTime();
+                }
+                currInfo = getNextInfo(dateFormat,buyTime, 0, code);
+
+                StockPredictDto dto1 = new StockPredictDto();
+                dto1.setHoleDay(stockPredictDto.getHoleDay());
+                dto1.setSaleTime(stockPredictDto.getSaleTime());
+                StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateFormat, code);
+                addInfo.setTemplatedSign(stockPredictDto.getAiStrategySign());
+                addInfo.setTemplatedName(AiStrategyEnum.getDescByCode(addInfo.getTemplatedSign()));
+                List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
+                if (templatePredicts == null || templatePredicts.size() == 0) {
+                    //重构信息，市值和换手率应改为涨停时的
+                    rebuildInsertInfo(addInfo, currInfo);
+                    stockTemplatePredictMapper.insertSelective(addInfo);
+                    //计算卖出信息
+                    calcSaleInfo(dto1, dateFormat, currInfo.get("code").toString(), addInfo);
+                    stockTemplatePredictMapper.updateByPrimaryKeySelective(addInfo);
+                }
+            }
+
+
+
+        } else {
+            //当日涨停
+            for (int jsonLen = 0; jsonLen < strategy.getTotalNum(); jsonLen++) {
+                StrategyBO finalStrategy = strategy;
+                int finalJsonLen = jsonLen;
+                Constant.emotionByDateRangeThreadPool.execute(() -> {
+                    try {
+                        //根据日期，股票，插入股票预测数据
+                        insertStockPredict(stockPredictDto, aiStrategyParamBo, dateFormat, finalStrategy, finalJsonLen);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                });
+            }
         }
+
     }
 
     /**
@@ -266,9 +326,9 @@ public class StockPredictService {
 //            String key = addInfo.getDate() + "_" + addInfo.getTemplatedId() + "_" + addInfo.getCode();
 //            redisTemplate.opsForValue().set(key, JsonUtil.toJson(addInfo), 10, TimeUnit.MINUTES);
             List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
-            if (templatePredicts==null ||templatePredicts.size() == 0) {
+            if (templatePredicts == null || templatePredicts.size() == 0) {
                 //重构信息，市值和换手率应改为涨停时的
-                rebuildInsertInfo(addInfo,currInfo);
+                rebuildInsertInfo(addInfo, currInfo);
                 stockTemplatePredictMapper.insertSelective(addInfo);
                 //计算卖出信息
                 calcSaleInfo(dto, dateStr, currInfo.get("code").toString(), addInfo);
@@ -279,24 +339,24 @@ public class StockPredictService {
         for (int i = 1; i < allNum; i++) {
             Map nextInfo = getNextInfo(dateFormat, i, (String) jsonObject.get("code"));
 
-            Boolean yesFlag=false;
+            Boolean yesFlag = false;
             //最大价格涨幅
             BigDecimal maxIncrease = new BigDecimal(nextInfo.get("maxPrice").toString()).subtract(new BigDecimal(currInfo.get("newPrice").toString())).divide(new BigDecimal(currInfo.get("newPrice").toString()), 4, BigDecimal.ROUND_HALF_UP);
             BigDecimal minIncrease = new BigDecimal(nextInfo.get("minPrice").toString()).subtract(new BigDecimal(currInfo.get("newPrice").toString())).divide(new BigDecimal(currInfo.get("newPrice").toString()), 4, BigDecimal.ROUND_HALF_UP);
             BigDecimal subtract = maxIncrease.subtract(minIncrease);
-            if(aiStrategyParamBo.getFirstRateSub()==null){
+            if (aiStrategyParamBo.getFirstRateSub() == null) {
                 aiStrategyParamBo.setFirstRateSub(new BigDecimal("0.05"));
             }
             //首次振幅小于5
-            if(subtract.compareTo(aiStrategyParamBo.getFirstRateSub())<=0&&i==1){
-                if(maxIncrease.compareTo(new BigDecimal(0.06))<0){
-                    yesFlag=true;
+            if (subtract.compareTo(aiStrategyParamBo.getFirstRateSub()) <= 0 && i == 1) {
+                if (maxIncrease.compareTo(new BigDecimal(0.06)) < 0) {
+                    yesFlag = true;
                 }
             }
             //最低价小于买入价即可
-            if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0&&
+            if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(buyPrice) < 0 &&
                     new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(lastClosePrice) > 0) {
-                yesFlag=true;
+                yesFlag = true;
             }
             if (yesFlag) {
                 StockPredictDto dto = new StockPredictDto();
@@ -310,7 +370,7 @@ public class StockPredictService {
                 if (templatePredicts.size() > 0) {
                     continue;
                 }
-                rebuildInsertInfo(addInfo,currInfo);
+                rebuildInsertInfo(addInfo, currInfo);
                 stockTemplatePredictMapper.insertSelective(addInfo);
                 //计算卖出信息
                 calcSaleInfo(dto, dateStr, nextInfo.get("code").toString(), addInfo);
@@ -419,7 +479,7 @@ public class StockPredictService {
     }
 
 
-    private void rebuildInsertInfo(StockTemplatePredict addInfo, Map currInfo){
+    private void rebuildInsertInfo(StockTemplatePredict addInfo, Map currInfo) {
         StockDetail dateBuyInfoDetail = convert(currInfo);
         addInfo.setBuyMarketValue(dateBuyInfoDetail.getMarketValue());
         addInfo.setBuyTurnoverRate(dateBuyInfoDetail.getTurnOverRate());
@@ -464,7 +524,7 @@ public class StockPredictService {
             if (!StringUtils.isNotBlank(dto.getSaleTime())) {
                 dto.setSaleTime("11:29");
             }
-            if (dto.getHoleDay()==null) {
+            if (dto.getHoleDay() == null) {
                 dto.setHoleDay(addInfo.getHoldDay());
             }
             Map timeSaleInfoMap = getNextInfo(dateStr, dto.getSaleTime(), dto.getHoleDay(), code);
@@ -487,7 +547,7 @@ public class StockPredictService {
 
 
     public List<StockTemplatePredict> getAll(StockPredictDto dto) {
-        List<StockTemplatePredict> stockTemplatePredicts =null;
+        List<StockTemplatePredict> stockTemplatePredicts = null;
         if (StringUtils.isNotBlank(dto.getStrategySign()) && dto.getStrategySign().contains(",")) {
             stockTemplatePredicts = new ArrayList<>();
             String[] split = dto.getStrategySign().split(",");
@@ -498,8 +558,7 @@ public class StockPredictService {
             if (stockTemplatePredicts.size() > 0) {
                 stockTemplatePredicts = stockTemplatePredicts.stream().sorted(Comparator.comparing(StockTemplatePredict::getDate)).collect(Collectors.toList());
             }
-        }
-        else if (StringUtils.isNotBlank(dto.getId()) && dto.getId().contains(",")) {
+        } else if (StringUtils.isNotBlank(dto.getId()) && dto.getId().contains(",")) {
             stockTemplatePredicts = new ArrayList<>();
             String[] split = dto.getId().split(",");
             for (String id : split) {
@@ -509,8 +568,8 @@ public class StockPredictService {
             if (stockTemplatePredicts.size() > 0) {
                 stockTemplatePredicts = stockTemplatePredicts.stream().sorted(Comparator.comparing(StockTemplatePredict::getDate)).collect(Collectors.toList());
             }
-        }else {
-           stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(), dto.getStrategySign(), dto.getHoleDay());
+        } else {
+            stockTemplatePredicts = stockTemplatePredictMapper.selectAllByDateBetweenEqualAndTemplatedIdAndHoldDay(dto.getBeginDate(), dto.getEndDate(), dto.getId(), dto.getStrategySign(), dto.getHoleDay());
 
         }
 

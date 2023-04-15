@@ -275,7 +275,7 @@ public class StockTradeService {
         String date = DateTimeUtil.getDateFormat(currenDate, DateTimeUtil.YYYY_MM_DD);
         //涨跌停价
         StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(code, date);
-        stockTradeBO.setPrice(upLimitPrice.getDownLimitPrice().toString());
+        stockTradeBO.setPrice(upLimitPrice.getSugSellPrice().toString());
 
         stockTradeBO.setAmount(sellNum.toString());
         stockTradeBO.setZqmc(name);

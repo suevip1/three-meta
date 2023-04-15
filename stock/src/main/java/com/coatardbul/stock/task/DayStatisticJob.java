@@ -146,6 +146,7 @@ public class DayStatisticJob {
 
         stockCronRefreshService.addMultiDayAmbushPlateInfo(dateStr);
         stockCronRefreshService.addHisTwoUpLimitAbovePlateInfo(dateStr);
+        stockCronRefreshService.ambushCallauctionRob(dateStr);
 
 
     }

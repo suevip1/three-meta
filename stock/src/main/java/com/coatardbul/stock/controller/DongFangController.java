@@ -104,6 +104,14 @@ public class DongFangController {
         stockCronRefreshService.addMultiDayAmbushPlateInfo(dto.getDateStr());
         return CommonResult.success(null);
     }
+
+    @ApiOperation("埋伏竞价抢筹过滤")
+    @RequestMapping(path = "/ambushCallauctionRob", method = RequestMethod.POST)
+    public CommonResult ambushCallauctionRob(@RequestBody DongFangPlateDTO dto) {
+        stockCronRefreshService.ambushCallauctionRob(dto.getDateStr());
+        return CommonResult.success(null);
+    }
+
     @RequestMapping(path = "/addDayAmbushPlateInfo", method = RequestMethod.POST)
     public CommonResult addDayAmbushPlateInfo(@RequestBody DongFangPlateDTO dto) {
         stockCronRefreshService.addDayAmbushPlateInfo(dto.getDateStr());

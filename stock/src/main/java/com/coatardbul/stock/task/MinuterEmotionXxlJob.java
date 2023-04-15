@@ -56,7 +56,9 @@ public class MinuterEmotionXxlJob {
         if (StringUtils.isNotBlank(param)) {
             StockEmotionDayDTO stockEmotionDayDTO = JsonUtil.readToValue(param, StockEmotionDayDTO.class);
             stockEmotionDayDTO.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-            stockEmotionDayDTO.setTimeStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM));
+            //延后五分钟
+            String minute = DateTimeUtil.getMinute(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM), -5);
+            stockEmotionDayDTO.setTimeStr(minute);
             log.info(",传递参数为：" + stockEmotionDayDTO.toString());
             stockMinuteEmotinStaticService.refreshDay(stockEmotionDayDTO);
         }
