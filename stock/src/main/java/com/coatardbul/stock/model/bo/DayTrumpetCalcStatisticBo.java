@@ -46,5 +46,8 @@ public class DayTrumpetCalcStatisticBo {
      */
     private String gemUpLimitId;
 
-
+    /**
+     *竞价涨幅大于5
+     */
+    private String callAuctionIncreaseId;
 }

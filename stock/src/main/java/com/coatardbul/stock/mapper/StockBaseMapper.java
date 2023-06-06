@@ -1,7 +1,9 @@
 package com.coatardbul.stock.mapper;
 
 import com.coatardbul.stock.model.entity.StockBase;
-import org.apache.ibatis.annotations.Param;import java.util.List;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface StockBaseMapper {
     int deleteByPrimaryKey(String code);

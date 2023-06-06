@@ -57,4 +57,9 @@ public class DayUpDowLimitStatisticBo {
      * 谢跌id
      */
     private String failId;
+
+    /**
+     * 涨幅大于5
+     */
+    private String callAuctionIncreaseId;
 }

@@ -3,14 +3,11 @@ package com.coatardbul.baseService.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.constants.Constant;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseCommon.model.bo.DayUpDowLimitStatisticBo;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.bo.StrategyQueryBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.baseCommon.model.dto.StockTemplateQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseCommon.util.TongHuaShunUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +51,9 @@ public abstract class StockStrategyCommonService {
     //同花顺问财地址
     private static final String STRATEGY_URL = "http://www.iwencai.com/customized/chart/get-robot-data";
 
+
+    private static final String STRATEGY_NEXT_URL = "http://www.iwencai.com/gateway/urp/v7/landing/getDataList?iwcpro=1";
+
     private static final String STATUS_CODE = "status_code";
 
     private static final String STATUS_MSG = "status_msg";
@@ -84,6 +84,9 @@ public abstract class StockStrategyCommonService {
 
         result.setAdd_info("");
         return result;
+    }
+    public String getCookieValue(){
+        return cookieValue;
     }
 
     /**
@@ -203,7 +206,7 @@ public abstract class StockStrategyCommonService {
     }
 
 
-    public StrategyBO strategyCommon(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+    public StrategyBO strategyFirstProcess(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
         StrategyBO result = new StrategyBO();
         //获取策略返回
         String response = getStrategyResponseStr(dto);
@@ -245,11 +248,62 @@ public abstract class StockStrategyCommonService {
         return result;
     }
 
-    /**
-     * 添加涨停描述
-     *
-     * @param strategyBO
-     */
+
+    public StrategyBO strategyNextProcess(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+        StrategyBO result = new StrategyBO();
+        //获取策略返回
+        String response = getStrategyNextResponseStr(dto);
+        if (StringUtils.isNotBlank(response)) {
+            //解析返回体
+            JSONObject requestObject = null;
+            try {
+                requestObject = JSONObject.parseObject(response);
+            } catch (JSONException e) {
+                throw new BusinessException("解析http请求返回的数据异常,返回字符串为：" + response + " 异常信息：" + e.getMessage());
+            }
+            if (!STATUS_SUCCESS.equals(requestObject.getString(STATUS_CODE))) {
+                throw new BusinessException("请求同花顺策略问句异常，" + requestObject.getString(STATUS_MSG));
+            }
+            //基础信息
+            JSONArray data = requestObject.getJSONObject("answer").getJSONArray("components")
+                    .getJSONObject(0).getJSONObject("data").getJSONArray("datas");
+
+            if (data == null) {
+                return null;
+            }
+            //总数
+            Integer totalNum = data.size();
+            log.info("策略查询返回数据总数：" + data.size());
+//            log.info("策略查询返回数据总数：" + data.size() + "数据详情" + data.toString());
+            result.setData(data);
+            result.setTotalNum(totalNum);
+            addUpLimitDescribe(result);
+        }
+        return result;
+    }
+
+    public StrategyBO strategyCommon(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+        StrategyBO strategyBO = strategyFirstProcess(dto);
+
+        if(strategyBO.getTotalNum()>strategyBO.getData().size()){
+            int totalTime = strategyBO.getTotalNum() / 100;
+            for(int i=2;i<=totalTime+1;i++){
+                dto.setPage(i);
+                dto.setPageSize(100);
+                StrategyBO strategyTemp = strategyNextProcess(dto);
+                strategyBO.getData().addAll(strategyTemp.getData());
+            }
+        }
+        return strategyBO;
+    }
+
+
+
+        /**
+         * 添加涨停描述
+         *
+         * @param strategyBO
+         */
     private void addUpLimitDescribe(StrategyBO strategyBO) {
         JSONArray jsonArray = strategyBO.getData();
         if (jsonArray == null || jsonArray.size() == 0) {
@@ -322,6 +376,59 @@ public abstract class StockStrategyCommonService {
             }
         }
         return result;
+    }
+
+
+
+    private String getStrategyNextResponseStr(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+        //默认信息
+        StrategyQueryBO defaultStrategyQuery = new StrategyQueryBO();
+        //请求dto信息
+        setRequestInfo(dto, defaultStrategyQuery);
+        dto.setQueryStr(defaultStrategyQuery.getQuestion());
+        //请求dto信息
+        String  paramStr=getNextParam(dto);
+        List<Header> headerList = new ArrayList<>();
+        String heXinStr = TongHuaShunUtil.getHeXinStr();
+        Header cookie = httpService.getHead("Cookie", cookieValue + heXinStr);
+        Header hexin = httpService.getHead("hexin-v", heXinStr);
+        Header orign =httpService.getHead ("Origin", "http://www.iwencai.com");
+        Header contentType = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
+
+        headerList.add(cookie);
+        headerList.add(hexin);
+        headerList.add(orign);
+        headerList.add(contentType);
+
+        log.info("策略查询传递参数" + paramStr);
+        String result = null;
+        int retryNum = 5;
+        while (retryNum > 0) {
+            try {
+                result = httpService.doPost(STRATEGY_NEXT_URL, paramStr, headerList);
+
+            } catch (ConnectTimeoutException e) {
+                retryNum--;
+                continue;
+            }
+            if (StringUtils.isNotBlank(result)) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private String getNextParam(StockStrategyQueryDTO dto) {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("query=").append(dto.getQueryStr());
+        sb.append("&urp_sort_way=desc");
+        sb.append("&urp_sort_index=最新涨跌幅");
+        sb.append("&page=").append(dto.getPage());
+        sb.append("&perpage=").append(dto.getPageSize());
+        sb.append("&comp_id=6734520");
+        sb.append("&uuid=24087");
+        return sb.toString();
     }
 
     /**

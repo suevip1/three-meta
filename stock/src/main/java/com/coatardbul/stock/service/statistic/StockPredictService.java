@@ -120,7 +120,9 @@ public class StockPredictService {
     public void executeSingle(StockPredictDto dto) {
         Assert.notNull(dto.getHoleDay(), "天数不不能为空");
         Assert.notNull(dto.getSaleTime(), "卖出时间不不能为空");
-
+        /**
+         * 走Ai策略
+         */
         if (!StringUtils.isNotBlank(dto.getId())) {
             //ai策略，目前只支持涨停伏击
             if (AiStrategyEnum.UPLIMIT_AMBUSH.getCode().equals(dto.getAiStrategySign())
@@ -143,7 +145,9 @@ public class StockPredictService {
             } else {
                 throw new BusinessException("sign不能为空或未识别");
             }
+
         } else {
+            //走普通问句策略
             //获取时间区间
             List<String> dateIntervalList = riverRemoteService.getDateIntervalList(dto.getBeginDate(), dto.getEndDate());
 
@@ -181,7 +185,7 @@ public class StockPredictService {
         if (strategy == null || strategy.getTotalNum() == 0) {
             return;
         }
-        //大价格补充
+        //昨曾大价格模式补充，大价格补充
         if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
             dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT_SUPPLEMENT.getSign());
             StrategyBO strategyTemp = null;
@@ -200,8 +204,6 @@ public class StockPredictService {
         }
         //埋伏竞价抢筹
         if (AiStrategyEnum.AMBUSH_CALLAUCTION_ROB.getCode().equals(stockPredictDto.getAiStrategySign())) {
-
-
 
             String endDateStr = riverRemoteService.getSpecialDay(dateFormat, -1);
             Set<String> codeArr = new HashSet<>();
@@ -281,16 +283,9 @@ public class StockPredictService {
      */
     private void insertStockPredict(StockPredictDto stockPredictDto, AiStrategyUplimitAmbushBo aiStrategyParamBo, String dateFormat, StrategyBO finalStrategy, int finalJsonLen) {
         JSONObject jsonObject = finalStrategy.getData().getJSONObject(finalJsonLen);
-//            Map convert = stockUpLimitAnalyzeCommonService.convertFirstUpLimit(jsonObject, dateFormat);
-//            BigDecimal lastClosePrice = new BigDecimal(convert.get("lastClosePrice").toString());
-//            BigDecimal multiply = lastClosePrice.multiply(new BigDecimal(1.02));
-        //昨日信息
-//        Map lastInfo = getNextInfo(dateFormat, -1, (String) jsonObject.get("code"));
-//        BigDecimal lastLastClosePriceTemp = new BigDecimal(lastInfo.get("lastClosePrice").toString());
-//        BigDecimal maxIncrease = new BigDecimal(lastInfo.get("maxPrice").toString()).subtract(lastLastClosePriceTemp).divide(lastLastClosePriceTemp, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100));
-//        if (maxIncrease.compareTo(aiStrategyParamBo.getLastMaxIncreaseMaxRate()) > 0) {
-//            throw new BusinessException("不符合条件");
-//        }
+
+
+
         //验证当日参数是否复合规定
         Map currInfo = getNextInfo(dateFormat, 0, (String) jsonObject.get("code"));
         BigDecimal lastClosePrice = new BigDecimal(currInfo.get("lastClosePrice").toString());
@@ -318,22 +313,30 @@ public class StockPredictService {
 //        }
         //昨曾模式，当天复合也可以买入
         if (AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-            StockPredictDto dto = new StockPredictDto();
-            String dateStr = currInfo.get("dateStr").toString();
-            StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, currInfo.get("code").toString());
-            addInfo.setTemplatedSign(stockPredictDto.getAiStrategySign());
-            addInfo.setTemplatedName(AiStrategyEnum.getDescByCode(addInfo.getTemplatedSign()));
+            try {
+                //前置过滤
+                preFilter(dateFormat,(String) jsonObject.get("code"));
+                StockPredictDto dto = new StockPredictDto();
+                String dateStr = currInfo.get("dateStr").toString();
+                StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, currInfo.get("code").toString());
+                addInfo.setTemplatedSign(stockPredictDto.getAiStrategySign());
+                addInfo.setTemplatedName(AiStrategyEnum.getDescByCode(addInfo.getTemplatedSign()));
 //            String key = addInfo.getDate() + "_" + addInfo.getTemplatedId() + "_" + addInfo.getCode();
 //            redisTemplate.opsForValue().set(key, JsonUtil.toJson(addInfo), 10, TimeUnit.MINUTES);
-            List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
-            if (templatePredicts == null || templatePredicts.size() == 0) {
-                //重构信息，市值和换手率应改为涨停时的
-                rebuildInsertInfo(addInfo, currInfo);
-                stockTemplatePredictMapper.insertSelective(addInfo);
-                //计算卖出信息
-                calcSaleInfo(dto, dateStr, currInfo.get("code").toString(), addInfo);
-                stockTemplatePredictMapper.updateByPrimaryKeySelective(addInfo);
+                List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByCodeAndTemplatedSignAndDate(addInfo.getCode(), addInfo.getTemplatedSign(), addInfo.getDate());
+                if (templatePredicts == null || templatePredicts.size() == 0) {
+                    //重构信息，市值和换手率应改为涨停时的
+                    rebuildInsertInfo(addInfo, currInfo);
+                    stockTemplatePredictMapper.insertSelective(addInfo);
+                    //计算卖出信息
+                    calcSaleInfo(dto, dateStr, currInfo.get("code").toString(), addInfo);
+                    stockTemplatePredictMapper.updateByPrimaryKeySelective(addInfo);
+                }
+            }catch (Exception e){
+                log.error("当前不符合");
             }
+
+
 
         }
         for (int i = 1; i < allNum; i++) {
@@ -358,9 +361,16 @@ public class StockPredictService {
                     new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(lastClosePrice) > 0) {
                 yesFlag = true;
             }
+
             if (yesFlag) {
                 StockPredictDto dto = new StockPredictDto();
                 String dateStr = nextInfo.get("dateStr").toString();
+                try {
+                    //前置过滤
+                    preFilter(dateStr,(String) jsonObject.get("code"));
+                }catch (Exception e) {
+                    continue;
+                }
                 StockTemplatePredict addInfo = getStockTemplatePredict(stockPredictDto, dateStr, nextInfo.get("code").toString());
                 addInfo.setTemplatedSign(stockPredictDto.getAiStrategySign());
                 addInfo.setTemplatedName(AiStrategyEnum.getDescByCode(addInfo.getTemplatedSign()));
@@ -378,6 +388,28 @@ public class StockPredictService {
 
             }
         }
+    }
+
+    /**
+     * 主要用于过滤macd，五日均线在10日均线之上
+     * @param dateFormat
+     * @param code
+     */
+    private void preFilter(String dateFormat, String code) {
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateSign(StockTemplateEnum.MACD_FILTER.getSign());
+        dto.setDateStr(dateFormat);
+        dto.setStockCode(code);
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyCommonService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (strategy == null || strategy.getTotalNum() == 0) {
+            throw new BusinessException("移动平均线不符合条件");
+        }
+
     }
 
     private Map getNextInfo(String dateFormat, String timeStr, Integer num, String code) {
@@ -465,8 +497,6 @@ public class StockPredictService {
         for (Object jo : data) {
             String code = (String) ((JSONObject) jo).get("code");
             StockTemplatePredict addInfo = getStockTemplatePredict(dto, dateStr, code);
-//            String key = addInfo.getDate() + "_" + addInfo.getTemplatedId() + "_" + addInfo.getCode();
-//            redisTemplate.opsForValue().set(key, JsonUtil.toJson(addInfo), 10, TimeUnit.MINUTES);
             List<StockTemplatePredict> templatePredicts = stockTemplatePredictMapper.selectAllByDateAndTemplatedIdAndCode(dateStr, addInfo.getTemplatedId(), addInfo.getCode());
             if (templatePredicts == null || templatePredicts.size() == 0) {
                 stockTemplatePredictMapper.insertSelective(addInfo);

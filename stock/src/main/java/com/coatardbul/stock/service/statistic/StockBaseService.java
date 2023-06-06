@@ -36,11 +36,10 @@ public class StockBaseService {
     private StockStrategyService stockStrategyService;
 
     public void addProcess() {
-        for (int i = 1; i < 55; i++) {
             StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
             dto.setRiverStockTemplateId("1567739221362475008");
             dto.setPageSize(100);
-            dto.setPage(i);
+            dto.setPage(1);
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD));
             StrategyBO strategy = null;
             try {
@@ -54,18 +53,26 @@ public class StockBaseService {
                     JSONObject jsonObject = data.getJSONObject(j);
                     String code = jsonObject.getString("code");
                     String name = jsonObject.getString("股票简称");
+                    String theme = jsonObject.getString("所属概念");
+                    String industry = jsonObject.getString("所属同花顺行业");
                     StockBase stockBase = new StockBase();
                     stockBase.setCode(code);
                     stockBase.setName(name);
+                    stockBase.setTheme(theme);
+                    stockBase.setIndustry(industry);
                     stockBase.setNameAbbr(getNameAbbr(name));
                     try {
                         stockBaseMapper.insert(stockBase);
                     } catch (Exception e) {
-                        log.error(e.getMessage());
+                        try {
+                            stockBaseMapper.updateByPrimaryKeySelective(stockBase);
+                        }catch (Exception e1){
+                            log.error("更新"+name+"失败");
+                        }
                     }
                 }
             }
-        }
+
 
     }
 

@@ -7,10 +7,12 @@
     <id column="code" jdbcType="VARCHAR" property="code" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="name_abbr" jdbcType="VARCHAR" property="nameAbbr" />
+    <result column="industry" jdbcType="VARCHAR" property="industry" />
+    <result column="theme" jdbcType="LONGVARCHAR" property="theme" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    code, `name`, name_abbr
+    code, `name`, name_abbr, industry, theme
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -26,10 +28,10 @@
   </delete>
   <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockBase">
     <!--@mbg.generated-->
-    insert into stock_base (code, `name`, name_abbr
-      )
-    values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{nameAbbr,jdbcType=VARCHAR}
-      )
+    insert into stock_base (code, `name`, name_abbr, 
+      industry, theme)
+    values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{nameAbbr,jdbcType=VARCHAR}, 
+      #{industry,jdbcType=VARCHAR}, #{theme,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockBase">
     <!--@mbg.generated-->
@@ -44,6 +46,12 @@
       <if test="nameAbbr != null and nameAbbr != ''">
         name_abbr,
       </if>
+      <if test="industry != null and industry != ''">
+        industry,
+      </if>
+      <if test="theme != null and theme != ''">
+        theme,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="code != null and code != ''">
@@ -54,6 +62,12 @@
       </if>
       <if test="nameAbbr != null and nameAbbr != ''">
         #{nameAbbr,jdbcType=VARCHAR},
+      </if>
+      <if test="industry != null and industry != ''">
+        #{industry,jdbcType=VARCHAR},
+      </if>
+      <if test="theme != null and theme != ''">
+        #{theme,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>
@@ -67,6 +81,12 @@
       <if test="nameAbbr != null and nameAbbr != ''">
         name_abbr = #{nameAbbr,jdbcType=VARCHAR},
       </if>
+      <if test="industry != null and industry != ''">
+        industry = #{industry,jdbcType=VARCHAR},
+      </if>
+      <if test="theme != null and theme != ''">
+        theme = #{theme,jdbcType=LONGVARCHAR},
+      </if>
     </set>
     where code = #{code,jdbcType=VARCHAR}
   </update>
@@ -74,7 +94,9 @@
     <!--@mbg.generated-->
     update stock_base
     set `name` = #{name,jdbcType=VARCHAR},
-      name_abbr = #{nameAbbr,jdbcType=VARCHAR}
+      name_abbr = #{nameAbbr,jdbcType=VARCHAR},
+      industry = #{industry,jdbcType=VARCHAR},
+      theme = #{theme,jdbcType=LONGVARCHAR}
     where code = #{code,jdbcType=VARCHAR}
   </update>
 

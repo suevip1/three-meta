@@ -229,16 +229,26 @@ public class TradeBaseService {
             result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
             result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
             result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
+            result.setCallAuctionPrice(new BigDecimal(map.get("auctionPrice").toString()));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("及时信息获取异常", e);
         }
         if (result.getLastClosePrice() == null || result.getCurrPrice() == null || result.getMaxPrice() == null) {
-            Map stockInfoByStrategy = getStockInfoByStrategy(code, date);
-            result.setLastClosePrice(new BigDecimal(stockInfoByStrategy.get("lastClosePrice").toString()));
-            result.setCurrPrice(new BigDecimal(stockInfoByStrategy.get("newPrice").toString()));
-            result.setMaxPrice(new BigDecimal(stockInfoByStrategy.get("maxPrice").toString()));
-            result.setMinPrice(new BigDecimal(stockInfoByStrategy.get("minPrice").toString()));
+            map = getStockInfoByStrategy(code, date);
+            result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
+            result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
+            result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
+            result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
+            result.setCallAuctionRate(new BigDecimal(map.get("auctionIncreaseRate").toString()).divide(new BigDecimal(100)));
         }
+        if (map.size() == 0) {
+            return null;
+        }
+        result.setName(map.get("name").toString());
+        result.setMarketValue(new BigDecimal(map.get("marketValue").toString()));
+        result.setTurnOverRate(new BigDecimal(map.get("turnOverRate").toString()));
+        result.setTradeAmount(new BigDecimal(map.get("tradeAmount").toString()));
+
         rebuild(result);
         return result;
     }
@@ -325,6 +335,15 @@ public class TradeBaseService {
             result.setUpLimitPrice(stockParseAndConvertService.getUpLimit(result.getCode(), result.getLastClosePrice()));
             //跌停价
             result.setDownLimitPrice(stockParseAndConvertService.getDownLimit(result.getCode(), result.getLastClosePrice()));
+
+
+            if (result.getCallAuctionRate() == null) {
+                //集合竞价涨幅
+                result.setCallAuctionRate(result.getCallAuctionPrice().subtract(result.getLastClosePrice()).
+                        divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
+            }
+
+
             //最高价涨幅
             BigDecimal maxPriceSubtract = result.getMaxPrice().subtract(result.getLastClosePrice());
             result.setMaxUpRate(maxPriceSubtract.divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
@@ -340,14 +359,14 @@ public class TradeBaseService {
             BigDecimal sugBuyRate = result.getCurrUpRate().add(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
             result.setSugBuyRate(sugBuyRate);
             result.setSugBuyPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugBuyRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
-            if(result.getSugBuyPrice().compareTo(result.getUpLimitPrice())>=0){
+            if (result.getSugBuyPrice().compareTo(result.getUpLimitPrice()) >= 0) {
                 result.setSugBuyPrice(result.getUpLimitPrice());
             }
             //建议卖出价格和比例
-            BigDecimal sugSellRate =  result.getCurrUpRate().subtract(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal sugSellRate = result.getCurrUpRate().subtract(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
             result.setSugSellRate(sugSellRate);
             result.setSugSellPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugSellRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
-            if(result.getSugSellPrice().compareTo(result.getDownLimitPrice())<=0){
+            if (result.getSugSellPrice().compareTo(result.getDownLimitPrice()) <= 0) {
                 result.setSugSellPrice(result.getDownLimitPrice());
             }
         }

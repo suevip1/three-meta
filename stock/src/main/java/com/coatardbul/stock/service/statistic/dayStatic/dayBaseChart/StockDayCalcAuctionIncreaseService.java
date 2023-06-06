@@ -13,7 +13,7 @@ import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.model.bo.DayAxiosBaseBO;
-import com.coatardbul.stock.model.bo.DayTrumpetCalcStatisticBo;
+import com.coatardbul.stock.model.bo.DayCallAuctionIncreaseBo;
 import com.coatardbul.stock.model.bo.StockStaticBaseBO;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.entity.StockDayEmotion;
@@ -41,7 +41,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class StockDayTrumpetCalcService extends BaseChartDayAbstractService {
+public class StockDayCalcAuctionIncreaseService extends BaseChartDayAbstractService {
 
     @Autowired
     RiverRemoteService riverRemoteService;
@@ -111,21 +111,12 @@ public class StockDayTrumpetCalcService extends BaseChartDayAbstractService {
         String orderByStr = stockStaticTemplate.getOrderBy().replace("dateStr", dto.getDateStr().replaceAll("-", ""));
         //解析
         Class classBySign = StockStaticModuleUtil.getClassBySign(stockStaticTemplate.getObjectSign());
-        DayTrumpetCalcStatisticBo o = (DayTrumpetCalcStatisticBo) JsonUtil.readToValue(stockStaticTemplate.getObjectStr(), classBySign);
+        DayCallAuctionIncreaseBo o = (DayCallAuctionIncreaseBo) JsonUtil.readToValue(stockStaticTemplate.getObjectStr(), classBySign);
         List<DayAxiosBaseBO> result = new ArrayList<>();
 //        DayAxiosBaseBO adjs = getAdjs(map.get(o.getRiseId()), map.get(o.getFailId()));
 //        result.add(adjs);
-        List<DayAxiosBaseBO> firstUpLimit = getStandardDeviationAndMedian(map.get(o.getFirstUpLimitId()), orderByStr, "首板");
-        List<DayAxiosBaseBO> secondUpLimit = getStandardDeviationAndMedian(map.get(o.getSecondUpLimitId()), orderByStr, "二板");
-        List<DayAxiosBaseBO> secondUpLimitAbove = getStandardDeviationAndMedian(map.get(o.getSecondUpLimitAboveId()), orderByStr, "二板以上");
-        List<DayAxiosBaseBO> thredUpLimitAbove = getStandardDeviationAndMedian(map.get(o.getThreeUpLimitAboveId()), orderByStr, "三板以上");
-        List<DayAxiosBaseBO> calcAuction = getStandardDeviationAndMedian(map.get(o.getCallAuctionIncreaseId()), orderByStr, "涨幅大于5");
-
+        List<DayAxiosBaseBO> firstUpLimit = getStandardDeviationAndMedian(map.get(o.getCallAuctionIncreaseId()), orderByStr, "涨幅大于5");
         result.addAll(firstUpLimit);
-        result.addAll(secondUpLimit);
-        result.addAll(secondUpLimitAbove);
-        result.addAll(thredUpLimitAbove);
-        result.addAll(calcAuction);
         return result;
     }
 

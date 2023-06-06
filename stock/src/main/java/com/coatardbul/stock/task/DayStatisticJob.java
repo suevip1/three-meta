@@ -8,7 +8,6 @@ import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
-import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.ScatterDayUpLimitCallAuctionService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.StockScatterService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeUserService;
@@ -34,8 +33,7 @@ import java.util.Date;
 @Slf4j
 @Component
 public class DayStatisticJob {
-    @Autowired
-    StockDayTrumpetCalcService stockDayTrumpetCalcService;
+
 
     @Autowired
     StockStrategyService stockStrategyService;
@@ -70,6 +68,19 @@ public class DayStatisticJob {
             stockDayStaticService.refreshDay(dto);
         }
         log.info("刷新每日涨跌统计数据结束");
+    }
+
+    @XxlJob("dayCallAuctionIncreaseJobHandler")
+    public void dayCallAuctionIncreaseJobHandler() throws IllegalAccessException, ParseException {
+        String param = XxlJobHelper.getJobParam();
+        log.info("刷新每日集合竞价涨幅大于5数据开始" + param);
+        if (StringUtils.isNotBlank(param)) {
+            StockEmotionDayDTO dto = JsonUtil.readToValue(param, StockEmotionDayDTO.class);
+            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+            log.info("刷新每日集合竞价涨幅大于5数据参数" + JsonUtil.toJson(dto));
+            stockDayStaticService.refreshDay(dto);
+        }
+        log.info("刷新每日集合竞价涨幅大于5数据结束");
     }
 
 

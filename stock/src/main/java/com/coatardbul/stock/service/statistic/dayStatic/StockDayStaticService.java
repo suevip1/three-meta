@@ -6,6 +6,7 @@ import com.coatardbul.stock.model.dto.StockEmotionDayRangeDTO;
 import com.coatardbul.stock.model.dto.StockEmotionQueryDTO;
 import com.coatardbul.stock.model.dto.StockEmotionRangeDayDTO;
 import com.coatardbul.stock.model.entity.StockDayEmotion;
+import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayCalcAuctionIncreaseService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayUpLimitPromotionService;
 import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayUpLimitStaticService;
@@ -31,7 +32,8 @@ import java.util.List;
 public class StockDayStaticService {
     @Autowired
     StockDayTrumpetCalcService stockDayTrumpetCalcService;
-
+@Autowired
+    StockDayCalcAuctionIncreaseService stockDayCalcAuctionIncreaseService;
     @Autowired
     StockDayUpLimitStaticService stockDayUpLimitStaticService;
     @Autowired
@@ -47,6 +49,9 @@ public class StockDayStaticService {
         }
         if (StockStaticModuleUtil.DAY_TRUMPET_CALC_STATISTIC.equals(objectSign)) {
             return stockDayTrumpetCalcService;
+        }
+        if (StockStaticModuleUtil.DAY_CALL_AUCTION_INCREASE.equals(objectSign)) {
+            return stockDayCalcAuctionIncreaseService;
         }
         if (StockStaticModuleUtil.DAY_UP_LIMIT_PROMOTION_STATISTIC.equals(objectSign)) {
             return stockDayUpLimitPromotionService;

@@ -4,13 +4,16 @@ import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
+import com.coatardbul.stock.mapper.StockBaseMapper;
+import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockEmotionDayRangeDTO;
 import com.coatardbul.stock.model.dto.StockEmotionQueryDTO;
 import com.coatardbul.stock.model.dto.StockEmotionRangeDayDTO;
+import com.coatardbul.stock.model.entity.StockBase;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
-import com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart.StockDayTrumpetCalcService;
+import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +43,20 @@ import java.text.ParseException;
 @RequestMapping("/stockQuery")
 public class StockDayStaticController {
 
-    @Autowired
-    StockDayTrumpetCalcService stockDayTrumpetCalcService;
+
 
     @Autowired
     StockStrategyService stockStrategyService;
 
     @Autowired
+    StockBaseMapper stockBaseMapper;
+
+    @Autowired
     StockDayStaticService stockDayStaticService;
 
 
+    @Autowired
+    TradeBaseService tradeBaseService;
 
     /**
      * 同花顺新版问财功能
@@ -61,6 +68,24 @@ public class StockDayStaticController {
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
     public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
         return CommonResult.success(stockStrategyService.strategy(dto));
+    }
+
+
+    @WebLog(value = "获取实时交易信息")
+    @RequestMapping(path = "/getImmediateStockBaseInfo", method = RequestMethod.POST)
+    public CommonResult getImmediateStockBaseInfo(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
+
+        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(dto.getStockCode(), dto.getDateStr());
+
+        if (upLimitPrice.getUpLimitPrice() == null) {
+            return CommonResult.failed("");
+        }else {
+            StockBase stockBase = stockBaseMapper.selectByPrimaryKey(upLimitPrice.getCode());
+            upLimitPrice.setTheme(stockBase.getTheme());
+            upLimitPrice.setIndustry(stockBase.getIndustry());
+            return CommonResult.success(upLimitPrice);
+
+        }
     }
 
 

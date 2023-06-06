@@ -6,6 +6,7 @@ import com.coatardbul.stock.mapper.StockTradeSellTaskMapper;
 import com.coatardbul.stock.model.entity.StockTradeSellTask;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;
+import com.coatardbul.stock.service.statistic.tradeQuartz.AiSellTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.LowRateSellTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TimeSellTradeService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,8 @@ public class SellTask extends QuartzJobBean {
     LowRateSellTradeService lowRateSellTradeService;
     @Autowired
     TimeSellTradeService timeSellTradeService;
+    @Autowired
+    AiSellTradeService aiSellTradeService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
@@ -52,8 +55,18 @@ public class SellTask extends QuartzJobBean {
 //            String buyDate = jsonObject.getString("buyDate");
 //            String buyTime = jsonObject.getString("buyTime");
 
-            flag = timeSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()),convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+            flag = timeSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
         }
+        if ("AI_SELL".equals(stockTradeSellTask.getStrategySign())) {
+
+//            String strategyParam = stockTradeSellTask.getStrategyParam();
+//            JSONObject jsonObject = JSONObject.parseObject(strategyParam);
+//            String buyDate = jsonObject.getString("buyDate");
+//            String buyTime = jsonObject.getString("buyTime");
+
+            flag = aiSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+        }
+
         //低于多少卖出
         if ("LOW_RATE_SELL".equals(stockTradeSellTask.getStrategySign())) {
             String dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
@@ -73,9 +86,9 @@ public class SellTask extends QuartzJobBean {
             String lessRateStr = jsonObject.getString("lessRate");
             String minRateStr = jsonObject.getString("minRate");
 
-            BigDecimal lessRate = new BigDecimal(lessRateStr).divide(new BigDecimal(100),2, BigDecimal.ROUND_HALF_UP);
-            BigDecimal minRate = new BigDecimal(minRateStr).divide(new BigDecimal(100),2, BigDecimal.ROUND_HALF_UP);
-            flag = lowRateSellTradeService.tradeProcess(lessRate, minRate, convertAmount(stockTradeSellTask.getTradeAmount()),convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+            BigDecimal lessRate = new BigDecimal(lessRateStr).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+            BigDecimal minRate = new BigDecimal(minRateStr).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+            flag = lowRateSellTradeService.tradeProcess(lessRate, minRate, convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
         }
 
         if (flag) {
@@ -90,18 +103,15 @@ public class SellTask extends QuartzJobBean {
     }
 
 
-
-
-
-    private BigDecimal convertAmount(Object ojb){
-        if(ojb==null){
+    private BigDecimal convertAmount(Object ojb) {
+        if (ojb == null) {
             return null;
         }
-        if(ojb instanceof String){
-            return  new BigDecimal(((String)ojb));
+        if (ojb instanceof String) {
+            return new BigDecimal(((String) ojb));
         }
-        if(ojb instanceof Integer){
-            return  new BigDecimal(((Integer)ojb));
+        if (ojb instanceof Integer) {
+            return new BigDecimal(((Integer) ojb));
         }
         return new BigDecimal(ojb.toString());
     }

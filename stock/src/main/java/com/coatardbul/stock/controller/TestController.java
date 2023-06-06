@@ -8,7 +8,6 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.baseService.feign.BaseServerFeign;
@@ -20,6 +19,7 @@ import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
+import com.coatardbul.stock.model.dto.DongFangPlateDTO;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
@@ -27,7 +27,9 @@ import com.coatardbul.stock.service.statistic.RedisService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
+import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;
+import com.coatardbul.stock.service.statistic.tradeQuartz.AiSellTradeService;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
@@ -64,7 +66,6 @@ import java.io.FileReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +84,8 @@ import java.util.Map;
 public class TestController {
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
-
+    @Autowired
+    StockDayStaticService stockDayStaticService;
     @Resource
     DongFangPlateService dongFangPlateService;
     @Autowired
@@ -120,6 +122,9 @@ public class TestController {
 
     @Autowired
     DongFangCommonService dongFangCommonService;
+
+    @Autowired
+    AiSellTradeService aiSellTradeService;
 
     @WebLog(value = "")
     @RequestMapping(path = "/test", method = RequestMethod.GET)
@@ -325,26 +330,84 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-
-        List<String> dateIntervalList = riverRemoteService.getDateIntervalList("2022-12-01", "2023-01-03");
+        Object allPlate = dongFangPlateService.getAllPlate();
+        String firstGid = getGid("历史测试", allPlate);
+        DongFangPlateDTO firstDto = new DongFangPlateDTO();
+        firstDto.setGid(firstGid);
+        dongFangPlateService.clearPlateStock(firstDto);
+        List<String> dateIntervalList = riverRemoteService.getDateIntervalList("2023-01-01", "2023-05-03");
         for (String dateFormat : dateIntervalList) {
-            sfdfd(dateFormat);
-        }
+            List<String> twoUpLimitAboveStockCodeArr = getStockCodeArr(dateFormat, StockTemplateEnum.CY_BIG_INCREASE_RATE.getSign());
+            firstDto.setCodeArr(twoUpLimitAboveStockCodeArr);
+            dongFangPlateService.addPlateInfo(firstDto);
 
+        }
 
         return null;
 
+    }
+
+    private List<String> getStockCodeArr(String dateStr, String templateSign) {
+        List<String> result = new ArrayList<>();
+        StockStrategyQueryDTO stockStrategyQueryDTO = new StockStrategyQueryDTO();
+        stockStrategyQueryDTO.setRiverStockTemplateSign(templateSign);
+        stockStrategyQueryDTO.setDateStr(dateStr);
+        StrategyBO strategy = null;
+        int retryNum = 5;
+        while (retryNum > 0) {
+            try {
+                strategy = stockStrategyCommonService.strategy(stockStrategyQueryDTO);
+                break;
+            } catch (Exception e) {
+                retryNum--;
+                log.error(e.getMessage(), e);
+            }
+        }
+        if (strategy != null && strategy.getTotalNum() > 0) {
+            for (int k = 0; k < strategy.getData().size(); k++) {
+                JSONObject jsonObject = strategy.getData().getJSONObject(k);
+                String code = jsonObject.getString("股票代码").substring(0, 6);
+                result.add(code);
+            }
+        }
+        return result;
+    }
+
+    public String getGid(String name, Object allPlate) {
+        if (allPlate instanceof JSONArray) {
+            JSONArray allPlateTemp = (JSONArray) allPlate;
+            for (int i = 0; i < allPlateTemp.size(); i++) {
+                String gname = allPlateTemp.getJSONObject(i).getString("gname");
+                if (gname.contains(name)) {
+                    String gid = allPlateTemp.getJSONObject(i).getString("gid");
+                    return gid;
+                }
+            }
+        }
+        return "";
     }
 
     @RequestMapping(path = "/test3", method = RequestMethod.POST)
     public String cosUpload111() throws Exception {
-        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        stockCronRefreshService.dayAddUpLimitStockJob(dateFormat);
+        Boolean aBoolean = aiSellTradeService.tradeProcess(convertAmount(10000), convertAmount(11), "002795");
+        log.info("sdfas");
 
         return null;
 
     }
 
+    private BigDecimal convertAmount(Object ojb) {
+        if (ojb == null) {
+            return null;
+        }
+        if (ojb instanceof String) {
+            return new BigDecimal(((String) ojb));
+        }
+        if (ojb instanceof Integer) {
+            return new BigDecimal(((Integer) ojb));
+        }
+        return new BigDecimal(ojb.toString());
+    }
 
     private void sfdfd(String dateFormat) {
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
@@ -359,14 +422,14 @@ public class TestController {
         if (strategy == null || strategy.getTotalNum() == 0) {
             return;
         }
-        for(int jsonLen=0;jsonLen<strategy.getTotalNum();jsonLen++){
+        for (int jsonLen = 0; jsonLen < strategy.getTotalNum(); jsonLen++) {
             JSONObject jsonObject = strategy.getData().getJSONObject(jsonLen);
             Map convert = stockUpLimitAnalyzeCommonService.convertFirstUpLimit(jsonObject, dateFormat);
             BigDecimal lastClosePrice = new BigDecimal(convert.get("lastClosePrice").toString());
             BigDecimal multiply = lastClosePrice.multiply(new BigDecimal(1.02));
             for (int i = 1; i < 4; i++) {
                 Map nextInfo = getNextInfo(dateFormat, i, (String) convert.get("code"));
-                if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(multiply) < 0&&new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(multiply) > 0) {
+                if (new BigDecimal(nextInfo.get("minPrice").toString()).compareTo(multiply) < 0 && new BigDecimal(nextInfo.get("maxPrice").toString()).compareTo(multiply) > 0) {
                     //todo
                     StockTemplatePredict stockTemplatePredict = new StockTemplatePredict();
                     stockTemplatePredict.setId(snowFlakeService.getSnowId());
@@ -381,7 +444,7 @@ public class TestController {
 //                stockTemplatePredict.setBuyIncreaseRate(preQuartzTradeDetail.getIncreaseRate());
 //                stockTemplatePredict.setCloseIncreaseRate(preQuartzTradeDetail.getCloseIncreaseRate());
                     stockTemplatePredictMapper.insert(stockTemplatePredict);
-                    String specialDay = riverRemoteService.getSpecialDay(dateFormat, i+2);
+                    String specialDay = riverRemoteService.getSpecialDay(dateFormat, i + 2);
                     try {
                         Map stockDetailMap = dongFangCommonService.getStockDetailMap(stockTemplatePredict.getCode(), specialDay, "11:29");
                         BigDecimal newPrice = new BigDecimal(stockDetailMap.get("newPrice").toString());

@@ -19,6 +19,23 @@ public class StockBaseDetail {
 
     private String name;
 
+
+    /**
+     * 市值
+     */
+    private BigDecimal marketValue;
+
+    /**
+     * 换手率
+     */
+    private BigDecimal turnOverRate;
+
+
+    /**
+     *交易金额
+     */
+    private BigDecimal tradeAmount;
+
     /**
      * 昨日收盘价
      */
@@ -90,6 +107,17 @@ public class StockBaseDetail {
      * 最低价对应的涨幅
      */
     private BigDecimal minPrice;
+
+
+    /**
+     * 同花顺所属行业
+     */
+    private String industry;
+
+    /**
+     * 概念
+     */
+    private String theme;
 
 
 }

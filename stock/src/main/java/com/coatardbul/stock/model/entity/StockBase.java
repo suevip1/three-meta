@@ -21,4 +21,14 @@ public class StockBase {
      * 名称缩写
      */
     private String nameAbbr;
+
+    /**
+     * 同花顺所属行业
+     */
+    private String industry;
+
+    /**
+     * 概念
+     */
+    private String theme;
 }

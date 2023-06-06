@@ -219,6 +219,9 @@ public class DongFangCommonService extends CommonService implements DataServiceB
             map.put("maxPrice", getDongFangPrice(data, "f44"));
             //最低收盘价
             map.put("minPrice", getDongFangPrice(data, "f45"));
+            //名称
+            map.put("name", data.get("f58").toString());
+
             //未知？？
 //            map.put("minPrice", split1[6]);
             //未知？？
@@ -255,6 +258,9 @@ public class DongFangCommonService extends CommonService implements DataServiceB
             map.put("marketValue", data.get("f116"));
             //流通市值
             map.put("circulationMarketValue", data.get("f117"));
+
+            //换手率
+            map.put("turnOverRate", getDongFangPrice(data, "f168"));
             //暂时不处理
 //            map.put("tradeBuySell5Time", split1[31]);
             calcMap(map);
@@ -324,7 +330,7 @@ public class DongFangCommonService extends CommonService implements DataServiceB
 
     private static String getCodeUrl(String code) {
         String codeUrl;
-        if (code.substring(0, 2).equals("00") || code.substring(0, 3).equals("300")) {
+        if (code.substring(0, 2).equals("00") || code.substring(0, 3).equals("300")||code.substring(0, 3).equals("301")) {
             codeUrl = "0." + code;
         } else {
             codeUrl = "1." + code;

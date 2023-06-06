@@ -1,6 +1,7 @@
 package com.coatardbul.stock.common.util;
 
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.stock.model.bo.DayCallAuctionIncreaseBo;
 import com.coatardbul.stock.model.bo.DayTrumpetCalcStatisticBo;
 import com.coatardbul.stock.model.bo.DayUpDowLimitStatisticBo;
 import com.coatardbul.stock.model.bo.DayUpLimitPromotionStatisticBo;
@@ -27,6 +28,9 @@ public class StockStaticModuleUtil {
     public static final String DAY_UP_DOW_LIMIT_STATISTIC="day_up_dow_limit_statistic";
     //涨停晋级率
     public static final String DAY_UP_LIMIT_PROMOTION_STATISTIC="day_up_limit_promotion_statistic";
+
+    //集合竞价涨幅大于5
+    public static final String DAY_CALL_AUCTION_INCREASE="day_call_auction_increase";
     //按天统计，统计市值散点信息
     public static final String DAY_MARKET_VALUE_STATISTIC="day_market_Value_statistic";
     //两板以上集合竞价散点图
@@ -54,6 +58,9 @@ public class StockStaticModuleUtil {
         if (DAY_UP_LIMIT_PROMOTION_STATISTIC.equals(objectSign)) {
             JsonUtil.readToValue(objectJson, DayUpLimitPromotionStatisticBo.class);
         }
+        if (DAY_CALL_AUCTION_INCREASE.equals(objectSign)) {
+            JsonUtil.readToValue(objectJson, DayCallAuctionIncreaseBo.class);
+        }
         if (DAY_STATIC_STATISTIC.equals(objectSign)) {
             JsonUtil.readToValue(objectJson, Object.class);
         }
@@ -77,6 +84,9 @@ public class StockStaticModuleUtil {
         }
         if (DAY_UP_LIMIT_PROMOTION_STATISTIC.equals(objectSign)) {
             return DayUpLimitPromotionStatisticBo.class;
+        }
+        if (DAY_CALL_AUCTION_INCREASE.equals(objectSign)) {
+            return DayCallAuctionIncreaseBo.class;
         }
         if(MINUTE_UP_DOWN_NUM_STATISTIC.equals(objectSign)){
             return MinuteUpDownNumStatisticBo.class;
