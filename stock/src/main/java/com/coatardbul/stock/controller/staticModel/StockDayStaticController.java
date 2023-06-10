@@ -5,7 +5,7 @@ import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
 import com.coatardbul.stock.mapper.StockBaseMapper;
-import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockEmotionDayRangeDTO;
 import com.coatardbul.stock.model.dto.StockEmotionQueryDTO;
@@ -75,14 +75,16 @@ public class StockDayStaticController {
     @RequestMapping(path = "/getImmediateStockBaseInfo", method = RequestMethod.POST)
     public CommonResult getImmediateStockBaseInfo(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
 
-        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(dto.getStockCode(), dto.getDateStr());
+        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(dto.getStockCode(), dto.getDateStr(),false);
 
         if (upLimitPrice.getUpLimitPrice() == null) {
             return CommonResult.failed("");
         }else {
             StockBase stockBase = stockBaseMapper.selectByPrimaryKey(upLimitPrice.getCode());
-            upLimitPrice.setTheme(stockBase.getTheme());
-            upLimitPrice.setIndustry(stockBase.getIndustry());
+            if(stockBase!=null){
+                upLimitPrice.setTheme(stockBase.getTheme());
+                upLimitPrice.setIndustry(stockBase.getIndustry());
+            }
             return CommonResult.success(upLimitPrice);
 
         }

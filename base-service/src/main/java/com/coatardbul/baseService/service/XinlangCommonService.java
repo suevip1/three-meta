@@ -48,34 +48,33 @@ public abstract class XinlangCommonService extends CommonService
     StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
 
 
-
-
     @Override
     public void getAndRefreshStockInfo(String code) {
 
         String response = getStockInfo(code);
         // 将获取的信息更新到code上
         if (StringUtils.isNotBlank(response)) {
-            updateStockInfo(code, response,null);
+            updateStockInfo(code, response, null);
         }
         //获取最新的对象
     }
+
     @Override
     public void getAndRefreshStockInfo(String code, String dateFormat) {
         updateStockInfo(code, null, dateFormat);
         String key = RedisKeyUtils.getHisStockTickInfo(dateFormat, code);
         String stockTickArrStr = (String) redisTemplate.opsForValue().get(key);
-        if(StringUtils.isNotBlank(stockTickArrStr)){
+        if (StringUtils.isNotBlank(stockTickArrStr)) {
             List<TickInfo> stockTickArr = JsonUtil.readToValue(stockTickArrStr, new TypeReference<List<TickInfo>>() {
             });
-            updateStockBaseInfo(stockTickArr, code,dateFormat);
+            updateStockBaseInfo(stockTickArr, code, dateFormat);
         }
 
         //获取最新的对象
     }
 
     @Override
-    public  String getStockInfo(String code){
+    public String getStockInfo(String code) {
         List<Header> headerList = new ArrayList<>();
         String codeUrl = getCodeUrl(code);
         //新浪财经接口 地址
@@ -89,6 +88,10 @@ public abstract class XinlangCommonService extends CommonService
         return response;
     }
 
+    @Override
+    public String getStockInfo(String code, Boolean proxyFlag) {
+        return getStockInfo(code);
+    }
 
 
     private static String getCodeUrl(String code) {
@@ -109,7 +112,7 @@ public abstract class XinlangCommonService extends CommonService
         if (StringUtils.isNotBlank(response)) {
             List<TickInfo> list = updateStockTickInfo(code, response);
             try {
-                updateStockBaseInfo(list, code,null);
+                updateStockBaseInfo(list, code, null);
             } catch (Exception e) {
             }
         }
@@ -117,7 +120,7 @@ public abstract class XinlangCommonService extends CommonService
 
 
     @Override
-    public String getStockTickInfo(String code){
+    public String getStockTickInfo(String code) {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
 
         List<Header> headerList = new ArrayList<>();
@@ -145,14 +148,14 @@ public abstract class XinlangCommonService extends CommonService
     }
 
     @Override
-    public void refreshStockMinuterInfo(String code,String dateFormat) {
-        String response = getStockMinuterInfo(code,dateFormat);
+    public void refreshStockMinuterInfo(String code, String dateFormat) {
+        String response = getStockMinuterInfo(code, dateFormat);
 
-        if(!StringUtils.isNotBlank(response)){
+        if (!StringUtils.isNotBlank(response)) {
             return;
         }
         try {
-            updateStockMinuterInfo(code,dateFormat, response);
+            updateStockMinuterInfo(code, dateFormat, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -160,7 +163,7 @@ public abstract class XinlangCommonService extends CommonService
     }
 
     @Override
-    public String getStockMinuterInfo(String code,String dateFormat){
+    public String getStockMinuterInfo(String code, String dateFormat) {
         List<Header> headerList = new ArrayList<>();
         String codeUrl = getCodeUrl(code);
 
@@ -168,7 +171,7 @@ public abstract class XinlangCommonService extends CommonService
         //返回信息
         String response = null;
         try {
-            response = httpService.doGet("https://finance.sina.com.cn/realstock/company/"+codeUrl+"/hisdata/"+dateFormat.substring(0,4)+"/"+dateFormat.substring(5,7)+".js?d=" +dateFormat , headerList, cronRefreshService.getProxyFlag());
+            response = httpService.doGet("https://finance.sina.com.cn/realstock/company/" + codeUrl + "/hisdata/" + dateFormat.substring(0, 4) + "/" + dateFormat.substring(5, 7) + ".js?d=" + dateFormat, headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
         }
         return response;
@@ -176,7 +179,7 @@ public abstract class XinlangCommonService extends CommonService
 
 
     @Override
-    public String getStockMinuterInfo(String code){
+    public String getStockMinuterInfo(String code) {
         List<Header> headerList = new ArrayList<>();
         String codeUrl = getCodeUrl(code);
 
@@ -204,14 +207,15 @@ public abstract class XinlangCommonService extends CommonService
             redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
         }
     }
-    private void updateStockMinuterInfo(String code, String dateformat,String response) throws ScriptException, FileNotFoundException, NoSuchMethodException {
+
+    private void updateStockMinuterInfo(String code, String dateformat, String response) throws ScriptException, FileNotFoundException, NoSuchMethodException {
         CronRefreshConfigBo cronRefreshConfigBo = cronRefreshService.getCronRefreshConfigBo();
-        String key = RedisKeyUtils.getHisStockMinuterInfo(code,dateformat);
+        String key = RedisKeyUtils.getHisStockMinuterInfo(code, dateformat);
         //先进行解密
         String[] split = response.split("\"");
         Object heXinDecode = XinLangUtil.getHeXinDecode(split[1]);
         String jsonStr = JsonUtil.toJson(heXinDecode);
-        List stockTickDetail = getStockMinuterDetail(code,dateformat, jsonStr);
+        List stockTickDetail = getStockMinuterDetail(code, dateformat, jsonStr);
         if (stockTickDetail != null && stockTickDetail.size() > 0) {
             redisTemplate.opsForValue().set(key, JsonUtil.toJson(stockTickDetail), cronRefreshConfigBo.getCodeExistHour(), TimeUnit.HOURS);
         }
@@ -246,7 +250,7 @@ public abstract class XinlangCommonService extends CommonService
     }
 
     @Override
-    public List getStockMinuterDetail(String code,String dateFormat, String response) {
+    public List getStockMinuterDetail(String code, String dateFormat, String response) {
         JSONObject jsonObject = JSONObject.parseObject(response);
         JSONArray jsonArray = jsonObject.getJSONObject("result").getJSONArray("data");
         List<Map> result = new ArrayList<Map>();
@@ -263,15 +267,15 @@ public abstract class XinlangCommonService extends CommonService
     }
 
     @Override
-    public  List<TickInfo> getStockTickDetail(String code, String response) {
+    public List<TickInfo> getStockTickDetail(String code, String response) {
         List<TickInfo> result = new ArrayList<TickInfo>();
         String[] split = response.split("\\n");
         for (int i = split.length - 1; i > 0; i--) {
             try {
-                TickInfo tickInfo= new TickInfo();
+                TickInfo tickInfo = new TickInfo();
                 String[] item = split[i].split("\\(")[1].split("\\)")[0].replace("'", "").split(",");
                 tickInfo.setTime(item[0]);
-                tickInfo.setVol( new BigDecimal(item[1].trim()).divide(new BigDecimal(100)));
+                tickInfo.setVol(new BigDecimal(item[1].trim()).divide(new BigDecimal(100)));
                 tickInfo.setPrice(new BigDecimal(item[2].trim()));
                 tickInfo.setBuySellFlag(item[3]);
                 result.add(tickInfo);
@@ -283,15 +287,13 @@ public abstract class XinlangCommonService extends CommonService
     }
 
 
-
-
     /**
      * @param response
      * @param map
      */
     @Override
     public void rebuildStockDetailMap(String response, Map map) {
-        if(!StringUtils.isNotBlank(response)){
+        if (!StringUtils.isNotBlank(response)) {
             return;
         }
         String[] split = response.split("\\n");

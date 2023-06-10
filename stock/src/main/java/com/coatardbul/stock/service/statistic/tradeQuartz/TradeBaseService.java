@@ -19,7 +19,7 @@ import com.coatardbul.stock.mapper.StockTradeDetailMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
-import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
 import com.coatardbul.stock.model.entity.StockTradeConfig;
 import com.coatardbul.stock.model.entity.StockTradeDateSwitch;
@@ -193,7 +193,7 @@ public class TradeBaseService {
         }
 
         //涨跌停价
-        StockBaseDetail upLimitPrice = getImmediateStockBaseInfo(code, date);
+        StockBaseDetail upLimitPrice = getImmediateStockBaseInfoNoProxy(code, date);
         if (upLimitPrice.getUpLimitPrice() == null) {
             throw new IllegalArgumentException("upLimitPrice.getUpLimitPrice()涨停价不能为空");
         }
@@ -205,53 +205,67 @@ public class TradeBaseService {
 
         return result;
     }
+    public StockBaseDetail getImmediateStockBaseInfoNoProxy(String code, String date) {
+        return getImmediateStockBaseInfo(code,date,false);
 
+    }
 
-    /**
-     * 通过tick数据获取
-     *
-     * @param code
-     * @param date
-     * @return
-     */
     public StockBaseDetail getImmediateStockBaseInfo(String code, String date) {
+       return getImmediateStockBaseInfo(code,date,true);
+    }
+        /**
+         * 通过tick数据获取
+         *
+         * @param code
+         * @param date
+         * @return
+         */
+    public StockBaseDetail getImmediateStockBaseInfo(String code, String date,Boolean proxyFlag) {
         StockBaseDetail result = new StockBaseDetail();
         result.setCode(code);
         DataServiceBridge build = dataFactory.build();
-        String response = build.getStockInfo(code);
+        String response = build.getStockInfo(code,proxyFlag);
         Map map = new HashMap();
         if (StringUtils.isNotBlank(response)) {
             build.rebuildStockDetailMap(response, map);
         }
 //        result.setName(map.get("name").toString());
         try {
-            result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
-            result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
-            result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
-            result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
-            result.setCallAuctionPrice(new BigDecimal(map.get("auctionPrice").toString()));
+            result.setLastClosePrice(getBigDecimalValue(map.get("lastClosePrice").toString()));
+            result.setCurrPrice(getBigDecimalValue(map.get("newPrice").toString()));
+            result.setMaxPrice(getBigDecimalValue(map.get("maxPrice").toString()));
+            result.setMinPrice(getBigDecimalValue(map.get("minPrice").toString()));
+            result.setCallAuctionPrice(getBigDecimalValue(map.get("auctionPrice").toString()));
         } catch (Exception e) {
             log.error("及时信息获取异常", e);
         }
         if (result.getLastClosePrice() == null || result.getCurrPrice() == null || result.getMaxPrice() == null) {
             map = getStockInfoByStrategy(code, date);
-            result.setLastClosePrice(new BigDecimal(map.get("lastClosePrice").toString()));
-            result.setCurrPrice(new BigDecimal(map.get("newPrice").toString()));
-            result.setMaxPrice(new BigDecimal(map.get("maxPrice").toString()));
-            result.setMinPrice(new BigDecimal(map.get("minPrice").toString()));
-            result.setCallAuctionRate(new BigDecimal(map.get("auctionIncreaseRate").toString()).divide(new BigDecimal(100)));
+            result.setLastClosePrice(getBigDecimalValue(map.get("lastClosePrice").toString()));
+            result.setCurrPrice(getBigDecimalValue(map.get("newPrice").toString()));
+            result.setMaxPrice(getBigDecimalValue(map.get("maxPrice").toString()));
+            result.setMinPrice(getBigDecimalValue(map.get("minPrice").toString()));
+            result.setCallAuctionRate(getBigDecimalValue(map.get("auctionIncreaseRate").toString()).divide(new BigDecimal(100)));
         }
         if (map.size() == 0) {
             return null;
         }
         result.setName(map.get("name").toString());
-        result.setMarketValue(new BigDecimal(map.get("marketValue").toString()));
-        result.setTurnOverRate(new BigDecimal(map.get("turnOverRate").toString()));
-        result.setTradeAmount(new BigDecimal(map.get("tradeAmount").toString()));
+        result.setMarketValue(getBigDecimalValue(map.get("marketValue").toString()));
+        result.setTurnOverRate(getBigDecimalValue(map.get("turnOverRate").toString()));
+        result.setTradeAmount(getBigDecimalValue(map.get("tradeAmount").toString()));
 
         rebuild(result);
         return result;
     }
+    private  BigDecimal getBigDecimalValue(String str){
+        if(str==null ||"-".equals(str)||"".equals(str)){
+            return BigDecimal.ZERO;
+        }else {
+            return new BigDecimal(str);
+        }
+    }
+
 
     private Map getStockInfoByStrategy(String code, String specialDay) {
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
@@ -329,7 +343,7 @@ public class TradeBaseService {
      *
      * @param result
      */
-    private void rebuild(StockBaseDetail result) {
+    public void rebuild(StockBaseDetail result) {
         if (result.getLastClosePrice() != null) {
             //涨停价
             result.setUpLimitPrice(stockParseAndConvertService.getUpLimit(result.getCode(), result.getLastClosePrice()));
@@ -355,20 +369,9 @@ public class TradeBaseService {
             result.setCurrUpRate(currPriceSubtract.divide(result.getLastClosePrice(), 4, BigDecimal.ROUND_HALF_UP));
 
             //建议买入价格和比例,价格笼子
-            BigDecimal rateCageLimit = new BigDecimal(0.019);
-            BigDecimal sugBuyRate = result.getCurrUpRate().add(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
-            result.setSugBuyRate(sugBuyRate);
-            result.setSugBuyPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugBuyRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
-            if (result.getSugBuyPrice().compareTo(result.getUpLimitPrice()) >= 0) {
-                result.setSugBuyPrice(result.getUpLimitPrice());
-            }
+            stockParseAndConvertService.setSuggestBuyPrice(result);
             //建议卖出价格和比例
-            BigDecimal sugSellRate = result.getCurrUpRate().subtract(rateCageLimit).setScale(4, BigDecimal.ROUND_HALF_UP);
-            result.setSugSellRate(sugSellRate);
-            result.setSugSellPrice(result.getLastClosePrice().multiply(BigDecimal.ONE.add(sugSellRate)).setScale(2, BigDecimal.ROUND_HALF_UP));
-            if (result.getSugSellPrice().compareTo(result.getDownLimitPrice()) <= 0) {
-                result.setSugSellPrice(result.getDownLimitPrice());
-            }
+            stockParseAndConvertService.setSuggestSellPrice(result);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.coatardbul.stock.model.bo.trade;
 
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.entity.StockTradeConfig;
 import lombok.Data;
 

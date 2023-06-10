@@ -18,7 +18,7 @@ import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
-import com.coatardbul.stock.model.bo.trade.StockBaseDetail;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
@@ -274,8 +274,9 @@ public class StockTradeService {
         Date currenDate = new Date();
         String date = DateTimeUtil.getDateFormat(currenDate, DateTimeUtil.YYYY_MM_DD);
         //涨跌停价
-        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfo(code, date);
+        StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfoNoProxy(code, date);
         stockTradeBO.setPrice(upLimitPrice.getSugSellPrice().toString());
+
 
         stockTradeBO.setAmount(sellNum.toString());
         stockTradeBO.setZqmc(name);

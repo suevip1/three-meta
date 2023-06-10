@@ -72,7 +72,8 @@ public class DongFangCommonService extends CommonService implements DataServiceB
     }
 
     @Override
-    public String getStockInfo(String code) {
+    public String getStockInfo(String code, Boolean proxyFlag) {
+
         List<Header> headerList = new ArrayList<>();
         String codeUrl = getCodeUrl(code);
         //东方财富 接口 地址
@@ -83,10 +84,15 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         try {
             response = httpService.doGet("http://push2.eastmoney.com/api/qt/stock/get?invt=2&fltt=1&cb=jQuery351021675633936193583_" + (l - 1)
                     + "&fields=f58%2Cf734%2Cf107%2Cf57%2Cf43%2Cf59%2Cf169%2Cf170%2Cf152%2Cf177%2Cf111%2Cf46%2Cf60%2Cf44%2Cf45%2Cf47%2Cf260%2Cf48%2Cf261%2Cf279%2Cf277%2Cf278%2Cf288%2Cf19%2Cf17%2Cf531%2Cf15%2Cf13%2Cf11%2Cf20%2Cf18%2Cf16%2Cf14%2Cf12%2Cf39%2Cf37%2Cf35%2Cf33%2Cf31%2Cf40%2Cf38%2Cf36%2Cf34%2Cf32%2Cf211%2Cf212%2Cf213%2Cf214%2Cf215%2Cf210%2Cf209%2Cf208%2Cf207%2Cf206%2Cf161%2Cf49%2Cf171%2Cf50%2Cf86%2Cf84%2Cf85%2Cf168%2Cf108%2Cf116%2Cf167%2Cf164%2Cf162%2Cf163%2Cf92%2Cf71%2Cf117%2Cf292%2Cf51%2Cf52%2Cf191%2Cf192%2Cf262%2Cf294%2Cf295%2Cf269%2Cf270%2Cf256%2Cf257%2Cf285%2Cf286&secid="
-                    + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, cronRefreshService.getProxyFlag());
+                    + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, proxyFlag);
         } catch (ConnectTimeoutException e) {
         }
         return response;
+    }
+
+    @Override
+    public String getStockInfo(String code) {
+        return getStockInfo(code, cronRefreshService.getProxyFlag());
     }
 
     /**
@@ -105,10 +111,10 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         String response = null;
         try {
             response = httpService.doGet("http://push2ex.eastmoney.com/getStockChanges?cb=jQuery35105455289533473615_" + (l - 1)
-                    + "&ut=7eea3edcaed734bea9cbfc24409ed989"
-                    +"&date="+dateFormat.replaceAll("-","")
-                    +"&dpt=wzchanges&code="+code
-                    +"&market=1&_="+(l - 11)
+                            + "&ut=7eea3edcaed734bea9cbfc24409ed989"
+                            + "&date=" + dateFormat.replaceAll("-", "")
+                            + "&dpt=wzchanges&code=" + code
+                            + "&market=1&_=" + (l - 11)
                     , headerList, cronRefreshService.getProxyFlag());
         } catch (ConnectTimeoutException e) {
         }
@@ -279,7 +285,11 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         if (data.get(key) == null || "-".equals(data.get(key).toString())) {
             return null;
         } else {
-            return new BigDecimal(data.get(key).toString()).divide(new BigDecimal(100));
+            if (data.get("f57").toString().substring(0, 2).equals("11") || data.get("f57").toString().substring(0, 2).equals("12")) {
+                return new BigDecimal(data.get(key).toString()).divide(new BigDecimal(1000));
+            } else {
+                return new BigDecimal(data.get(key).toString()).divide(new BigDecimal(100));
+            }
         }
     }
 
@@ -318,11 +328,22 @@ public class DongFangCommonService extends CommonService implements DataServiceB
         long l = System.currentTimeMillis();
         //返回信息
         String response = null;
-        try {
-            response = httpService.doGet("https://push2.eastmoney.com/api/qt/stock/details/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55" +
-                    "&fltt=2&cb=jQuery3510020623351060268913_" + (l - 1) + "&pos=-5000&secid=" + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, cronRefreshService.getProxyFlag());
-        } catch (ConnectTimeoutException e) {
+
+        if (code.substring(0, 2).equals("12") || code.substring(0, 2).equals("11")) {
+            try {
+                response = httpService.doGet("https://push2.eastmoney.com/api/qt/stock/get?" +
+                        "invt=2&fltt=1&cb=jQuery3510778125534289833_" + (l - 1) + "&fields=f58%2Cf734%2Cf107%2Cf57%2Cf43%2Cf59%2Cf169%2Cf170%2Cf152%2Cf46%2Cf60%2Cf44%2Cf45%2Cf171%2Cf47%2Cf86%2Cf292%2Cf19%2Cf39%2Cf20%2Cf40%2Cf17%2Cf531%2Cf18%2Cf15%2Cf16%2Cf13%2Cf14%2Cf11%2Cf12%2Cf37%2Cf38%2Cf35%2Cf36%2Cf33%2Cf34%2Cf31%2Cf32%2Cf48%2Cf50%2Cf161%2Cf49%2Cf191%2Cf192%2Cf71%2Cf264%2Cf263%2Cf262%2Cf267%2Cf265%2Cf268%2Cf706%2Cf700%2Cf701%2Cf703%2Cf154%2Cf704%2Cf702%2Cf705%2Cf721%2Cf51%2Cf52%2Cf301" +
+                        "&secid=" + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=6751315946175528%7C0%7C1%7C0%7Cweb&_=" + l, headerList, cronRefreshService.getProxyFlag());
+            } catch (ConnectTimeoutException e) {
+            }
+        } else {
+            try {
+                response = httpService.doGet("https://push2.eastmoney.com/api/qt/stock/details/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55" +
+                        "&fltt=2&cb=jQuery3510020623351060268913_" + (l - 1) + "&pos=-5000&secid=" + codeUrl + "&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=3155316106775332%7C0%7C1%7C0%7Cweb&_=" + l, headerList, cronRefreshService.getProxyFlag());
+            } catch (ConnectTimeoutException e) {
+            }
         }
+
         return response;
 
     }
@@ -330,7 +351,7 @@ public class DongFangCommonService extends CommonService implements DataServiceB
 
     private static String getCodeUrl(String code) {
         String codeUrl;
-        if (code.substring(0, 2).equals("00") || code.substring(0, 3).equals("300")||code.substring(0, 3).equals("301")) {
+        if (code.substring(0, 2).equals("00") || code.substring(0, 2).equals("12") || code.substring(0, 3).equals("300") || code.substring(0, 3).equals("301")) {
             codeUrl = "0." + code;
         } else {
             codeUrl = "1." + code;

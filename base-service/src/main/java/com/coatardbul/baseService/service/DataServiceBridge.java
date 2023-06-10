@@ -24,6 +24,7 @@ public interface DataServiceBridge {
 
     String getStockInfo(String code);
 
+    String getStockInfo(String code,Boolean proxyFlag);
 
 
     void rebuildStockDetailMap(String response, Map map);

@@ -52,6 +52,9 @@ public class BuyTradeService extends TradeBaseService {
         result.setUserMoney(userMoney);
         if (userMoney != null) {
             buyNum = userMoney.divide(commonTradeInfo.getStockBaseDetail().getSugBuyPrice().multiply(new BigDecimal(100)), 0, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(100));
+            if(result.getCode().substring(0,2).equals("11")||result.getCode().substring(0,2).equals("12")){
+                buyNum = userMoney.divide(commonTradeInfo.getStockBaseDetail().getSugBuyPrice().multiply(new BigDecimal(10)), 0, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(10));
+            }
         }
         result.setTradeNum(buyNum);
         result.setPrice(commonTradeInfo.getStockBaseDetail().getSugBuyPrice());

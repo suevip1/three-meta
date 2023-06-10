@@ -36,6 +36,12 @@ public class StockBaseController {
         stockBaseService.addProcess();
         return CommonResult.success(null);
     }
+    @ApiOperation("新增转债信息")
+    @RequestMapping(path = "/addConvertBondProcess", method = RequestMethod.GET)
+    public CommonResult addConvertBondProcess() {
+        stockBaseService.addConvertBondProcess();
+        return CommonResult.success(null);
+    }
 
     @ApiOperation("查询所有")
     @RequestMapping(path = "/findAll", method = RequestMethod.POST)

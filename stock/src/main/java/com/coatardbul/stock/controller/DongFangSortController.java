@@ -39,4 +39,13 @@ public class DongFangSortController {
     }
 
 
+    @ApiOperation("获取转债信息")
+    @RequestMapping(path = "/getConvertBond", method = RequestMethod.POST)
+    public CommonResult getConvertBond() {
+        return CommonResult.success(dongFangSortService.getConvertBondLimit());
+    }
+
+
+
+
 }

@@ -3,6 +3,7 @@ package com.coatardbul.stock.service.statistic;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.TongHuaShunUtil;
@@ -16,7 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -32,6 +35,8 @@ public class StockBaseService {
 
     @Autowired
     private StockBaseMapper stockBaseMapper;
+    @Resource
+    DongFangSortService dongFangSortService;
     @Autowired
     private StockStrategyService stockStrategyService;
 
@@ -110,5 +115,24 @@ public class StockBaseService {
     }
 
 
+    public void addConvertBondProcess() {
 
+        List<StockBaseDetail> convertBond = dongFangSortService.getAllConvertBond();
+        for(StockBaseDetail stockBaseDetail:convertBond){
+            StockBase stockBase = new StockBase();
+            stockBase.setCode(stockBaseDetail.getCode());
+            stockBase.setName(stockBaseDetail.getName());
+            stockBase.setNameAbbr(getNameAbbr(stockBaseDetail.getName()));
+
+            try {
+                stockBaseMapper.insert(stockBase);
+            } catch (Exception e) {
+                try {
+                    stockBaseMapper.updateByPrimaryKeySelective(stockBase);
+                }catch (Exception e1){
+                    log.error("更新"+stockBaseDetail.getName()+"失败");
+                }
+            }
+        }
+    }
 }
