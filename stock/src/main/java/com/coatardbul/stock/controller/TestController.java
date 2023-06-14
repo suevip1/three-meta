@@ -8,6 +8,7 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.baseService.feign.BaseServerFeign;
@@ -19,9 +20,9 @@ import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
-import com.coatardbul.stock.model.dto.DongFangPlateDTO;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
+import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
 import com.coatardbul.stock.service.statistic.RedisService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
@@ -66,6 +67,8 @@ import java.io.FileReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +93,9 @@ public class TestController {
     DongFangPlateService dongFangPlateService;
     @Autowired
     SnowFlakeService snowFlakeService;
+    @Autowired
+    StockStrategyService stockStrategyService;
+
     @Autowired
     StockTemplatePredictMapper stockTemplatePredictMapper;
     @Autowired
@@ -330,17 +336,39 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        Object allPlate = dongFangPlateService.getAllPlate();
-        String firstGid = getGid("历史测试", allPlate);
-        DongFangPlateDTO firstDto = new DongFangPlateDTO();
-        firstDto.setGid(firstGid);
-        dongFangPlateService.clearPlateStock(firstDto);
-        List<String> dateIntervalList = riverRemoteService.getDateIntervalList("2023-01-01", "2023-05-03");
-        for (String dateFormat : dateIntervalList) {
-            List<String> twoUpLimitAboveStockCodeArr = getStockCodeArr(dateFormat, StockTemplateEnum.CY_BIG_INCREASE_RATE.getSign());
-            firstDto.setCodeArr(twoUpLimitAboveStockCodeArr);
-            dongFangPlateService.addPlateInfo(firstDto);
+        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
+        dto.setRiverStockTemplateId("1567739221362475008");
+        dto.setPageSize(100);
+        dto.setPage(1);
+        dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
+        StrategyBO strategy = null;
+        try {
+            strategy = stockStrategyService.strategy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        Map<String,Integer> parameters = new HashMap<String,Integer>();
+        if (strategy != null && strategy.getTotalNum() > 0) {
+            JSONArray data = strategy.getData();
+            for (int j = 0; j < data.size(); j++) {
+                JSONObject jsonObject = data.getJSONObject(j);
+                String code = jsonObject.getString("code");
+                String name = jsonObject.getString("股票简称");
+                String theme = jsonObject.getString("所属概念");
+                String industry = jsonObject.getString("所属同花顺行业");
+                if(StringUtils.isNotBlank(industry)){
+                    String str = industry.split("-")[0];
+                    if(parameters.containsKey(str)){
+                        parameters.put(str,parameters.get(str)+1);
+                    }else {
+                        parameters.put(str,1);
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, Integer> map : parameters.entrySet()) {
 
+            log.info(map.getKey() + "=" + map.getValue());
         }
 
         return null;

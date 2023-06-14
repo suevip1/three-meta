@@ -91,8 +91,14 @@ public class StockParseAndConvertService {
         } else {
             multiply = new BigDecimal(1.3);
         }
-        BigDecimal result = price.multiply(multiply).setScale(2, BigDecimal.ROUND_HALF_UP);
-        return result;
+        if ( code.substring(0, 2).equals("11") || code.substring(0, 2).equals("12")) {
+            BigDecimal result = price.multiply(multiply).setScale(3, BigDecimal.ROUND_HALF_UP);
+            return result;
+
+        }else {
+            BigDecimal result = price.multiply(multiply).setScale(2, BigDecimal.ROUND_HALF_UP);
+            return result;
+        }
     }
 
     public BigDecimal getDownLimit(String code, BigDecimal price) {
@@ -104,8 +110,14 @@ public class StockParseAndConvertService {
         } else {
             multiply = new BigDecimal(0.7);
         }
-        BigDecimal result = price.multiply(multiply).setScale(2, BigDecimal.ROUND_HALF_UP);
-        return result;
+        if ( code.substring(0, 2).equals("11") || code.substring(0, 2).equals("12")) {
+            BigDecimal result = price.multiply(multiply).setScale(3, BigDecimal.ROUND_HALF_UP);
+            return result;
+
+        }else {
+            BigDecimal result = price.multiply(multiply).setScale(2, BigDecimal.ROUND_HALF_UP);
+            return result;
+        }
     }
 
     public void setSuggestBuyPrice( StockBaseDetail result) {

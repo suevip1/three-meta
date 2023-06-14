@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.stock.mapper.StockIndustryAnalyseMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
+    <!--@mbg.generated-->
+    <!--@Table stock_industry_analyse-->
+    <id column="date" jdbcType="VARCHAR" property="date" />
+    <result column="call_auction" jdbcType="LONGVARCHAR" property="callAuction" />
+    <result column="greate_than_line" jdbcType="LONGVARCHAR" property="greateThanLine" />
+    <result column="big_increase" jdbcType="LONGVARCHAR" property="bigIncrease" />
+    <result column="next_call_auction_buy" jdbcType="LONGVARCHAR" property="nextCallAuctionBuy" />
+    <result column="small_increase" jdbcType="LONGVARCHAR" property="smallIncrease" />
+    <result column="uplimit_info" jdbcType="LONGVARCHAR" property="uplimitInfo" />
+    <result column="remark" jdbcType="LONGVARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    `date`, call_auction, greate_than_line, big_increase, next_call_auction_buy, small_increase, 
+    uplimit_info, remark
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from stock_industry_analyse
+    where `date` = #{date,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from stock_industry_analyse
+    where `date` = #{date,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
+    <!--@mbg.generated-->
+    insert into stock_industry_analyse (`date`, call_auction, greate_than_line, 
+      big_increase, next_call_auction_buy, 
+      small_increase, uplimit_info, remark
+      )
+    values (#{date,jdbcType=VARCHAR}, #{callAuction,jdbcType=LONGVARCHAR}, #{greateThanLine,jdbcType=LONGVARCHAR}, 
+      #{bigIncrease,jdbcType=LONGVARCHAR}, #{nextCallAuctionBuy,jdbcType=LONGVARCHAR}, 
+      #{smallIncrease,jdbcType=LONGVARCHAR}, #{uplimitInfo,jdbcType=LONGVARCHAR}, #{remark,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
+    <!--@mbg.generated-->
+    insert into stock_industry_analyse
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="date != null and date != ''">
+        `date`,
+      </if>
+      <if test="callAuction != null and callAuction != ''">
+        call_auction,
+      </if>
+      <if test="greateThanLine != null and greateThanLine != ''">
+        greate_than_line,
+      </if>
+      <if test="bigIncrease != null and bigIncrease != ''">
+        big_increase,
+      </if>
+      <if test="nextCallAuctionBuy != null and nextCallAuctionBuy != ''">
+        next_call_auction_buy,
+      </if>
+      <if test="smallIncrease != null and smallIncrease != ''">
+        small_increase,
+      </if>
+      <if test="uplimitInfo != null and uplimitInfo != ''">
+        uplimit_info,
+      </if>
+      <if test="remark != null and remark != ''">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="date != null and date != ''">
+        #{date,jdbcType=VARCHAR},
+      </if>
+      <if test="callAuction != null and callAuction != ''">
+        #{callAuction,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="greateThanLine != null and greateThanLine != ''">
+        #{greateThanLine,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="bigIncrease != null and bigIncrease != ''">
+        #{bigIncrease,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="nextCallAuctionBuy != null and nextCallAuctionBuy != ''">
+        #{nextCallAuctionBuy,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="smallIncrease != null and smallIncrease != ''">
+        #{smallIncrease,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="uplimitInfo != null and uplimitInfo != ''">
+        #{uplimitInfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="remark != null and remark != ''">
+        #{remark,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
+    <!--@mbg.generated-->
+    update stock_industry_analyse
+    <set>
+      <if test="callAuction != null and callAuction != ''">
+        call_auction = #{callAuction,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="greateThanLine != null and greateThanLine != ''">
+        greate_than_line = #{greateThanLine,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="bigIncrease != null and bigIncrease != ''">
+        big_increase = #{bigIncrease,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="nextCallAuctionBuy != null and nextCallAuctionBuy != ''">
+        next_call_auction_buy = #{nextCallAuctionBuy,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="smallIncrease != null and smallIncrease != ''">
+        small_increase = #{smallIncrease,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="uplimitInfo != null and uplimitInfo != ''">
+        uplimit_info = #{uplimitInfo,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="remark != null and remark != ''">
+        remark = #{remark,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where `date` = #{date,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
+    <!--@mbg.generated-->
+    update stock_industry_analyse
+    set call_auction = #{callAuction,jdbcType=LONGVARCHAR},
+      greate_than_line = #{greateThanLine,jdbcType=LONGVARCHAR},
+      big_increase = #{bigIncrease,jdbcType=LONGVARCHAR},
+      next_call_auction_buy = #{nextCallAuctionBuy,jdbcType=LONGVARCHAR},
+      small_increase = #{smallIncrease,jdbcType=LONGVARCHAR},
+      uplimit_info = #{uplimitInfo,jdbcType=LONGVARCHAR},
+      remark = #{remark,jdbcType=LONGVARCHAR}
+    where `date` = #{date,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2023-06-14-->
+  <select id="selectByAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from stock_industry_analyse
+
+    </select>
+
+<!--auto generated by MybatisCodeHelper on 2023-06-14-->
+  <select id="selectAllByDateBetweenEqual" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from stock_industry_analyse
+    <where>
+
+      <if test="minDate != null and minDate != ''">
+        and `date` <![CDATA[>=]]> #{minDate,jdbcType=VARCHAR}
+      </if>
+      <if test="maxDate != null and maxDate != ''">
+        and `date` <![CDATA[<=]]> #{maxDate,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+</mapper>
