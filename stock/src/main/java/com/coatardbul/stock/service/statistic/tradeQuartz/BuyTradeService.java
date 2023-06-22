@@ -29,7 +29,7 @@ public class BuyTradeService extends TradeBaseService {
 
 
 
-    public Boolean buyTrade( PreTradeDetail preTradeDetail) {
+    public Boolean buyTrade(PreTradeDetail preTradeDetail, String userName) {
         Boolean flag = false;
         //调用购买接口，
         StockTradeBO stockTradeBO = new StockTradeBO();
@@ -37,7 +37,7 @@ public class BuyTradeService extends TradeBaseService {
         stockTradeBO.setPrice(preTradeDetail.getPrice().toString());
         stockTradeBO.setAmount(preTradeDetail.getTradeNum().toString());
         stockTradeBO.setZqmc(preTradeDetail.getName());
-        String response = stockTradeService.buy(stockTradeBO);
+        String response = stockTradeService.buy(stockTradeBO,userName);
         //成功
         if (StringUtils.isNotBlank(response)) {
             flag = true;

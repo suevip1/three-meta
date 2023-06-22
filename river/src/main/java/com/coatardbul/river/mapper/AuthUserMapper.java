@@ -1,12 +1,7 @@
 package com.coatardbul.river.mapper;
-import org.apache.ibatis.annotations.Param;
 
-import com.coatardbul.river.model.entity.AuthUser;
-import org.apache.ibatis.annotations.Mapper;
+import com.coatardbul.baseCommon.model.entity.AuthUser;import org.apache.ibatis.annotations.Param;import java.util.List;
 
-import java.util.List;
-
-@Mapper
 public interface AuthUserMapper {
     int deleteByPrimaryKey(String id);
 
@@ -20,8 +15,5 @@ public interface AuthUserMapper {
 
     int updateByPrimaryKey(AuthUser record);
 
-    List<AuthUser> selectAllByUsernameAndPassword(@Param("username")String username,@Param("password")String password);
-
-
-
+    List<AuthUser> selectAllByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
 }

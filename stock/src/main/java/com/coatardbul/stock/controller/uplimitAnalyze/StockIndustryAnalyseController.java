@@ -59,6 +59,12 @@ public class StockIndustryAnalyseController {
         stockIndustryAnalyseService.add(dto);
         return CommonResult.success(null);
     }
+    @WebLog(value = "")
+    @RequestMapping(path = "/get", method = RequestMethod.POST)
+    public CommonResult get(@Validated @RequestBody StockIndustryAnalyseDTO dto)  {
+
+        return CommonResult.success(stockIndustryAnalyseService.get(dto));
+    }
 
     @WebLog(value = "")
     @RequestMapping(path = "/modify", method = RequestMethod.POST)

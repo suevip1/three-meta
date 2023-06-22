@@ -182,7 +182,7 @@
                 and id = #{id,jdbcType=VARCHAR}
             </if>
             <if test="date != null">
-                and "date" = #{date,jdbcType=VARCHAR}
+                and `date` = #{date,jdbcType=VARCHAR}
             </if>
             <if test="week != null">
                 and week = #{week,jdbcType=INTEGER}
@@ -219,8 +219,7 @@
         select
         <include refid="Base_Column_List"/>
         from auth_calendar
-                where "date" <![CDATA[>]]> #{minDate,jdbcType=VARCHAR}
-                  and "date" <![CDATA[<]]> #{maxDate,jdbcType=VARCHAR}
+        where `date` <![CDATA[>=]]> #{minDate,jdbcType=VARCHAR} and `date` <![CDATA[<=]]> #{maxDate,jdbcType=VARCHAR}
         <if test="dateProp != null">
             and date_prop = #{dateProp,jdbcType=INTEGER}
         </if>

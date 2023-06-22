@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -56,7 +60,9 @@ public class StockTradeUserController {
     @RequestMapping(path = "/autoLogin", method = RequestMethod.POST)
     public CommonResult autoLogin() {
         try {
-            stockTradeUserService.autoLogin();
+            HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+            stockTradeUserService.autoLogin(request);
             return CommonResult.success("登陆成功");
         } catch (Exception e) {
             return CommonResult.failed(e.getMessage());

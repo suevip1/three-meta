@@ -15,6 +15,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -56,5 +57,37 @@ public interface RiverServerFeign {
     @RequestMapping(value = "river/api/calendar/getSpecialDay", method = RequestMethod.POST)
     @Headers("Content-Type: application/json")
     public CommonResult<String> getSpecialDay(CalendarSpecialDTO dto);
+
+
+    /**
+     * 验证token
+     * @param token
+     * @return
+     */
+    @RequestMapping(value = "river/user/verifyUserValid", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult<Boolean> verifyUserValid(String token);
+
+
+    /**
+     * 记录登陆信息
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "river/loginDetail/logLoginInfo", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult logLoginInfo(HttpServletRequest request);
+
+
+
+    /**
+     * 获取目前登陆用户
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "river/user/getCurrUserName", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult<String> getCurrUserName();
+
 
 }

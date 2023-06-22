@@ -2,6 +2,7 @@ package com.coatardbul.stock.service.statistic;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
@@ -42,7 +43,7 @@ public class StockBaseService {
 
     public void addProcess() {
             StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
-            dto.setRiverStockTemplateId("1567739221362475008");
+            dto.setRiverStockTemplateSign(StockTemplateEnum.FOR_EACH_STOCK.getSign());
             dto.setPageSize(100);
             dto.setPage(1);
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD));

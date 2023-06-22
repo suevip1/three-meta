@@ -18,11 +18,12 @@
     <result column="stock_name" jdbcType="VARCHAR" property="stockName" />
     <result column="trade_num" jdbcType="VARCHAR" property="tradeNum" />
     <result column="trade_price" jdbcType="VARCHAR" property="tradePrice" />
+    <result column="trade_user_id" jdbcType="VARCHAR" property="tradeUserId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, strategy_id, strategy_sign, strategy_name, strategy_param, job_name, cron, trade_amount, 
-    trade_rate_type, trade_rate, stock_code, stock_name, trade_num, trade_price
+    trade_rate_type, trade_rate, stock_code, stock_name, trade_num, trade_price, trade_user_id
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -42,102 +43,110 @@
       strategy_name, strategy_param, job_name, 
       cron, trade_amount, trade_rate_type, 
       trade_rate, stock_code, stock_name, 
-      trade_num, trade_price)
+      trade_num, trade_price, trade_user_id
+      )
     values (#{id,jdbcType=VARCHAR}, #{strategyId,jdbcType=VARCHAR}, #{strategySign,jdbcType=VARCHAR}, 
       #{strategyName,jdbcType=VARCHAR}, #{strategyParam,jdbcType=VARCHAR}, #{jobName,jdbcType=VARCHAR}, 
       #{cron,jdbcType=VARCHAR}, #{tradeAmount,jdbcType=VARCHAR}, #{tradeRateType,jdbcType=INTEGER}, 
       #{tradeRate,jdbcType=VARCHAR}, #{stockCode,jdbcType=VARCHAR}, #{stockName,jdbcType=VARCHAR}, 
-      #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR})
+      #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR}, #{tradeUserId,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTradeSellTask">
     <!--@mbg.generated-->
     insert into stock_trade_sell_task
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         id,
       </if>
-      <if test="strategyId != null">
+      <if test="strategyId != null and strategyId != ''">
         strategy_id,
       </if>
-      <if test="strategySign != null">
+      <if test="strategySign != null and strategySign != ''">
         strategy_sign,
       </if>
-      <if test="strategyName != null">
+      <if test="strategyName != null and strategyName != ''">
         strategy_name,
       </if>
-      <if test="strategyParam != null">
+      <if test="strategyParam != null and strategyParam != ''">
         strategy_param,
       </if>
-      <if test="jobName != null">
+      <if test="jobName != null and jobName != ''">
         job_name,
       </if>
-      <if test="cron != null">
+      <if test="cron != null and cron != ''">
         cron,
       </if>
-      <if test="tradeAmount != null">
+      <if test="tradeAmount != null and tradeAmount != ''">
         trade_amount,
       </if>
       <if test="tradeRateType != null">
         trade_rate_type,
       </if>
-      <if test="tradeRate != null">
+      <if test="tradeRate != null and tradeRate != ''">
         trade_rate,
       </if>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         stock_code,
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         stock_name,
       </if>
-      <if test="tradeNum != null">
+      <if test="tradeNum != null and tradeNum != ''">
         trade_num,
       </if>
-      <if test="tradePrice != null">
+      <if test="tradePrice != null and tradePrice != ''">
         trade_price,
+      </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        trade_user_id,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         #{id,jdbcType=VARCHAR},
       </if>
-      <if test="strategyId != null">
+      <if test="strategyId != null and strategyId != ''">
         #{strategyId,jdbcType=VARCHAR},
       </if>
-      <if test="strategySign != null">
+      <if test="strategySign != null and strategySign != ''">
         #{strategySign,jdbcType=VARCHAR},
       </if>
-      <if test="strategyName != null">
+      <if test="strategyName != null and strategyName != ''">
         #{strategyName,jdbcType=VARCHAR},
       </if>
-      <if test="strategyParam != null">
+      <if test="strategyParam != null and strategyParam != ''">
         #{strategyParam,jdbcType=VARCHAR},
       </if>
-      <if test="jobName != null">
+      <if test="jobName != null and jobName != ''">
         #{jobName,jdbcType=VARCHAR},
       </if>
-      <if test="cron != null">
+      <if test="cron != null and cron != ''">
         #{cron,jdbcType=VARCHAR},
       </if>
-      <if test="tradeAmount != null">
+      <if test="tradeAmount != null and tradeAmount != ''">
         #{tradeAmount,jdbcType=VARCHAR},
       </if>
       <if test="tradeRateType != null">
         #{tradeRateType,jdbcType=INTEGER},
       </if>
-      <if test="tradeRate != null">
+      <if test="tradeRate != null and tradeRate != ''">
         #{tradeRate,jdbcType=VARCHAR},
       </if>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         #{stockCode,jdbcType=VARCHAR},
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         #{stockName,jdbcType=VARCHAR},
       </if>
-      <if test="tradeNum != null">
+      <if test="tradeNum != null and tradeNum != ''">
         #{tradeNum,jdbcType=VARCHAR},
       </if>
-      <if test="tradePrice != null">
+      <if test="tradePrice != null and tradePrice != ''">
         #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        #{tradeUserId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -145,44 +154,47 @@
     <!--@mbg.generated-->
     update stock_trade_sell_task
     <set>
-      <if test="strategyId != null">
+      <if test="strategyId != null and strategyId != ''">
         strategy_id = #{strategyId,jdbcType=VARCHAR},
       </if>
-      <if test="strategySign != null">
+      <if test="strategySign != null and strategySign != ''">
         strategy_sign = #{strategySign,jdbcType=VARCHAR},
       </if>
-      <if test="strategyName != null">
+      <if test="strategyName != null and strategyName != ''">
         strategy_name = #{strategyName,jdbcType=VARCHAR},
       </if>
-      <if test="strategyParam != null">
+      <if test="strategyParam != null and strategyParam != ''">
         strategy_param = #{strategyParam,jdbcType=VARCHAR},
       </if>
-      <if test="jobName != null">
+      <if test="jobName != null and jobName != ''">
         job_name = #{jobName,jdbcType=VARCHAR},
       </if>
-      <if test="cron != null">
+      <if test="cron != null and cron != ''">
         cron = #{cron,jdbcType=VARCHAR},
       </if>
-      <if test="tradeAmount != null">
+      <if test="tradeAmount != null and tradeAmount != ''">
         trade_amount = #{tradeAmount,jdbcType=VARCHAR},
       </if>
       <if test="tradeRateType != null">
         trade_rate_type = #{tradeRateType,jdbcType=INTEGER},
       </if>
-      <if test="tradeRate != null">
+      <if test="tradeRate != null and tradeRate != ''">
         trade_rate = #{tradeRate,jdbcType=VARCHAR},
       </if>
-      <if test="stockCode != null">
+      <if test="stockCode != null and stockCode != ''">
         stock_code = #{stockCode,jdbcType=VARCHAR},
       </if>
-      <if test="stockName != null">
+      <if test="stockName != null and stockName != ''">
         stock_name = #{stockName,jdbcType=VARCHAR},
       </if>
-      <if test="tradeNum != null">
+      <if test="tradeNum != null and tradeNum != ''">
         trade_num = #{tradeNum,jdbcType=VARCHAR},
       </if>
-      <if test="tradePrice != null">
+      <if test="tradePrice != null and tradePrice != ''">
         trade_price = #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        trade_user_id = #{tradeUserId,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
@@ -202,7 +214,8 @@
       stock_code = #{stockCode,jdbcType=VARCHAR},
       stock_name = #{stockName,jdbcType=VARCHAR},
       trade_num = #{tradeNum,jdbcType=VARCHAR},
-      trade_price = #{tradePrice,jdbcType=VARCHAR}
+      trade_price = #{tradePrice,jdbcType=VARCHAR},
+      trade_user_id = #{tradeUserId,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 

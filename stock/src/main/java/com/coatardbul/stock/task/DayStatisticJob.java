@@ -4,6 +4,8 @@ import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
+import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
+import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
@@ -50,8 +52,9 @@ public class DayStatisticJob {
     StockTradeUserService stockTradeUserService;
 
     @Autowired
+    StockUserBaseService stockUserBaseService;
+    @Autowired
     StockCronRefreshService stockCronRefreshService;
-
 
 
     @Autowired
@@ -134,13 +137,20 @@ public class DayStatisticJob {
      */
     @XxlJob("dayAutoLoginJobHandler")
     public void dayAutoLoginJobHandler() {
-        stockTradeUserService.autoLogin();
+        int num = 10;
+        while (num>0) {
+            try {
+                StockTradeLoginDTO dto=new StockTradeLoginDTO();
+                String defaultTradeUser = stockUserBaseService.getDefaultTradeUser();
+                dto.setId(defaultTradeUser);
+                stockTradeUserService.login(dto,false);
+                break;
+            } catch (Exception e) {
+                num--;
+            }
+        }
+
     }
-
-
-
-
-
 
 
     /**
@@ -152,8 +162,8 @@ public class DayStatisticJob {
     @XxlJob("hisStrategyScanPlateAddJobHandle")
     public void hisStrategyScanPlateAddJobHandle() {
 
-        String dateStr="";
-        dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        String dateStr = "";
+        dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
 
         stockCronRefreshService.addMultiDayAmbushPlateInfo(dateStr);
         stockCronRefreshService.addHisTwoUpLimitAbovePlateInfo(dateStr);

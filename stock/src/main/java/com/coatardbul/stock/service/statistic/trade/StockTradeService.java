@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
@@ -18,7 +19,6 @@ import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
-import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
@@ -26,17 +26,20 @@ import com.coatardbul.stock.model.entity.StockTradeSellJob;
 import com.coatardbul.stock.model.entity.StockTradeSellTask;
 import com.coatardbul.stock.model.entity.StockTradeStrategy;
 import com.coatardbul.stock.model.entity.StockTradeUrl;
+import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TimeBuyTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -95,14 +98,16 @@ public class StockTradeService {
 
     @Autowired
     TimeBuyTradeService timeBuyTradeService;
-
+    @Autowired
+    StockUserBaseService stockUserBaseService;
     /**
      * 查询持仓
      *
      * @return
      */
-    public String queryAssetAndPosition() {
+    public String queryAssetAndPosition(HttpServletRequest request) {
 
+        String userName = stockUserBaseService.getCurrUserName(request);
         List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.ASSET_POSITION.getSign());
         if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
             return null;
@@ -112,7 +117,7 @@ public class StockTradeService {
         String url = stockTradeUrl.getUrl().replace("${validatekey}", stockTradeUrl.getValidateKey());
         String param = "moneyType=RMB";
         try {
-            String result = stockTradeBaseService.tradeByString(url, param);
+            String result = stockTradeBaseService.tradeByString(url, param,userName);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
@@ -126,7 +131,8 @@ public class StockTradeService {
     }
 
 
-    private String bugSellCommon(StockTradeBO dto) {
+    private String bugSellCommon(StockTradeBO dto, String userName) {
+
         List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.BUY_SELL.getSign());
         if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
             return null;
@@ -136,28 +142,32 @@ public class StockTradeService {
         String url = stockTradeUrl.getUrl().replace("${validatekey}", stockTradeUrl.getValidateKey());
 
         try {
-            String result = stockTradeBaseService.trade(url, dto);
+            String result = stockTradeBaseService.trade(url, dto,userName);
             log.info("交易对象" + JsonUtil.toJson(dto) + "交易返回信息" + result);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
                 return jsonObject.getString("Data");
+            }else {
+                throw new BusinessException(jsonObject.getString("Message"));
             }
-            return result;
         } catch (ConnectTimeoutException e) {
             log.error(e.getMessage(), e);
         }
         return null;
     }
 
-    public String sell(StockTradeBO dto) {
+    public String sell(StockTradeBO dto,String userName) {
         dto.setTradeType("S");
-        return bugSellCommon(dto);
+        return bugSellCommon(dto,userName);
     }
 
     public String buy(StockTradeBO dto) {
+        return buy(dto, null);
+    }
+    public String buy(StockTradeBO dto,String userName) {
         dto.setTradeType("B");
-        return bugSellCommon(dto);
+        return bugSellCommon(dto, userName);
     }
 
     public void addSellInfo(StockTradeSellJob dto) {
@@ -196,11 +206,11 @@ public class StockTradeService {
     }
 
 
-    public void initBuyInfo() {
+    public void initBuyInfo(HttpServletRequest request) {
         List<StockTradeBuyConfig> stockTradeBuyConfigs = stockTradeBuyConfigMapper.selectByAll(null);
         if (stockTradeBuyConfigs != null && stockTradeBuyConfigs.size() > 0) {
             //查询持仓可用金额
-            String result = queryAssetAndPosition();
+            String result = queryAssetAndPosition(request);
             JSONArray jsonArray = JSONArray.parseArray(result);
             String kyzj = jsonArray.getJSONObject(0).getString("Kyzj");
             for (StockTradeBuyConfig stbc : stockTradeBuyConfigs) {
@@ -222,9 +232,9 @@ public class StockTradeService {
     /**
      * 直接买入
      */
-    public Boolean directBuy(BigDecimal userMoney, BigDecimal buyNum, String code, String name) {
+    public Boolean directBuy(BigDecimal userMoney, BigDecimal buyNum, String code, String name, String userName) {
 
-        return timeBuyTradeService.tradeProcess(userMoney, buyNum, code);
+        return timeBuyTradeService.tradeProcess(userMoney, buyNum, code,userName);
     }
 
 
@@ -267,7 +277,8 @@ public class StockTradeService {
     }
 
 
-    public void directSell(BigDecimal sellPrice, BigDecimal sellNum, String code, String name) {
+    public void directSell(BigDecimal sellPrice, BigDecimal sellNum, String code, String name, HttpServletRequest request) {
+        String userName = stockUserBaseService.getCurrUserName(request);
         StockTradeBO stockTradeBO = new StockTradeBO();
         stockTradeBO.setStockCode(code);
 
@@ -280,6 +291,6 @@ public class StockTradeService {
 
         stockTradeBO.setAmount(sellNum.toString());
         stockTradeBO.setZqmc(name);
-        sell(stockTradeBO);
+        sell(stockTradeBO,userName);
     }
 }

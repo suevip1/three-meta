@@ -15,6 +15,7 @@ import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
 import com.coatardbul.stock.model.entity.StockTradeUrl;
 import com.coatardbul.stock.model.entity.StockTradeUser;
+import com.coatardbul.stock.service.StockUserBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -32,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,6 +70,8 @@ public class StockTradeUserService {
     @Autowired
     TradeClient tradeClient;
 
+    @Autowired
+    StockUserBaseService stockUserBaseService;
     public void updateCookie(StockUserCookieDTO dto) {
         if (StringUtils.isNotBlank(dto.getCookie())) {
             stockTradeBaseService.updateCookie(dto);
@@ -75,9 +79,13 @@ public class StockTradeUserService {
         stockTradeUrlMapper.updateValidateKey(dto.getValidatekey());
     }
 
-    public void autoLogin() {
-
-        login(null, true);
+    public void autoLogin(HttpServletRequest request) {
+        String userName = stockUserBaseService.getCurrUserName(request);
+        if (StringUtils.isBlank(userName)) {
+            StockTradeLoginDTO dto=new StockTradeLoginDTO();
+            dto.setId(userName);
+            login(dto,false);
+        }
 
     }
 

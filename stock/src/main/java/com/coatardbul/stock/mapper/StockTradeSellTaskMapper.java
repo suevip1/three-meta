@@ -1,8 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockTradeSellTask;
-
-import java.util.List;
+import com.coatardbul.stock.model.entity.StockTradeSellTask;import java.util.List;
 
 public interface StockTradeSellTaskMapper {
     int deleteByPrimaryKey(String id);

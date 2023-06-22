@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @Service
 public class AiSellTradeService extends SellTradeService {
 
-    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code) {
+    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code, String userName) {
         Boolean flag = false;
         TradeAllConfigDetail commonTradeInfo = null;
         try {
@@ -38,10 +38,10 @@ public class AiSellTradeService extends SellTradeService {
         if (SimulateTypeEnum.REAL.getSign().equals(commonTradeInfo.getDefaultStockTradeConfig().getSimulateType())) {
             //涨幅
             if (increaseSubtractAiTrade(commonTradeInfo.getStockBaseDetail())) {
-                flag = sellTrade(preTradeDetail);
+                flag = sellTrade(preTradeDetail, userName);
             }
             if (increaseAiTrade(commonTradeInfo.getStockBaseDetail())) {
-                flag = sellTrade(preTradeDetail);
+                flag = sellTrade(preTradeDetail, userName);
             }
         }
 

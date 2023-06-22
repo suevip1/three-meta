@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coatardbul.river.mapper.AuthUserMapper">
-  <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.AuthUser">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseCommon.model.entity.AuthUser">
     <!--@mbg.generated-->
     <!--@Table auth_user-->
     <id column="id" jdbcType="VARCHAR" property="id" />
@@ -18,11 +18,12 @@
     <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
     <result column="creator" jdbcType="VARCHAR" property="creator" />
     <result column="modifier" jdbcType="VARCHAR" property="modifier" />
+    <result column="expire_time" jdbcType="TIMESTAMP" property="expireTime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, username, `password`, nickname, `status`, sex, birthday, phone, email, remark, 
-    gmt_create, gmt_modified, creator, modifier
+    gmt_create, gmt_modified, creator, modifier, expire_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -36,33 +37,35 @@
     delete from auth_user
     where id = #{id,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.coatardbul.river.model.entity.AuthUser">
+  <insert id="insert" parameterType="com.coatardbul.baseCommon.model.entity.AuthUser">
     <!--@mbg.generated-->
     insert into auth_user (id, username, `password`, 
       nickname, `status`, sex, 
       birthday, phone, email, 
       remark, gmt_create, gmt_modified, 
-      creator, modifier)
+      creator, modifier, expire_time
+      )
     values (#{id,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
       #{nickname,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT}, #{sex,jdbcType=TINYINT}, 
       #{birthday,jdbcType=TIMESTAMP}, #{phone,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
       #{remark,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
-      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR})
+      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, #{expireTime,jdbcType=TIMESTAMP}
+      )
   </insert>
-  <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.AuthUser">
+  <insert id="insertSelective" parameterType="com.coatardbul.baseCommon.model.entity.AuthUser">
     <!--@mbg.generated-->
     insert into auth_user
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         id,
       </if>
-      <if test="username != null">
+      <if test="username != null and username != ''">
         username,
       </if>
-      <if test="password != null">
+      <if test="password != null and password != ''">
         `password`,
       </if>
-      <if test="nickname != null">
+      <if test="nickname != null and nickname != ''">
         nickname,
       </if>
       <if test="status != null">
@@ -74,13 +77,13 @@
       <if test="birthday != null">
         birthday,
       </if>
-      <if test="phone != null">
+      <if test="phone != null and phone != ''">
         phone,
       </if>
-      <if test="email != null">
+      <if test="email != null and email != ''">
         email,
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         remark,
       </if>
       <if test="gmtCreate != null">
@@ -89,24 +92,27 @@
       <if test="gmtModified != null">
         gmt_modified,
       </if>
-      <if test="creator != null">
+      <if test="creator != null and creator != ''">
         creator,
       </if>
-      <if test="modifier != null">
+      <if test="modifier != null and modifier != ''">
         modifier,
+      </if>
+      <if test="expireTime != null">
+        expire_time,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         #{id,jdbcType=VARCHAR},
       </if>
-      <if test="username != null">
+      <if test="username != null and username != ''">
         #{username,jdbcType=VARCHAR},
       </if>
-      <if test="password != null">
+      <if test="password != null and password != ''">
         #{password,jdbcType=VARCHAR},
       </if>
-      <if test="nickname != null">
+      <if test="nickname != null and nickname != ''">
         #{nickname,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
@@ -118,13 +124,13 @@
       <if test="birthday != null">
         #{birthday,jdbcType=TIMESTAMP},
       </if>
-      <if test="phone != null">
+      <if test="phone != null and phone != ''">
         #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="email != null">
+      <if test="email != null and email != ''">
         #{email,jdbcType=VARCHAR},
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         #{remark,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
@@ -133,25 +139,28 @@
       <if test="gmtModified != null">
         #{gmtModified,jdbcType=TIMESTAMP},
       </if>
-      <if test="creator != null">
+      <if test="creator != null and creator != ''">
         #{creator,jdbcType=VARCHAR},
       </if>
-      <if test="modifier != null">
+      <if test="modifier != null and modifier != ''">
         #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="expireTime != null">
+        #{expireTime,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.AuthUser">
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseCommon.model.entity.AuthUser">
     <!--@mbg.generated-->
     update auth_user
     <set>
-      <if test="username != null">
+      <if test="username != null and username != ''">
         username = #{username,jdbcType=VARCHAR},
       </if>
-      <if test="password != null">
+      <if test="password != null and password != ''">
         `password` = #{password,jdbcType=VARCHAR},
       </if>
-      <if test="nickname != null">
+      <if test="nickname != null and nickname != ''">
         nickname = #{nickname,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
@@ -163,13 +172,13 @@
       <if test="birthday != null">
         birthday = #{birthday,jdbcType=TIMESTAMP},
       </if>
-      <if test="phone != null">
+      <if test="phone != null and phone != ''">
         phone = #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="email != null">
+      <if test="email != null and email != ''">
         email = #{email,jdbcType=VARCHAR},
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         remark = #{remark,jdbcType=VARCHAR},
       </if>
       <if test="gmtCreate != null">
@@ -178,16 +187,19 @@
       <if test="gmtModified != null">
         gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
       </if>
-      <if test="creator != null">
+      <if test="creator != null and creator != ''">
         creator = #{creator,jdbcType=VARCHAR},
       </if>
-      <if test="modifier != null">
+      <if test="modifier != null and modifier != ''">
         modifier = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="expireTime != null">
+        expire_time = #{expireTime,jdbcType=TIMESTAMP},
       </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.AuthUser">
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseCommon.model.entity.AuthUser">
     <!--@mbg.generated-->
     update auth_user
     set username = #{username,jdbcType=VARCHAR},
@@ -202,14 +214,15 @@
       gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
       creator = #{creator,jdbcType=VARCHAR},
-      modifier = #{modifier,jdbcType=VARCHAR}
+      modifier = #{modifier,jdbcType=VARCHAR},
+      expire_time = #{expireTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 
 <!--auto generated by MybatisCodeHelper on 2022-05-06-->
   <select id="selectAllByUsernameAndPassword" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from auth_user
         where username=#{username,jdbcType=VARCHAR} and `password`=#{password,jdbcType=VARCHAR}
     </select>

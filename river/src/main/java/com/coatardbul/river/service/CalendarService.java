@@ -176,8 +176,8 @@ public class CalendarService {
 
 
 
-    public List<AuthCalendar> getCalendarList(CalendarDTO calendarDTO) {
-        List<AuthCalendar> authCalendars = authCalendarMapper.selectAllByDateBetween(calendarDTO.getBeginMonth(), calendarDTO.getEndMonth(),calendarDTO.getDateProp());
+    public List<AuthCalendar> getCalendarList(CalendarDateDTO calendarDTO) {
+        List<AuthCalendar> authCalendars = authCalendarMapper.selectAllByDateBetween(calendarDTO.getBeginDate(), calendarDTO.getEndDate(),calendarDTO.getDateProp());
 
         if (authCalendars != null && authCalendars.size() > 0) {
             return authCalendars.stream().map(this::convert).collect(Collectors.toList());

@@ -112,4 +112,9 @@ public class StockIndustryAnalyseService {
     public void delete(StockIndustryAnalyseDTO dto) {
         stockIndustryAnalyseMapper.deleteByPrimaryKey(dto.getDate());
     }
+
+    public StockIndustryAnalyseDTO get(StockIndustryAnalyseDTO dto) {
+        StockIndustryAnalyse stockIndustryAnalyse = stockIndustryAnalyseMapper.selectByPrimaryKey(dto.getDate());
+       return convert(stockIndustryAnalyse);
+    }
 }

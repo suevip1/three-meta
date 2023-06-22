@@ -7,10 +7,15 @@ import com.coatardbul.stock.mapper.StockTradeBuyTaskMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.entity.StockTradeStrategy;
+import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -36,13 +41,17 @@ public class StockTradeBuyTaskService {
     StockTradeStrategyMapper stockTradeStrategyMapper;
     @Autowired
     StockTradeService stockTradeService;
-
+@Autowired
+    StockUserBaseService stockUserBaseService;
 
     public void add(StockTradeBuyTask dto) throws Exception {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        String userName = stockUserBaseService.getCurrUserName(request);
         dto.setId(baseServerFeign.getSnowflakeId());
         dto.setJobName(stockTradeService.getJobName(dto));
+        dto.setTradeUserId(userName);
         stockTradeBuyTaskMapper.insert(dto);
-
 
         StockTradeStrategy stockTradeStrategies = stockTradeStrategyMapper.selectAllBySign(dto.getStrategySign());
 

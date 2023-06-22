@@ -1,10 +1,11 @@
 package com.coatardbul.stock.controller.trade;
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
+import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeBuyTaskService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;
-import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +41,8 @@ public class StockTradeController {
     StockTradeService stockTradeService;
 @Autowired
 StockTradeBuyTaskService stockTradeBuyTaskService;
+    @Autowired
+    StockUserBaseService stockUserBaseService;
     /**
      * 查询持仓
      *
@@ -46,7 +52,9 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
     @RequestMapping(path = "/queryAssetAndPosition", method = RequestMethod.POST)
     public CommonResult queryAssetAndPosition() {
         try {
-            String result = stockTradeService.queryAssetAndPosition();
+            HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+            String result = stockTradeService.queryAssetAndPosition(request);
             return CommonResult.success(result);
         }catch (Exception e){
             return CommonResult.failed(e.getMessage());
@@ -98,27 +106,34 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
 
     @RequestMapping(path = "/initBuyInfo", method = RequestMethod.POST)
     public CommonResult initBuyInfo() {
-        stockTradeService.initBuyInfo();
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        stockTradeService.initBuyInfo(request);
         return CommonResult.success(null);
     }
 
     @RequestMapping(path = "/quickBuy", method = RequestMethod.POST)
     public CommonResult quickBuy(@RequestBody Map map) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
+        String userName = stockUserBaseService.getCurrUserName(request);
         stockTradeService.directBuy(
                 new BigDecimal(map.get("buyAmount").toString()),
                 null,
                 (String)map.get("code"),
-                (String) map.get("name"));
-        return CommonResult.success(null);
+                (String) map.get("name"),userName);
+        return CommonResult.success("买入成功");
     }
     @RequestMapping(path = "/quickSell", method = RequestMethod.POST)
     public CommonResult quickSell(@RequestBody Map map) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+
         stockTradeService.directSell(
                 map.get("sellPrice")!=null? new BigDecimal(map.get("sellPrice").toString()):null,
                  new BigDecimal(map.get("sellNum").toString()),
                 (String)map.get("code"),
-                (String) map.get("name"));
-        return CommonResult.success(null);
+                (String) map.get("name"),request);
+        return CommonResult.success("卖出成功");
     }
 
     @ApiOperation("涨停条件买入")

@@ -319,7 +319,7 @@ public class StockTemplateService {
         List<String> lastDayAndToday = new ArrayList<>();
         if (StringUtils.isNotBlank(todayStr)) {
             List<String> afterDayList = dayList.stream().filter(o1 -> o1.compareTo(todayStr) >= 0).sorted().collect(Collectors.toList());
-            for (int i = afterDayList.size()-1; i > 0; i--) {
+            for (int i = afterDayList.size() - 1; i > 0; i--) {
                 DateEnumBo dateEnumBo = new DateEnumBo();
                 dateEnumBo.setDateChName(DateTimeUtil.parseDateStr(afterDayList.get(i), DateTimeUtil.YYYY_MM_DD, DateTimeUtil.YYYY_MM_DD_WORD));
                 dateEnumBo.setDateFormatStr(afterDayList.get(i));
@@ -570,7 +570,7 @@ public class StockTemplateService {
         if (scriptStr.contains(LAST_DAY_STRING)) {
             //过滤取最大值
             Integer maxNum = dateEnumArr.stream().filter(o1 -> o1.getDateScript().contains(LAST_DAY_STRING)).map(DateEnumBo::getNum).max(Comparator.comparing(Integer::intValue)).get();
-            PageHelper.startPage(0, maxNum+1);
+            PageHelper.startPage(0, maxNum + 1);
             //排序获取最近几天数据
             List<String> dateList = authCalendarMapper.selectDateListByDateLessThanAndDateProp(dateStr, DateTypeEnum.WORK_DAY.getCode());
             List<DateEnumBo> scriptDateArr = getScriptDateArr(dateList, dateStr);
@@ -579,7 +579,7 @@ public class StockTemplateService {
         if (scriptStr.contains(AFTER_DAY_STRING)) {
             //过滤取最大值
             Integer maxNum = dateEnumArr.stream().filter(o1 -> o1.getDateScript().contains(AFTER_DAY_STRING)).map(DateEnumBo::getNum).max(Comparator.comparing(Integer::intValue)).get();
-            PageHelper.startPage(0, maxNum+1);
+            PageHelper.startPage(0, maxNum + 1);
             //排序获取最近几天数据
             List<String> dateList = authCalendarMapper.selectDateListByDateGreaterThanAndDateProp(dateStr, DateTypeEnum.WORK_DAY.getCode());
             List<DateEnumBo> scriptDateArr = getScriptDateArr(dateList, dateStr);
@@ -702,6 +702,27 @@ public class StockTemplateService {
     }
 
 
+    public String exportEnum() {
+
+        StringBuffer sb = new StringBuffer();
+        List<StockQueryTemplate> list = stockQueryTemplateMapper.selectByAll();
+        for (int i = 0; i < list.size(); i++) {
+            // STOCK_DETAIL("STOCK_DETAIL", "股票详情", "1515522893696598016"),
+            StockQueryTemplate stockQueryTemplate = list.get(i);
+
+            String templateSign = "";
+            if (StringUtils.isNotBlank(stockQueryTemplate.getTemplateSign())) {
+                templateSign=stockQueryTemplate.getTemplateSign();
+            }else {
+                templateSign="a"+i;
+            }
+            sb.append(templateSign + "(\"" + templateSign + "\",  \"" + stockQueryTemplate.getName() + "\", \"" + stockQueryTemplate.getId() + "\"),\n");
+        }
+        log.info("11111111111");
+
+        log.info(sb.toString());
+        return sb.toString();
+    }
 }
 
 

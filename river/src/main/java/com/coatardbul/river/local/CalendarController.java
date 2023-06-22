@@ -78,7 +78,7 @@ public class CalendarController {
      */
     @PostMapping(value = "/getCalendarList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public CommonResult<List<AuthCalendar>> getCalendarList(@RequestBody @Valid CalendarDTO calendarDTO) {
+    public CommonResult<List<AuthCalendar>> getCalendarList(@RequestBody @Valid CalendarDateDTO calendarDTO) {
         return CommonResult.success( calendarService.getCalendarList(calendarDTO));
     }
 

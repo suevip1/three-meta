@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Service
 public class UplimitBuyTradeService extends BuyTradeService {
 
-    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code) {
+    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code, String userName) {
         Boolean flag = false;
         TradeAllConfigDetail commonTradeInfo = null;
         try {
@@ -38,7 +38,7 @@ public class UplimitBuyTradeService extends BuyTradeService {
         if (SimulateTypeEnum.REAL.getSign().equals(commonTradeInfo.getDefaultStockTradeConfig().getSimulateType())) {
             if (commonTradeInfo.getStockBaseDetail().getCurrUpRate().compareTo(new BigDecimal(9)) > 0) {
                 //调用购买接口，
-                flag = buyTrade(preTradeDetail);
+                flag = buyTrade(preTradeDetail, userName);
             }
         }
 

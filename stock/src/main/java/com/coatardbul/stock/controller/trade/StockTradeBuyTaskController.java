@@ -39,6 +39,7 @@ public class StockTradeBuyTaskController {
     @WebLog(value = "保存所有信息")
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     public CommonResult add(@Validated @RequestBody StockTradeBuyTask dto) throws Exception {
+
         stockTradeBuyTaskService.add(dto);
         return CommonResult.success(null);
     }

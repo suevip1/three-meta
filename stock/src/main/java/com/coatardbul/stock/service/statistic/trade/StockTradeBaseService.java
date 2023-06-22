@@ -6,6 +6,7 @@ import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.StockTradeUserMapper;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
 import com.coatardbul.stock.model.entity.StockTradeUser;
+import com.coatardbul.stock.service.StockUserBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -41,18 +41,20 @@ public class StockTradeBaseService {
 
     @Autowired
     RedisTemplate redisTemplate;
+    @Autowired
+    StockUserBaseService stockUserBaseService;
+
 
 
     /**
-     *
      * @param url 请求路径
-     * @param dto  请求参数
+     * @param dto 请求参数
      * @return
      * @throws ConnectTimeoutException
      */
-    public String trade(String url, Object dto) throws ConnectTimeoutException {
+    public String trade(String url, Object dto, String userName) throws ConnectTimeoutException {
         //http请求
-        List<Header> headerList = getHeaderList();
+        List<Header> headerList = getHeaderList(userName);
         if (headerList == null || headerList.size() == 0) {
             throw new BusinessException("cookie参数异常");
         }
@@ -63,9 +65,9 @@ public class StockTradeBaseService {
         return result;
     }
 
-    public String tradeByString(String url, String param) throws ConnectTimeoutException {
+    public String tradeByString(String url, String param, String userName) throws ConnectTimeoutException {
         //http请求
-        List<Header> headerList = getHeaderList();
+        List<Header> headerList = getHeaderList(userName);
         if (headerList == null || headerList.size() == 0) {
             throw new BusinessException("cookie参数异常");
         }
@@ -74,20 +76,18 @@ public class StockTradeBaseService {
     }
 
 
-    private List<Header> getHeaderList() {
-        if (redisTemplate.hasKey(TRADE_USER_COOKIE)) {
-            String value = (String) redisTemplate.opsForValue().get(TRADE_USER_COOKIE);
-            List<Header> headerList = new ArrayList<>();
-            Header cookie = httpService.getHead("Cookie", value);
-            Header orign = httpService.getHead("Origin", "https://jywg.18.cn");
-            Header contentType = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
-            headerList.add(cookie);
-            headerList.add(orign);
-            headerList.add(contentType);
-            return headerList;
-        } else {
-            return null;
-        }
+    private List<Header> getHeaderList(String userName) {
+
+        StockTradeUser stockTradeUser = stockTradeUserMapper.selectByPrimaryKey(userName);
+        List<Header> headerList = new ArrayList<>();
+        Header cookie = httpService.getHead("Cookie", stockTradeUser.getCookie());
+        Header orign = httpService.getHead("Origin", "https://jywg.18.cn");
+        Header contentType = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
+        headerList.add(cookie);
+        headerList.add(orign);
+        headerList.add(contentType);
+        return headerList;
+
     }
 
 
@@ -125,8 +125,6 @@ public class StockTradeBaseService {
     }
 
     public void updateCookie(StockUserCookieDTO dto) {
-        String key = TRADE_USER_COOKIE;
-        redisTemplate.opsForValue().set(key, dto.getCookie(), dto.getDuration(), TimeUnit.MINUTES);
         StockTradeUser stockTradeUser = new StockTradeUser();
         stockTradeUser.setId(dto.getId());
         stockTradeUser.setCookie(dto.getCookie());

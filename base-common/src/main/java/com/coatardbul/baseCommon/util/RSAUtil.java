@@ -62,7 +62,7 @@ public class RSAUtil {
 	 * 密钥长度
 	 * 
 	 */
-	private static final Integer KEY_LENGTH = 1024;
+	private static final Integer KEY_LENGTH = 512;
 
 	/**
 	 * RSA最大加密明文大小
@@ -228,7 +228,7 @@ public class RSAUtil {
 		Map<String, Object> keyMap = genKeyPair();
 		String publicKey = getPublicKey(keyMap);
 		String privateKey = getPrivateKey(keyMap);
-		String sourceStr="1234567890";
+		String sourceStr="123456sdafdssdfsdfsdsdfsdafsdafsdfwdfwefweufweoifjoiwehjwehvoiewhoi\"\"7890";
 		String en = encryptByPublicKey(sourceStr, publicKey);
 		String de = decryptByPrivateKey(en, privateKey);
 		log.info("公钥：{}", publicKey);

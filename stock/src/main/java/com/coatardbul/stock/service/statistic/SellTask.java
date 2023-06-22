@@ -48,6 +48,7 @@ public class SellTask extends QuartzJobBean {
         //买入配置id
         String buyId = strings[0];
         StockTradeSellTask stockTradeSellTask = stockTradeSellTaskMapper.selectByPrimaryKey(buyId);
+        String userName=stockTradeSellTask.getTradeUserId();
         if ("TIME_SELL".equals(stockTradeSellTask.getStrategySign())) {
 
 //            String strategyParam = stockTradeSellTask.getStrategyParam();
@@ -55,7 +56,7 @@ public class SellTask extends QuartzJobBean {
 //            String buyDate = jsonObject.getString("buyDate");
 //            String buyTime = jsonObject.getString("buyTime");
 
-            flag = timeSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+            flag = timeSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode(),userName);
         }
         if ("AI_SELL".equals(stockTradeSellTask.getStrategySign())) {
 
@@ -64,7 +65,7 @@ public class SellTask extends QuartzJobBean {
 //            String buyDate = jsonObject.getString("buyDate");
 //            String buyTime = jsonObject.getString("buyTime");
 
-            flag = aiSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+            flag = aiSellTradeService.tradeProcess(convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode(),userName);
         }
 
         //低于多少卖出
@@ -88,7 +89,7 @@ public class SellTask extends QuartzJobBean {
 
             BigDecimal lessRate = new BigDecimal(lessRateStr).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
             BigDecimal minRate = new BigDecimal(minRateStr).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
-            flag = lowRateSellTradeService.tradeProcess(lessRate, minRate, convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode());
+            flag = lowRateSellTradeService.tradeProcess(lessRate, minRate, convertAmount(stockTradeSellTask.getTradeAmount()), convertAmount(stockTradeSellTask.getTradeNum()), stockTradeSellTask.getStockCode(),userName);
         }
 
         if (flag) {

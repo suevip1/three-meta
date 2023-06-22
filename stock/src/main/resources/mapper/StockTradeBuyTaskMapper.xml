@@ -15,11 +15,12 @@
     <result column="stock_name" jdbcType="VARCHAR" property="stockName" />
     <result column="trade_num" jdbcType="VARCHAR" property="tradeNum" />
     <result column="trade_price" jdbcType="VARCHAR" property="tradePrice" />
+    <result column="trade_user_id" jdbcType="VARCHAR" property="tradeUserId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, strategy_sign, strategy_name, strategy_param, job_name, cron, trade_amount, stock_code, 
-    stock_name, trade_num, trade_price
+    stock_name, trade_num, trade_price, trade_user_id
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -38,11 +39,13 @@
     insert into stock_trade_buy_task (id, strategy_sign, strategy_name, 
       strategy_param, job_name, cron, 
       trade_amount, stock_code, stock_name, 
-      trade_num, trade_price)
+      trade_num, trade_price, trade_user_id
+      )
     values (#{id,jdbcType=VARCHAR}, #{strategySign,jdbcType=VARCHAR}, #{strategyName,jdbcType=VARCHAR}, 
       #{strategyParam,jdbcType=VARCHAR}, #{jobName,jdbcType=VARCHAR}, #{cron,jdbcType=VARCHAR}, 
       #{tradeAmount,jdbcType=VARCHAR}, #{stockCode,jdbcType=VARCHAR}, #{stockName,jdbcType=VARCHAR}, 
-      #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR})
+      #{tradeNum,jdbcType=VARCHAR}, #{tradePrice,jdbcType=VARCHAR}, #{tradeUserId,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.baseService.entity.bo.StockTradeBuyTask">
     <!--@mbg.generated-->
@@ -81,6 +84,9 @@
       <if test="tradePrice != null and tradePrice != ''">
         trade_price,
       </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        trade_user_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null and id != ''">
@@ -115,6 +121,9 @@
       </if>
       <if test="tradePrice != null and tradePrice != ''">
         #{tradePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        #{tradeUserId,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -152,6 +161,9 @@
       <if test="tradePrice != null and tradePrice != ''">
         trade_price = #{tradePrice,jdbcType=VARCHAR},
       </if>
+      <if test="tradeUserId != null and tradeUserId != ''">
+        trade_user_id = #{tradeUserId,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
@@ -167,7 +179,8 @@
       stock_code = #{stockCode,jdbcType=VARCHAR},
       stock_name = #{stockName,jdbcType=VARCHAR},
       trade_num = #{tradeNum,jdbcType=VARCHAR},
-      trade_price = #{tradePrice,jdbcType=VARCHAR}
+      trade_price = #{tradePrice,jdbcType=VARCHAR},
+      trade_user_id = #{tradeUserId,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 

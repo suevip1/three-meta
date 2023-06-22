@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.river.mapper.LoginDetailMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.LoginDetail">
+    <!--@mbg.generated-->
+    <!--@Table login_detail-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="user_agent" jdbcType="LONGVARCHAR" property="userAgent" />
+    <result column="client_port" jdbcType="VARCHAR" property="clientPort" />
+    <result column="request_uri" jdbcType="VARCHAR" property="requestUri" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, ip, user_agent, client_port, request_uri, gmt_create
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from login_detail
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from login_detail
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.river.model.entity.LoginDetail">
+    <!--@mbg.generated-->
+    insert into login_detail (id, ip, user_agent, 
+      client_port, request_uri, gmt_create
+      )
+    values (#{id,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{userAgent,jdbcType=LONGVARCHAR}, 
+      #{clientPort,jdbcType=VARCHAR}, #{requestUri,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.LoginDetail">
+    <!--@mbg.generated-->
+    insert into login_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        id,
+      </if>
+      <if test="ip != null and ip != ''">
+        ip,
+      </if>
+      <if test="userAgent != null and userAgent != ''">
+        user_agent,
+      </if>
+      <if test="clientPort != null and clientPort != ''">
+        client_port,
+      </if>
+      <if test="requestUri != null and requestUri != ''">
+        request_uri,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null and ip != ''">
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="userAgent != null and userAgent != ''">
+        #{userAgent,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="clientPort != null and clientPort != ''">
+        #{clientPort,jdbcType=VARCHAR},
+      </if>
+      <if test="requestUri != null and requestUri != ''">
+        #{requestUri,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.LoginDetail">
+    <!--@mbg.generated-->
+    update login_detail
+    <set>
+      <if test="ip != null and ip != ''">
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="userAgent != null and userAgent != ''">
+        user_agent = #{userAgent,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="clientPort != null and clientPort != ''">
+        client_port = #{clientPort,jdbcType=VARCHAR},
+      </if>
+      <if test="requestUri != null and requestUri != ''">
+        request_uri = #{requestUri,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.LoginDetail">
+    <!--@mbg.generated-->
+    update login_detail
+    set ip = #{ip,jdbcType=VARCHAR},
+      user_agent = #{userAgent,jdbcType=LONGVARCHAR},
+      client_port = #{clientPort,jdbcType=VARCHAR},
+      request_uri = #{requestUri,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

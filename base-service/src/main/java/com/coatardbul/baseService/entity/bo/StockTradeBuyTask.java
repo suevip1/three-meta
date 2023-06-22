@@ -58,4 +58,9 @@ public class StockTradeBuyTask {
     * 交易价格
     */
     private String tradePrice;
+
+    /**
+     * 交易用户id
+     */
+    private String tradeUserId;
 }

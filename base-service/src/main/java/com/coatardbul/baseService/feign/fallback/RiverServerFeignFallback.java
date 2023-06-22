@@ -14,6 +14,7 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -60,6 +61,24 @@ public class RiverServerFeignFallback implements FallbackFactory<RiverServerFeig
 
             @Override
             public CommonResult<String> getSpecialDay(CalendarSpecialDTO dto) {
+                log.error("调用失败", throwable);
+                return null;
+            }
+
+            @Override
+            public CommonResult<Boolean> verifyUserValid(String token) {
+                log.error("调用失败", throwable);
+                return null;
+            }
+
+            @Override
+            public CommonResult logLoginInfo(HttpServletRequest request) {
+                log.error("调用失败", throwable);
+                return null;
+            }
+
+            @Override
+            public CommonResult<String> getCurrUserName() {
                 log.error("调用失败", throwable);
                 return null;            }
         };

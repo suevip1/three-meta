@@ -27,7 +27,7 @@ public class SellTradeService extends TradeBaseService{
     StockTradeService stockTradeService;
 
 
-    public Boolean sellTrade( PreTradeDetail preTradeDetail) {
+    public Boolean sellTrade(PreTradeDetail preTradeDetail, String userName) {
         Boolean flag = false;
         //调用购买接口，
         StockTradeBO stockTradeBO = new StockTradeBO();
@@ -35,7 +35,7 @@ public class SellTradeService extends TradeBaseService{
         stockTradeBO.setPrice(preTradeDetail.getPrice().toString());
         stockTradeBO.setAmount(preTradeDetail.getTradeNum().toString());
         stockTradeBO.setZqmc(preTradeDetail.getName());
-        String response = stockTradeService.sell(stockTradeBO);
+        String response = stockTradeService.sell(stockTradeBO,userName);
         //成功
         if (StringUtils.isNotBlank(response)) {
             flag = true;

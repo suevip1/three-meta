@@ -3,6 +3,7 @@ package com.coatardbul.baseCommon.exception.handle;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseCommon.exception.LoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,6 +31,12 @@ public class UnifiedExceptionHandler {
     @ResponseBody
     public CommonResult business(BusinessException e) {
         return CommonResult.failed(e.getMessage());
+    }
+
+    @ExceptionHandler({LoginException.class})
+    @ResponseBody
+    public CommonResult login(LoginException e) {
+        return CommonResult.unauthorized(e.getMessage());
     }
 
     @ExceptionHandler({Exception.class})

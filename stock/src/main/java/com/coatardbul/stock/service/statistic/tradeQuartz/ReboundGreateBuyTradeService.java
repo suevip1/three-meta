@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Service
 public class ReboundGreateBuyTradeService extends BuyTradeService {
 
-    public Boolean tradeProcess(BigDecimal  reboundRate ,BigDecimal userMoney, BigDecimal buyNum, String code) {
+    public Boolean tradeProcess(BigDecimal  reboundRate , BigDecimal userMoney, BigDecimal buyNum, String code, String userName) {
         Boolean flag = false;
         TradeAllConfigDetail commonTradeInfo = null;
         try {
@@ -39,7 +39,7 @@ public class ReboundGreateBuyTradeService extends BuyTradeService {
             //反弹比例大于预设值
             if (currnReboundRate.compareTo(reboundRate) > 0) {
                 //调用购买接口，
-                flag = buyTrade(preTradeDetail);
+                flag = buyTrade(preTradeDetail, userName);
             }
         }
 

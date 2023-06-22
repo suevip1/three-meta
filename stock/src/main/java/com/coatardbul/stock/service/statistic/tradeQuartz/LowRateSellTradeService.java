@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Service
 public class LowRateSellTradeService extends SellTradeService {
 
-    public Boolean tradeProcess(BigDecimal lessRate, BigDecimal minRate,BigDecimal userMoney, BigDecimal buyNum, String code) {
+    public Boolean tradeProcess(BigDecimal lessRate, BigDecimal minRate, BigDecimal userMoney, BigDecimal buyNum, String code, String userName) {
         Boolean flag = false;
         TradeAllConfigDetail commonTradeInfo = null;
         try {
@@ -39,7 +39,7 @@ public class LowRateSellTradeService extends SellTradeService {
             if (subtract.compareTo(lessRate) > 0) {
                 //最低的线在哪成交，不可能跌停立马出掉，万一回弹呢，即目前价格涨幅大于最低线
                 if (minRate.compareTo(commonTradeInfo.getStockBaseDetail().getCurrUpRate()) < 0) {
-                    flag = sellTrade(preTradeDetail);
+                    flag = sellTrade(preTradeDetail, userName);
                 }
             }
         }

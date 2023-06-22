@@ -120,4 +120,20 @@ public class StockTemplateController {
         }
     }
 
+    /**
+     * 导出问句枚举
+     */
+    @PostMapping(value = "/exportEnum", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public CommonResult<String> exportEnum() throws BusinessException {
+
+        try {
+            String query = stockTemplateService.exportEnum();
+            return CommonResult.success(query);
+        } catch (Exception e) {
+            log.error(e.getMessage(),e);
+            throw new BusinessException(e.getMessage());
+        }
+    }
+
 }

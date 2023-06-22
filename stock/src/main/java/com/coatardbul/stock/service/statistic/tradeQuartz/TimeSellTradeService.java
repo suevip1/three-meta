@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Service
 public class TimeSellTradeService extends SellTradeService {
 
-    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code) {
+    public Boolean tradeProcess(BigDecimal userMoney, BigDecimal buyNum, String code, String userName) {
         Boolean flag = false;
         TradeAllConfigDetail commonTradeInfo = null;
         try {
@@ -36,7 +36,7 @@ public class TimeSellTradeService extends SellTradeService {
         //真实交易
         if (SimulateTypeEnum.REAL.getSign().equals(commonTradeInfo.getDefaultStockTradeConfig().getSimulateType())) {
             //调用购买接口，
-            flag = sellTrade(preTradeDetail);
+            flag = sellTrade(preTradeDetail,userName);
         }
 
 
