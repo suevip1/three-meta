@@ -1,18 +1,20 @@
 package com.coatardbul.stock.service.statistic;
 
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.SailServerFeign;
-import com.coatardbul.stock.mapper.StockCookieMapper;
+import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
-import com.coatardbul.stock.model.entity.StockCookie;
+import com.coatardbul.stock.model.entity.AccountBase;
+import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -26,64 +28,43 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StockCookieService {
 
+
     @Autowired
-    StockCookieMapper stockCookieMapper;
+    StockUserBaseService stockUserBaseService;
     @Autowired
     BaseServerFeign baseServerFeign;
     @Autowired
     StockStrategyService stockStrategyService;
-
+    @Autowired
+    AccountBaseMapper accountBaseMapper;
     @Autowired
     SailServerFeign sailServerFeign;
-    public void add(StockCookieDTO dto) {
-        StockCookie convert = convert(dto);
-        convert.setId(baseServerFeign.getSnowflakeId());
-        stockCookieMapper.insert(convert);
-    }
 
-    public void modify(StockCookieDTO dto) {
-        StockCookie convert = convert(dto);
-        stockCookieMapper.updateByPrimaryKeySelective(convert);
-    }
 
-    public List<StockCookieDTO> findAll() {
-        List<StockCookie> stockCookies = stockCookieMapper.selectAll();
-        if (stockCookies != null && stockCookies.size() > 0) {
-            return stockCookies.stream().map(this::convert).collect(Collectors.toList());
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    private StockCookie convert(StockCookieDTO dto) {
-        StockCookie result = new StockCookie();
-        result.setId(dto.getId());
-        result.setTypeKey(dto.getKey());
-        result.setCookieValue(dto.getCookie());
-        result.setRemark(dto.getRemark());
-        return result;
-    }
-
-    private StockCookieDTO convert(StockCookie stockCookie) {
-        StockCookieDTO dto = new StockCookieDTO();
-        dto.setId(stockCookie.getId());
-        dto.setKey(stockCookie.getTypeKey());
-        dto.setCookie(stockCookie.getCookieValue());
-        dto.setRemark(stockCookie.getRemark());
-        return dto;
-
-    }
-
+    /**
+     * 同花顺登陆账号cookie
+     *
+     * @param dto
+     */
     public void simpleModify(StockCookieDTO dto) {
-        stockCookieMapper.updateCookieValue(dto.getCookie());
-        stockStrategyService.setCookieValue(dto.getCookie());
-        //调用sail，刷新sailcookie
-        for(int i=1;i<10;i++){
-            sailServerFeign.refreshCookie();
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        String userName = stockUserBaseService.getCurrUserName(request);
+
+        AccountBase accountBase = new AccountBase();
+        accountBase.setUserId(userName);
+        accountBase.setCookie(dto.getCookie());
+        accountBase.setTradeType(dto.getTradeType());
+        accountBaseMapper.updateByUserIdAndTradeTypeSelective(accountBase);
+        //更新其他服务启的cookie
+        if(CookieTypeEnum.TONG_HUA_SHUN.getType().equals(dto.getTradeType())){
+            stockStrategyService.setCookieValue(dto.getCookie());
+            //调用sail，刷新sailcookie
+            for (int i = 1; i < 10; i++) {
+                sailServerFeign.refreshCookie();
+            }
         }
+
     }
 
-    public void refreshCache() {
-        stockStrategyService.refreshCookie();
-    }
+
 }

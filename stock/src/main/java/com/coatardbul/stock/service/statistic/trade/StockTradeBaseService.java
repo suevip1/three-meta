@@ -1,12 +1,10 @@
 package com.coatardbul.stock.service.statistic.trade;
 
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.service.HttpPoolService;
-import com.coatardbul.stock.mapper.StockTradeUserMapper;
-import com.coatardbul.stock.model.dto.StockUserCookieDTO;
-import com.coatardbul.stock.model.entity.StockTradeUser;
-import com.coatardbul.stock.service.StockUserBaseService;
+import com.coatardbul.stock.mapper.AccountBaseMapper;
+import com.coatardbul.stock.model.entity.AccountBase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,17 +30,16 @@ public class StockTradeBaseService {
 
 
     private final static String TRADE_USER_COOKIE = "TRADE_USER_COOKIE";
-    @Autowired
-    StockTradeUserMapper stockTradeUserMapper;
+
     @Autowired
     HttpPoolService httpService;
 
     @Autowired
     RedisTemplate redisTemplate;
+
+
     @Autowired
-    StockUserBaseService stockUserBaseService;
-
-
+    AccountBaseMapper accountBaseMapper;
 
     /**
      * @param url 请求路径
@@ -77,10 +72,9 @@ public class StockTradeBaseService {
 
 
     private List<Header> getHeaderList(String userName) {
-
-        StockTradeUser stockTradeUser = stockTradeUserMapper.selectByPrimaryKey(userName);
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
         List<Header> headerList = new ArrayList<>();
-        Header cookie = httpService.getHead("Cookie", stockTradeUser.getCookie());
+        Header cookie = httpService.getHead("Cookie", accountBase.getCookie());
         Header orign = httpService.getHead("Origin", "https://jywg.18.cn");
         Header contentType = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
         headerList.add(cookie);
@@ -124,13 +118,5 @@ public class StockTradeBaseService {
         return params.toString();
     }
 
-    public void updateCookie(StockUserCookieDTO dto) {
-        StockTradeUser stockTradeUser = new StockTradeUser();
-        stockTradeUser.setId(dto.getId());
-        stockTradeUser.setCookie(dto.getCookie());
-        Date expireDate = DateTimeUtil.getBeforeDate(-dto.getDuration(), Calendar.MINUTE);
-        stockTradeUser.setExpireTime(expireDate);
-        stockTradeUserMapper.updateByPrimaryKeySelective(stockTradeUser);
 
-    }
 }

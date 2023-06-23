@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class StockUserCookieDTO {
 
-    private String id;
+    private String userId;
 
     private Integer duration;
 

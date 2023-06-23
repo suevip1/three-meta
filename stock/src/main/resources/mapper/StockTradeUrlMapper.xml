@@ -8,11 +8,10 @@
     <result column="url" jdbcType="VARCHAR" property="url" />
     <result column="sign" jdbcType="VARCHAR" property="sign" />
     <result column="remark" jdbcType="VARCHAR" property="remark" />
-    <result column="validate_key" jdbcType="VARCHAR" property="validateKey" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, url, sign, remark, validate_key
+    id, url, sign, remark
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -29,45 +28,39 @@
   <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockTradeUrl">
     <!--@mbg.generated-->
     insert into stock_trade_url (id, url, sign, 
-      remark, validate_key)
+      remark)
     values (#{id,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{sign,jdbcType=VARCHAR}, 
-      #{remark,jdbcType=VARCHAR}, #{validateKey,jdbcType=VARCHAR})
+      #{remark,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockTradeUrl">
     <!--@mbg.generated-->
     insert into stock_trade_url
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         id,
       </if>
-      <if test="url != null">
+      <if test="url != null and url != ''">
         url,
       </if>
-      <if test="sign != null">
+      <if test="sign != null and sign != ''">
         sign,
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         remark,
-      </if>
-      <if test="validateKey != null">
-        validate_key,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
+      <if test="id != null and id != ''">
         #{id,jdbcType=VARCHAR},
       </if>
-      <if test="url != null">
+      <if test="url != null and url != ''">
         #{url,jdbcType=VARCHAR},
       </if>
-      <if test="sign != null">
+      <if test="sign != null and sign != ''">
         #{sign,jdbcType=VARCHAR},
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="validateKey != null">
-        #{validateKey,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -75,17 +68,14 @@
     <!--@mbg.generated-->
     update stock_trade_url
     <set>
-      <if test="url != null">
+      <if test="url != null and url != ''">
         url = #{url,jdbcType=VARCHAR},
       </if>
-      <if test="sign != null">
+      <if test="sign != null and sign != ''">
         sign = #{sign,jdbcType=VARCHAR},
       </if>
-      <if test="remark != null">
+      <if test="remark != null and remark != ''">
         remark = #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="validateKey != null">
-        validate_key = #{validateKey,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=VARCHAR}
@@ -95,8 +85,7 @@
     update stock_trade_url
     set url = #{url,jdbcType=VARCHAR},
       sign = #{sign,jdbcType=VARCHAR},
-      remark = #{remark,jdbcType=VARCHAR},
-      validate_key = #{validateKey,jdbcType=VARCHAR}
+      remark = #{remark,jdbcType=VARCHAR}
     where id = #{id,jdbcType=VARCHAR}
   </update>
 

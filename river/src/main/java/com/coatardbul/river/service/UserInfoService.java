@@ -12,6 +12,8 @@ import com.coatardbul.river.model.entity.DictInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -80,8 +82,8 @@ public class UserInfoService {
     }
 
 
-    public String getCurrUserName(HttpServletRequest request) {
-
+    public String getCurrUserName() {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         String token = request.getHeader("token");
         if (StringUtils.isNotBlank(token)) {
             List<DictInfo> dictInfos = dictInfoMapper.selectAllByBusiTypeAndSignKey(DictTypeEnum.ENCRYPT.getSign(), DictKeyEnum.AES_KEY.getSign());

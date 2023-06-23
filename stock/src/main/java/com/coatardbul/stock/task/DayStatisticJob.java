@@ -1,6 +1,5 @@
 package com.coatardbul.stock.task;
 
-import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
@@ -13,7 +12,6 @@ import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.ScatterDayUpLimitCallAuctionService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.StockScatterService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeUserService;
-import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitValPriceService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +44,7 @@ public class DayStatisticJob {
 
     @Autowired
     ScatterDayUpLimitCallAuctionService stockScatterUpLimitService;
-    @Autowired
-    StockUpLimitValPriceService stockUpLimitValPriceService;
+
     @Autowired
     StockTradeUserService stockTradeUserService;
 
@@ -101,18 +98,7 @@ public class DayStatisticJob {
     }
 
 
-    @XxlJob("dayTwoAboveUpLimitVolPriceJobHandler")
-    public void dayTwoAboveUpLimitVolPriceJobHandler() throws ParseException {
-        String param = XxlJobHelper.getJobParam();
-        log.info("刷新两板以上量价关系开始" + param);
-        if (StringUtils.isNotBlank(param)) {
-            StockStrategyQueryDTO dto = JsonUtil.readToValue(param, StockStrategyQueryDTO.class);
-            dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-            log.info("刷新两板以上量价关系参数" + JsonUtil.toJson(dto));
-            stockUpLimitValPriceService.dayTwoAboveUpLimitVolPriceJobHandler(dto);
-        }
-        log.info("刷新两板以上量价关系结束");
-    }
+
 
 
     @XxlJob("dayMarketValueUpLimitJobHandler")
@@ -142,8 +128,8 @@ public class DayStatisticJob {
             try {
                 StockTradeLoginDTO dto=new StockTradeLoginDTO();
                 String defaultTradeUser = stockUserBaseService.getDefaultTradeUser();
-                dto.setId(defaultTradeUser);
-                stockTradeUserService.login(dto,false);
+                dto.setUserId(defaultTradeUser);
+                stockTradeUserService.login(dto);
                 break;
             } catch (Exception e) {
                 num--;

@@ -1,20 +1,22 @@
 package com.coatardbul.stock.service.statistic.trade;
 
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.RSAUtil;
 import com.coatardbul.baseService.client.TradeClient;
 import com.coatardbul.baseService.entity.bo.HttpConfigBo;
 import com.coatardbul.baseService.entity.bo.HttpResponseInfo;
 import com.coatardbul.baseService.service.CronRefreshService;
 import com.coatardbul.baseService.service.HttpPoolService;
+import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
-import com.coatardbul.stock.mapper.StockTradeUserMapper;
 import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.model.dto.StockUserCookieDTO;
+import com.coatardbul.stock.model.entity.AccountBase;
 import com.coatardbul.stock.model.entity.StockTradeUrl;
-import com.coatardbul.stock.model.entity.StockTradeUser;
 import com.coatardbul.stock.service.StockUserBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +40,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,47 +65,37 @@ public class StockTradeUserService {
     StockTradeBaseService stockTradeBaseService;
     @Autowired
     StockTradeUrlMapper stockTradeUrlMapper;
-    @Autowired
-    StockTradeUserMapper stockTradeUserMapper;
+
     @Autowired
     HttpPoolService httpService;
     @Autowired
     CronRefreshService cronRefreshService;
     @Autowired
     TradeClient tradeClient;
-
+@Autowired
+AccountBaseMapper accountBaseMapper;
     @Autowired
     StockUserBaseService stockUserBaseService;
-    public void updateCookie(StockUserCookieDTO dto) {
-        if (StringUtils.isNotBlank(dto.getCookie())) {
-            stockTradeBaseService.updateCookie(dto);
-        }
-        stockTradeUrlMapper.updateValidateKey(dto.getValidatekey());
-    }
+
 
     public void autoLogin(HttpServletRequest request) {
         String userName = stockUserBaseService.getCurrUserName(request);
-        if (StringUtils.isBlank(userName)) {
+        if (StringUtils.isNotBlank(userName)) {
             StockTradeLoginDTO dto=new StockTradeLoginDTO();
-            dto.setId(userName);
-            login(dto,false);
+            dto.setUserId(userName);
+            login(dto);
         }
 
     }
 
+
+
+    /**
+     *
+     * @param dto 包含用户id
+     */
     public void login(StockTradeLoginDTO dto) {
-        login(dto, false);
-    }
-
-    public void login(StockTradeLoginDTO dto, boolean autoLoginFlag) {
-        StockTradeUser stockTradeUser = null;
-        if (autoLoginFlag) {
-            //登陆账号
-            List<StockTradeUser> stockTradeUsers = stockTradeUserMapper.selectAll();
-            stockTradeUser = stockTradeUsers.get(0);
-        } else {
-            stockTradeUser = stockTradeUserMapper.selectByPrimaryKey(dto.getId());
-        }
+        AccountBase accountBase= accountBaseMapper.selectByUserIdAndTradeType(dto.getUserId(), CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
         //登陆路径
         List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.LOGIN.getSign());
         if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
@@ -115,12 +109,13 @@ public class StockTradeUserService {
         List<Header> headerList = getHeadList();
         //登陆请求参数
         Map<String, Object> params = null;
-        if (autoLoginFlag) {
+        //传入验证码，走人工，不传验证码，走ai识别
+        if (!StringUtils.isNotBlank(dto.getRandNumber())) {
             //验证码
             StockTradeLoginDTO randomAndKey = getRandomAndIdentifyCode();
-            params = getLoginParams(stockTradeUser, randomAndKey);
+            params = getLoginParams(accountBase, randomAndKey);
         } else {
-            params = getLoginParams(stockTradeUser, null, dto);
+            params = getLoginParams(accountBase, null, dto);
         }
         //post
         HttpPost httpPost = httpService.setHttpPost(stockTradeUrl.getUrl(), "", headerList);
@@ -157,23 +152,49 @@ public class StockTradeUserService {
         } catch (ConnectTimeoutException e) {
             throw new BusinessException("登陆失败");
         }
+
+
+        //有效key
         String validateKey = getValidateKey(content);
-
-
+        accountBase.setParam1(validateKey);
         //更新cookie和key
-        StockUserCookieDTO stockUserCookieDTO = new StockUserCookieDTO();
-        stockUserCookieDTO.setId(stockTradeUser.getId());
-        if (autoLoginFlag) {
-            stockUserCookieDTO.setDuration(Integer.valueOf("1800"));
-        } else {
-            stockUserCookieDTO.setDuration(Integer.valueOf(dto.getDuration()));
-        }
-        stockUserCookieDTO.setCookie(tradeClient.getCurrentCookie());
-        stockUserCookieDTO.setValidatekey(validateKey);
-        updateCookie(stockUserCookieDTO);
-
+        updateTradeInfo(accountBase,dto);
     }
 
+    /**
+     * 更新交易信息
+     * @param accountBase
+     * @param dto
+     */
+    private void updateTradeInfo( AccountBase accountBase,StockTradeLoginDTO dto){
+        //更新cookie和key
+        Integer duration=null;
+        if (dto.getDuration()==null) {
+            duration=Integer.valueOf("1800");
+        } else {
+            duration= Integer.valueOf(dto.getDuration());
+        }
+        //更新交易参数
+        Date expireDate = DateTimeUtil.getBeforeDate(-duration.intValue(), Calendar.MINUTE);
+        accountBase.setExpireTime(expireDate);
+        accountBase.setCookie(tradeClient.getCurrentCookie());
+        accountBaseMapper.updateByPrimaryKeySelective(accountBase);
+    }
+
+    /**
+     * 更新页面传入的userid，cookie，持续时间，有效key
+     * @param dto
+     */
+    public void updateCookie(StockUserCookieDTO dto) {
+        AccountBase accountBase=new AccountBase();
+        accountBase.setUserId(dto.getUserId());
+        Date expireDate = DateTimeUtil.getBeforeDate(-dto.getDuration(), Calendar.MINUTE);
+        accountBase.setExpireTime(expireDate);
+        accountBase.setParam1(dto.getValidatekey());
+        accountBase.setCookie(dto.getCookie());
+        accountBase.setTradeType(CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
+        accountBaseMapper.updateByUserIdAndTradeTypeSelective(accountBase);
+    }
     private List<Header> getHeadList() {
         List<Header> headerList = new ArrayList<>();
         Header cookie1 = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
@@ -184,16 +205,16 @@ public class StockTradeUserService {
     }
 
 
-    private Map<String, Object> getLoginParams(StockTradeUser stockTradeUser, StockTradeLoginDTO randomAndKey) {
+    private Map<String, Object> getLoginParams( AccountBase accountBase, StockTradeLoginDTO randomAndKey) {
 
-        return getLoginParams(stockTradeUser, randomAndKey, null);
+        return getLoginParams(accountBase, randomAndKey, null);
     }
 
-    private Map<String, Object> getLoginParams(StockTradeUser stockTradeUser, StockTradeLoginDTO randomAndKey, StockTradeLoginDTO dto) {
+    private Map<String, Object> getLoginParams( AccountBase accountBase, StockTradeLoginDTO randomAndKey, StockTradeLoginDTO dto) {
 
         Map<String, Object> params = new HashMap<>();
-        params.put("userId", stockTradeUser.getAccount());
-        params.put("password", encodePassword(stockTradeUser.getPassword()));
+        params.put("userId", accountBase.getAccount());
+        params.put("password", encodePassword(accountBase.getPassword()));
         if (randomAndKey == null) {
             params.put("randNumber", dto.getRandNumber());
             params.put("identifyCode", dto.getIdentifyCode());
@@ -302,8 +323,6 @@ public class StockTradeUserService {
         return content.substring(inputBegin, inputEnd);
     }
 
-    public StockTradeUser baseInfo(String id) {
-        StockTradeUser stockTradeUser = stockTradeUserMapper.selectByPrimaryKey(id);
-        return stockTradeUser;
-    }
+
+
 }

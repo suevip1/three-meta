@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.base;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.baseCommon.constants.CookieEnum;
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.model.bo.StrategyQueryBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
@@ -10,9 +10,10 @@ import com.coatardbul.baseService.entity.feign.StockTemplateQueryDTO;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
-import com.coatardbul.stock.mapper.StockCookieMapper;
-import com.coatardbul.stock.model.entity.StockCookie;
+import com.coatardbul.stock.mapper.AccountBaseMapper;
+import com.coatardbul.stock.model.entity.AccountBase;
 import com.coatardbul.stock.model.entity.StockStaticTemplate;
+import com.coatardbul.stock.service.StockUserBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -36,18 +36,15 @@ public class StockStrategyService  extends StockStrategyCommonService {
     @Autowired
     RiverServerFeign riverServerFeign;
 
-
     @Autowired
-    StockCookieMapper stockCookieMapper;
-
-
+    AccountBaseMapper accountBaseMapper;
+    @Autowired
+    StockUserBaseService stockUserBaseService;
     @Autowired
     public void refreshCookie() {
-        List<StockCookie> stockCookies = stockCookieMapper.selectAll();
-        if (stockCookies != null && stockCookies.size() > 0) {
-            cookieValue = stockCookies.stream().filter(o1 -> CookieEnum.strategy.getCode().equals(o1.getTypeKey()))
-                    .collect(Collectors.toList()).get(0).getCookieValue();
-        }
+        String userId = stockUserBaseService.getDefaultTradeUser();
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userId, CookieTypeEnum.TONG_HUA_SHUN.getType());
+        cookieValue=accountBase.getCookie();
     }
 
     public void setCookieValue(String cookieValue) {

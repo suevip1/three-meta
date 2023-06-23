@@ -159,7 +159,7 @@ public class TradeBaseService {
 //        stockTradeDetail.setTradePrice();
 //        stockTradeDetail.setTradeAllAmount();
 //        stockTradeDetail.setMsg();
-        stockTradeDetailMapper.insert(stockTradeDetail);
+//        stockTradeDetailMapper.insert(stockTradeDetail);
     }
 
 

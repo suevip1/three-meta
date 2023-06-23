@@ -13,9 +13,12 @@ import lombok.Data;
 @Data
 public class StockTradeLoginDTO {
 
-    private String id;
-
+    /**
+     * 用户id
+     */
     private String userId;
+
+    private String account;
 
     private String password;
 

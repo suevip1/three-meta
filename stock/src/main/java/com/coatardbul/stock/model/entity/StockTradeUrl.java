@@ -20,6 +20,4 @@ public class StockTradeUrl {
      * 描述
      */
     private String remark;
-
-    private String validateKey;
 }

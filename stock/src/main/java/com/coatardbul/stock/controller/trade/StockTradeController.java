@@ -52,9 +52,8 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
     @RequestMapping(path = "/queryAssetAndPosition", method = RequestMethod.POST)
     public CommonResult queryAssetAndPosition() {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
-            String result = stockTradeService.queryAssetAndPosition(request);
+            String result = stockTradeService.queryAssetAndPosition();
             return CommonResult.success(result);
         }catch (Exception e){
             return CommonResult.failed(e.getMessage());
@@ -106,9 +105,8 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
 
     @RequestMapping(path = "/initBuyInfo", method = RequestMethod.POST)
     public CommonResult initBuyInfo() {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
-        stockTradeService.initBuyInfo(request);
+        stockTradeService.initBuyInfo();
         return CommonResult.success(null);
     }
 

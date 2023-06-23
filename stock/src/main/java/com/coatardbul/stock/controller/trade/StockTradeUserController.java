@@ -61,7 +61,6 @@ public class StockTradeUserController {
     public CommonResult autoLogin() {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-
             stockTradeUserService.autoLogin(request);
             return CommonResult.success("登陆成功");
         } catch (Exception e) {
@@ -69,12 +68,5 @@ public class StockTradeUserController {
 
         }
     }
-
-    @RequestMapping(path = "/baseInfo", method = RequestMethod.POST)
-    public CommonResult baseInfo(@Validated @RequestBody StockTradeLoginDTO dto) {
-        stockTradeUserService.baseInfo(dto.getId());
-        return CommonResult.success(null);
-    }
-
 
 }

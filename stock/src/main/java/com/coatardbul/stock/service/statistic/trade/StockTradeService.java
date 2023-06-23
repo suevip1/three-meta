@@ -2,6 +2,7 @@ package com.coatardbul.stock.service.statistic.trade;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
@@ -12,6 +13,7 @@ import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
 import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
+import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTradeBuyConfigMapper;
 import com.coatardbul.stock.mapper.StockTradeDetailMapper;
@@ -20,6 +22,7 @@ import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
+import com.coatardbul.stock.model.entity.AccountBase;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
@@ -33,11 +36,12 @@ import com.coatardbul.stock.service.statistic.tradeQuartz.TimeBuyTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -88,8 +92,7 @@ public class StockTradeService {
     @Autowired
     StockParseAndConvertService stockParseAndConvertService;
 
-    @Autowired
-    StockTradeDetailMapper stockTradeDetailMapper;
+
     @Autowired
     StockTradeAssetPositionService stockTradeAssetPositionService;
     @Autowired
@@ -100,21 +103,26 @@ public class StockTradeService {
     TimeBuyTradeService timeBuyTradeService;
     @Autowired
     StockUserBaseService stockUserBaseService;
+    @Autowired
+    AccountBaseMapper accountBaseMapper;
     /**
      * 查询持仓
      *
      * @return
      */
-    public String queryAssetAndPosition(HttpServletRequest request) {
-
+    public String queryAssetAndPosition() {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         String userName = stockUserBaseService.getCurrUserName(request);
+        //账号信息
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
+        //路径信息
         List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.ASSET_POSITION.getSign());
         if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
             return null;
         }
         StockTradeUrl stockTradeUrl = stockTradeUrls.get(0);
 
-        String url = stockTradeUrl.getUrl().replace("${validatekey}", stockTradeUrl.getValidateKey());
+        String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
         String param = "moneyType=RMB";
         try {
             String result = stockTradeBaseService.tradeByString(url, param,userName);
@@ -133,13 +141,16 @@ public class StockTradeService {
 
     private String bugSellCommon(StockTradeBO dto, String userName) {
 
+        //账号信息
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
+
         List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.BUY_SELL.getSign());
         if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
             return null;
         }
         StockTradeUrl stockTradeUrl = stockTradeUrls.get(0);
 
-        String url = stockTradeUrl.getUrl().replace("${validatekey}", stockTradeUrl.getValidateKey());
+        String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
 
         try {
             String result = stockTradeBaseService.trade(url, dto,userName);
@@ -206,11 +217,11 @@ public class StockTradeService {
     }
 
 
-    public void initBuyInfo(HttpServletRequest request) {
+    public void initBuyInfo() {
         List<StockTradeBuyConfig> stockTradeBuyConfigs = stockTradeBuyConfigMapper.selectByAll(null);
         if (stockTradeBuyConfigs != null && stockTradeBuyConfigs.size() > 0) {
             //查询持仓可用金额
-            String result = queryAssetAndPosition(request);
+            String result = queryAssetAndPosition();
             JSONArray jsonArray = JSONArray.parseArray(result);
             String kyzj = jsonArray.getJSONObject(0).getString("Kyzj");
             for (StockTradeBuyConfig stbc : stockTradeBuyConfigs) {

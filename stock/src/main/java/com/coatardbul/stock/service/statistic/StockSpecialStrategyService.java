@@ -15,7 +15,6 @@ import com.coatardbul.stock.model.bo.StockUpLimitInfoBO;
 import com.coatardbul.stock.model.bo.StockUpLimitNameBO;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.service.base.StockStrategyService;
-import com.coatardbul.stock.service.statistic.uplimitAnalyze.StockUpLimitValPriceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +45,7 @@ public class StockSpecialStrategyService {
 
     @Autowired
     StockStrategyService stockStrategyService;
-    @Autowired
-    StockUpLimitValPriceService stockUpLimitValPriceService;
+
     @Autowired
     UpLimitStrongWeakService upLimitStrongWeakService;
     @Autowired

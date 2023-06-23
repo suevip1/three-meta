@@ -1,9 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockTradeUrl;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
+import com.coatardbul.stock.model.entity.StockTradeUrl;import org.apache.ibatis.annotations.Param;import java.util.List;
 
 public interface StockTradeUrlMapper {
     int deleteByPrimaryKey(String id);
@@ -22,8 +19,5 @@ public interface StockTradeUrlMapper {
 
     List<StockTradeUrl> selectAllBySign(@Param("sign") String sign);
 
-
-    int updateValidateKey(@Param("updatedValidateKey")String updatedValidateKey);
-
-
+    int updateValidateKey(@Param("updatedValidateKey") String updatedValidateKey);
 }

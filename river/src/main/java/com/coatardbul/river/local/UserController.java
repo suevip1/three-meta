@@ -17,11 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Api(value = "用户信息")
@@ -76,8 +73,7 @@ public class UserController {
     @ApiOperation(value = "获取目前用户信息", notes = "获取目前用户信息")
     @RequestMapping(value = "/getCurrUserName", method = RequestMethod.POST)
     public CommonResult<String> getCurrUserName() {
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String userName = userInfoService.getCurrUserName(request);
+        String userName = userInfoService.getCurrUserName();
         return CommonResult.success(userName);
     }
 }

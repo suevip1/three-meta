@@ -13,12 +13,11 @@ import lombok.Data;
 @Data
 public class StockCookieDTO {
 
-    private String id;
+    private String tradeType;
 
-    private String key;
+
 
     private String cookie;
 
 
-    private String remark;
 }

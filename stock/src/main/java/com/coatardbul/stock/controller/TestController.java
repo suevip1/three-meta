@@ -417,6 +417,8 @@ public class TestController {
 
     @RequestMapping(path = "/test3", method = RequestMethod.POST)
     public String cosUpload111() throws Exception {
+
+        String userName = null;
         Boolean aBoolean = aiSellTradeService.tradeProcess(convertAmount(10000), convertAmount(11), "002795", userName);
         log.info("sdfas");
 

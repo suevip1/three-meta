@@ -1,21 +1,18 @@
 package com.coatardbul.sail.service.base;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.baseCommon.constants.CookieEnum;
+import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.model.bo.StrategyQueryBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseService.entity.feign.StockTemplateQueryDTO;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
-import com.coatardbul.sail.mapper.StockCookieMapper;
-import com.coatardbul.sail.model.entity.StockCookie;
+import com.coatardbul.sail.mapper.AccountBaseMapper;
+import com.coatardbul.sail.model.entity.AccountBase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -33,19 +30,18 @@ public class StockStrategyService  extends StockStrategyCommonService {
     RiverServerFeign riverServerFeign;
 
 
+
+
+
     @Autowired
-    StockCookieMapper stockCookieMapper;
-
-
+    AccountBaseMapper accountBaseMapper;
 
 
     @Autowired
     public void refreshCookie() {
-        List<StockCookie> stockCookies = stockCookieMapper.selectAll();
-        if (stockCookies != null && stockCookies.size() > 0) {
-            cookieValue = stockCookies.stream().filter(o1 -> CookieEnum.strategy.getCode().equals(o1.getTypeKey()))
-                    .collect(Collectors.toList()).get(0).getCookieValue();
-        }
+        String userId = "sxl14459048";
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userId, CookieTypeEnum.TONG_HUA_SHUN.getType());
+        cookieValue=accountBase.getCookie();
     }
     public void setCookieValue(String cookieValue) {
         this.cookieValue = cookieValue;

@@ -2,7 +2,6 @@ package com.coatardbul.stock.controller;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
-import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockCookieService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,22 +29,8 @@ public class StockCookieController {
 
     @Autowired
     StockCookieService stockCookieService;
-    @Autowired
-    StockStrategyService stockStrategyService;
 
-    @ApiOperation("cookie新增")
-    @RequestMapping(path = "/add", method = RequestMethod.POST)
-    public CommonResult add(@Validated @RequestBody StockCookieDTO dto) {
-        stockCookieService.add(dto);
-        return CommonResult.success(null);
-    }
 
-    @ApiOperation(value = "同花顺新版问财功能cookie修改")
-    @RequestMapping(path = "/modify", method = RequestMethod.POST)
-    public CommonResult modify(@Validated @RequestBody StockCookieDTO dto) {
-        stockCookieService.modify(dto);
-        return CommonResult.success(null);
-    }
 
     /**
      * 修改同时更新缓存
@@ -59,20 +44,7 @@ public class StockCookieController {
         return CommonResult.success(null);
     }
 
-    @ApiOperation("查询所有")
-    @RequestMapping(path = "/findAll", method = RequestMethod.POST)
-    public CommonResult findAll() {
-        return CommonResult.success(stockCookieService.findAll());
-    }
 
-
-    @ApiOperation("查询所有")
-    @RequestMapping(path = "/refreshCache", method = RequestMethod.POST)
-    public CommonResult refreshCache() {
-        stockCookieService.refreshCache();
-
-        return CommonResult.success(null);
-    }
 
 
 }
