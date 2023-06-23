@@ -1,11 +1,13 @@
 package com.coatardbul.stock.controller;
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.service.statistic.DongFangSortService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,8 +43,8 @@ public class DongFangSortController {
 
     @ApiOperation("获取转债信息")
     @RequestMapping(path = "/getConvertBond", method = RequestMethod.POST)
-    public CommonResult getConvertBond() {
-        return CommonResult.success(dongFangSortService.getConvertBondLimit());
+    public CommonResult getConvertBond(@RequestBody StockStrategyQueryDTO dto) {
+        return CommonResult.success(dongFangSortService.getConvertBondLimit(dto));
     }
 
 

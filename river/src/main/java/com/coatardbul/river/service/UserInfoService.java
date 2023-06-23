@@ -35,6 +35,11 @@ public class UserInfoService {
         return authUserMapper.selectByPrimaryKey(userId);
     }
 
+    /**
+     * 登陆将创建时间添加进去
+     * @param userDto
+     * @return
+     */
     public String login(UserDto userDto) {
         List<AuthUser> authUsers = authUserMapper.selectAllByUsernameAndPassword(userDto.getAccount(), userDto.getPassword());
         List<DictInfo> dictInfos = dictInfoMapper.selectAllByBusiTypeAndSignKey(DictTypeEnum.ENCRYPT.getSign(), DictKeyEnum.AES_KEY.getSign());
@@ -66,6 +71,15 @@ public class UserInfoService {
                 try {
                     String decrypt = AESUtil.decrypt(token, dictInfos.get(0).getSignValue());
                     AuthUser userDto = JsonUtil.readToValue(decrypt, AuthUser.class);
+                    Date gmtCreate = userDto.getGmtCreate();
+                    if (gmtCreate == null) {
+                        long l = gmtCreate.getTime() - System.currentTimeMillis();
+                        long l1 = l / 1000 / 60 / 60 / 24;
+                        //超过5天，token失效
+                        if (l1 >= 5) {
+                            return false;
+                        }
+                    }
                     List<AuthUser> authUsers = authUserMapper.selectAllByUsernameAndPassword(userDto.getUsername(), userDto.getPassword());
                     if (authUsers.size() > 0) {
                         return true;

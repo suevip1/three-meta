@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockBaseMapper;
@@ -94,9 +95,9 @@ public class DongFangSortService {
 
     }
 
-    public List<StockBaseDetail> getConvertBondLimit() {
+    public List<StockBaseDetail> getConvertBondLimit(StockStrategyQueryDTO dto) {
 
-        return getConvertBondLimit(null, null);
+        return getConvertBondLimit(null, null,dto.getOrderStr());
     }
 
     public List<StockBaseDetail> getAllConvertBond() {
@@ -125,7 +126,7 @@ public class DongFangSortService {
      * @param pageSize
      * @return
      */
-    public List<StockBaseDetail> getConvertBondLimit(Integer page, Integer pageSize) {
+    public List<StockBaseDetail> getConvertBondLimit(Integer page, Integer pageSize,String orderStr) {
         if (page == null) {
             page = 1;
         }
@@ -133,7 +134,7 @@ public class DongFangSortService {
             pageSize = 50;
         }
         List<StockBaseDetail> result = new ArrayList();
-        JSONArray jsonArray = getConvertBondCommon(page, pageSize);
+        JSONArray jsonArray = getConvertBondCommon(page, pageSize,orderStr);
         for (int i = 0; i < 20; i++) {
             JSONObject jsonObject1 = jsonArray.getJSONObject(i);
             StockBaseDetail stockDetail = getStockBaseDetail(jsonObject1);
@@ -172,9 +173,19 @@ public class DongFangSortService {
 
         }
     }
-
-
     public JSONArray getConvertBondCommon(Integer page, Integer pageSize) {
+
+      return   getConvertBondCommon(page, pageSize,"f3");
+    }
+
+    /**
+     * f3涨幅排序 f6金额排序
+     * @param page
+     * @param pageSize
+     * @param orderStr
+     * @return
+     */
+    public JSONArray getConvertBondCommon(Integer page, Integer pageSize,String orderStr) {
         if (page == null) {
             page = 1;
         }
@@ -193,10 +204,11 @@ public class DongFangSortService {
         headerList.add(referer);
         long l = System.currentTimeMillis();
         String response = null;
+        //f3涨幅， f6 交易金额
         String url = "http://60.push2.eastmoney.com/api/qt/clist/get?" +
                 "cb=jQuery112406253327725026963_" + (l - 33) +
                 "&pn=" + page + "&pz=" + pageSize + "&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2" +
-                "&wbp2u=6751315946175528|0|1|0|web&fid=f3&fs=b:MK0354" +
+                "&wbp2u=6751315946175528|0|1|0|web&fid="+orderStr+"&fs=b:MK0354" +
                 "&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152" +
                 "&" +
                 "_=" + l;
