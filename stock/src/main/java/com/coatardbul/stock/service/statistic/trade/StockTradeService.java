@@ -16,7 +16,6 @@ import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTradeBuyConfigMapper;
-import com.coatardbul.stock.mapper.StockTradeDetailMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
@@ -105,6 +104,7 @@ public class StockTradeService {
     StockUserBaseService stockUserBaseService;
     @Autowired
     AccountBaseMapper accountBaseMapper;
+
     /**
      * 查询持仓
      *
@@ -125,11 +125,52 @@ public class StockTradeService {
         String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
         String param = "moneyType=RMB";
         try {
-            String result = stockTradeBaseService.tradeByString(url, param,userName);
+            String result = stockTradeBaseService.tradeByString(url, param, userName);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
                 return jsonObject.getString("Data");
+            } else {
+                throw new BusinessException("登陆异常");
+            }
+        } catch (ConnectTimeoutException e) {
+            throw new BusinessException("登陆异常");
+        }
+    }
+
+    public JSONArray getHisDealData(String beginDate, String endDate, int pageSize) {
+        JSONArray hisDealData = getHisDealData(beginDate, endDate, pageSize, "");
+        if (hisDealData.size() == pageSize) {
+            JSONArray dwc = getHisDealData(beginDate, endDate, pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+            hisDealData.addAll(dwc);
+            while (dwc.size() == pageSize) {
+                dwc = getHisDealData(beginDate, endDate, pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+                hisDealData.addAll(dwc);
+            }
+        }
+        return hisDealData;
+    }
+
+    public JSONArray getHisDealData(String beginDate, String endDate, int pageSize, String dwc) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        String userName = stockUserBaseService.getCurrUserName(request);
+        //账号信息
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
+        //路径信息
+        List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.HIS_DEAL_DATA.getSign());
+        if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
+            return new JSONArray();
+        }
+        StockTradeUrl stockTradeUrl = stockTradeUrls.get(0);
+
+        String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
+        String param = "st=" + beginDate + "&et=" + endDate + "&qqhs=" + pageSize + "&dwc=" + dwc;
+        try {
+            String result = stockTradeBaseService.tradeByString(url, param, userName);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            String status = jsonObject.getString("Status");
+            if ("0".equals(status)) {
+                return jsonObject.getJSONArray("Data");
             } else {
                 throw new BusinessException("登陆异常");
             }
@@ -153,13 +194,13 @@ public class StockTradeService {
         String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
 
         try {
-            String result = stockTradeBaseService.trade(url, dto,userName);
+            String result = stockTradeBaseService.trade(url, dto, userName);
             log.info("交易对象" + JsonUtil.toJson(dto) + "交易返回信息" + result);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
                 return jsonObject.getString("Data");
-            }else {
+            } else {
                 throw new BusinessException(jsonObject.getString("Message"));
             }
         } catch (ConnectTimeoutException e) {
@@ -168,15 +209,16 @@ public class StockTradeService {
         return null;
     }
 
-    public String sell(StockTradeBO dto,String userName) {
+    public String sell(StockTradeBO dto, String userName) {
         dto.setTradeType("S");
-        return bugSellCommon(dto,userName);
+        return bugSellCommon(dto, userName);
     }
 
     public String buy(StockTradeBO dto) {
         return buy(dto, null);
     }
-    public String buy(StockTradeBO dto,String userName) {
+
+    public String buy(StockTradeBO dto, String userName) {
         dto.setTradeType("B");
         return bugSellCommon(dto, userName);
     }
@@ -245,7 +287,7 @@ public class StockTradeService {
      */
     public Boolean directBuy(BigDecimal userMoney, BigDecimal buyNum, String code, String name, String userName) {
 
-        return timeBuyTradeService.tradeProcess(userMoney, buyNum, code,userName);
+        return timeBuyTradeService.tradeProcess(userMoney, buyNum, code, userName);
     }
 
 
@@ -302,6 +344,8 @@ public class StockTradeService {
 
         stockTradeBO.setAmount(sellNum.toString());
         stockTradeBO.setZqmc(name);
-        sell(stockTradeBO,userName);
+        sell(stockTradeBO, userName);
     }
+
+
 }

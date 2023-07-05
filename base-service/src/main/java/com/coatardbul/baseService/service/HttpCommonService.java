@@ -3,7 +3,6 @@ package com.coatardbul.baseService.service;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
 import com.coatardbul.baseService.entity.bo.HttpConfigBo;
 import com.coatardbul.baseService.entity.bo.HttpResponseInfo;
-import com.google.common.net.HttpHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Consts;
 import org.apache.http.Header;
@@ -262,7 +261,7 @@ public abstract class HttpCommonService {
         Integer sockTimeout = cronRefreshConfigBo.getSockTimeout();
         RequestConfig defaultRequestConfig = null;
         if (isProxy) {
-            HttpHost proxy = proxyIpService.getNewProxyHttpHost();
+            HttpHost proxy = proxyIpService.getRandomProxyHttpHost();
             httpConfigBo.setProxy(proxy);
             defaultRequestConfig = RequestConfig.custom().setConnectTimeout(sockTimeout).setConnectionRequestTimeout(sockTimeout).setSocketTimeout(sockTimeout).setProxy(proxy).build();
         } else {

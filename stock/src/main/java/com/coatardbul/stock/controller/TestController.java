@@ -357,7 +357,7 @@ public class TestController {
                 String theme = jsonObject.getString("所属概念");
                 String industry = jsonObject.getString("所属同花顺行业");
                 if(StringUtils.isNotBlank(industry)){
-                    String str = industry.split("-")[0];
+                    String str = industry.split("-")[0]+"-"+industry.split("-")[1];
                     if(parameters.containsKey(str)){
                         parameters.put(str,parameters.get(str)+1);
                     }else {

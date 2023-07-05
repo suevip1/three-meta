@@ -39,6 +39,11 @@ public class DongFangSortController {
     public CommonResult getSpeed() {
         return CommonResult.success(dongFangSortService.getSpeed());
     }
+    @ApiOperation("获取涨幅排序信息")
+    @RequestMapping(path = "/getIncrease", method = RequestMethod.POST)
+    public CommonResult getIncrease() {
+        return CommonResult.success(dongFangSortService.getIncrease());
+    }
 
 
     @ApiOperation("获取转债信息")

@@ -44,6 +44,24 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
     @Autowired
     StockUserBaseService stockUserBaseService;
     /**
+     * 获取历史数据
+     *
+     * @param
+     * @return
+     */
+    @RequestMapping(path = "/getHisDealData", method = RequestMethod.POST)
+    public CommonResult getHisDealData(@RequestBody Map map) {
+        try {
+            String beginDate = map.get("beginDate").toString();
+            String endDate = map.get("endDate").toString();
+            int pageSize =Integer.valueOf( map.get("pageSize").toString());
+            Object result = stockTradeService.getHisDealData(beginDate,endDate,pageSize);
+            return CommonResult.success(result);
+        }catch (Exception e){
+            return CommonResult.failed(e.getMessage());
+        }
+    }
+    /**
      * 查询持仓
      *
      * @param

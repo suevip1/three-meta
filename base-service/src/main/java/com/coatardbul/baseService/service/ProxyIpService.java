@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,6 @@ public class ProxyIpService {
     HttpPoolService httpService;
     @Autowired
     RedisTemplate redisTemplate;
-
 
 
     public void addIpProcess(ProxyIpQueryDTO dto) throws ConnectTimeoutException {
@@ -69,19 +69,25 @@ public class ProxyIpService {
 
 
     /**
-     * 获取最新的代理ip，端口
+     * 获取随机的代理ip，端口
      *
      * @return
      */
-    public HttpHost getNewProxyHttpHost() {
+    public HttpHost getRandomProxyHttpHost() {
         Set keys = redisTemplate.keys(PROXY_IP + "*");
         if (keys.size() > 0) {
+            Random random = new Random();
+            int randomNum = random.nextInt(keys.size() - 1);
+            int i = 0;
             for (Object codeKey : keys) {
-                if (codeKey instanceof String) {
-                    String key = codeKey.toString();
-                    String[] s = key.split("_");
-                    return new HttpHost(s[1], Integer.valueOf(s[2]));
+                if (randomNum == i) {
+                    if (codeKey instanceof String) {
+                        String key = codeKey.toString();
+                        String[] s = key.split("_");
+                        return new HttpHost(s[1], Integer.valueOf(s[2]));
+                    }
                 }
+                i++;
             }
         }
         return null;
@@ -104,7 +110,7 @@ public class ProxyIpService {
     }
 
     public void deleteByIp(String ip) {
-        Set keys = redisTemplate.keys(PROXY_IP+"_"+ip + "*");
+        Set keys = redisTemplate.keys(PROXY_IP + "_" + ip + "*");
         if (keys.size() > 0) {
             redisTemplate.delete(keys);
         }

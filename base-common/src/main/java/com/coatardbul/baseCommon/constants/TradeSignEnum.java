@@ -3,6 +3,7 @@ package com.coatardbul.baseCommon.constants;
 public enum TradeSignEnum {
     ASSET_POSITION("asset_position","持仓"),
 
+    HIS_DEAL_DATA("his_deal_data","历史交易数据"),
 
     LOGIN("login","登陆"),
 
