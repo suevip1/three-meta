@@ -183,10 +183,15 @@ public class DongFangSortService {
         }
         List<StockBaseDetail> result = new ArrayList();
         JSONArray jsonArray = getConvertBondCommon(page, pageSize, orderStr);
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 50; i++) {
             JSONObject jsonObject1 = jsonArray.getJSONObject(i);
             StockBaseDetail stockDetail = getStockBaseDetail(jsonObject1);
             tradeBaseService.rebuild(stockDetail);
+            StockBase stockBase = stockBaseMapper.selectByPrimaryKey(stockDetail.getCode());
+            if (stockBase != null) {
+                stockDetail.setIndustry(stockBase.getIndustry());
+                stockDetail.setTheme(stockBase.getTheme());
+            }
             result.add(stockDetail);
         }
 
@@ -198,6 +203,8 @@ public class DongFangSortService {
         try {
             stockDetail.setName(jsonObject1.getString("f14"));
             stockDetail.setCode(jsonObject1.getString("f12"));
+            stockDetail.setConvertName(jsonObject1.getString("f234"));
+            stockDetail.setConvertCode(jsonObject1.getString("f232"));
             stockDetail.setTradeAmount(getDongFangPrice(jsonObject1, "f6"));
             stockDetail.setLastClosePrice(getDongFangPrice(jsonObject1, "f18"));
             stockDetail.setCallAuctionPrice(getDongFangPrice(jsonObject1, "f17"));
@@ -259,7 +266,7 @@ public class DongFangSortService {
                 "cb=jQuery112406253327725026963_" + (l - 33) +
                 "&pn=" + page + "&pz=" + pageSize + "&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2" +
                 "&wbp2u=6751315946175528|0|1|0|web&fid=" + orderStr + "&fs=b:MK0354" +
-                "&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152" +
+                "&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152,f234,f232" +
                 "&" +
                 "_=" + l;
         url = url.replaceAll("\\|", "%124");

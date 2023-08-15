@@ -49,6 +49,14 @@ public class StockIndustryAnalyseController {
         return CommonResult.success(stockIndustryAnalyseService.findDayRange(dto));
     }
 
+    @WebLog(value = "更新所有的题材")
+    @RequestMapping(path = "/updateDayRange", method = RequestMethod.POST)
+    public CommonResult updateDayRange(@Validated @RequestBody StockEmotionDayRangeDTO dto) {
+
+        stockIndustryAnalyseService.updateDayRange(dto);
+        return CommonResult.success(null);
+    }
+
 
     /**
      *添加

@@ -22,6 +22,14 @@ public class StockBaseDetail {
 
 
     /**
+     * 转债对应的正股名称
+     */
+    private String convertCode;
+
+    private String convertName;
+
+
+    /**
      * 市值
      */
     private BigDecimal marketValue;

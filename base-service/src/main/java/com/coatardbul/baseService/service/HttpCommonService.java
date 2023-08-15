@@ -40,6 +40,7 @@ import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,6 +82,14 @@ public abstract class HttpCommonService {
                 //返回json格式
                 String res = EntityUtils.toString(response.getEntity());
                 result.setResponseStr(res);
+                if(org.apache.commons.lang3.StringUtils.isNotBlank(res)&&res.contains("Nginx forbidden")){
+                    if (isProxy) {
+                        //删除当前ip，重试
+                        proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                        log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
+                    }
+                    log.error("Nginx forbidden");
+                }
             }
             //407 Proxy Authentication Required
 //            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
@@ -93,7 +102,6 @@ public abstract class HttpCommonService {
                 proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
                 log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
             }
-//            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
             log.error("httpclient超时异常" + e.getMessage());
         } catch (ClientProtocolException e) {
             log.error("ClientProtocolException" + e.getMessage());
@@ -238,7 +246,7 @@ public abstract class HttpCommonService {
                 httpRequestBase.addHeader(headerTemp);
             }
         }
-        httpRequestBase.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36");
+        httpRequestBase.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
 //        httpRequestBase.addHeader(HttpHeaders.CONNECTION, "close");
     }
 
@@ -354,6 +362,140 @@ public abstract class HttpCommonService {
      */
     public String doPost(String url, String jsonString, List<Header> headerList) throws ConnectTimeoutException {
         return doPost(url, jsonString, headerList, true);
+    }
+
+    public  String doPostTemp111(String  url, String  jsonString) throws IOException {
+        List<Header> headerList = new ArrayList<>();
+        String cookieValue="other_uid=Ths_iwencai_Xuangu_d0yv0c2qbuwxxr4076fajv816q6j9quy; ta_random_userid=dbwn8c27fu; cid=a7f6ebeb5111466ff7ff4306cb9a85e41658914348; cid=a7f6ebeb5111466ff7ff4306cb9a85e41658914348; ComputerID=a7f6ebeb5111466ff7ff4306cb9a85e41658914348; WafStatus=0; user=MDptb181NTg0MDIwOTg6Ok5vbmU6NTAwOjU2ODQwMjA5ODo1LDEsNDA7NiwxLDQwOzcsMTExMTExMTExMTEwLDQwOzgsMTExMTAxMTEwMDAwMTExMTEwMDEwMDEwMDEwMDAwMDAsNDA7MzMsMDAwMTAwMDAwMDAwLDc5OzM2LDEwMDExMTExMDAwMDExMDAxMDExMTExMSw3OTs0NiwwMDAwMTExMTEwMDAwMDExMTExMTExMTEsNzk7NTEsMTEwMDAwMDAwMDAwMDAwMCw3OTs1OCwwMDAwMDAwMDAwMDAwMDAwMSw3OTs3OCwxLDc5Ozg3LDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMCw3OTs0NCwxMSw0MDsxLDEwMSw0MDsyLDEsNDA7MywxLDQwOzEwMiwxLDQwOjI0Ojo6NTU4NDAyMDk4OjE2NzU4OTM4MDk6OjoxNjA4NjI0MTgwOjQwMjk5MTowOjFlYmM1YzMyOTgxMDk3YWY1NWZjMjlmMmMwNTBkZDFlODpkZWZhdWx0XzQ6MQ%3D%3D; userid=558402098; u_name=mo_558402098; escapename=mo_558402098; ticket=36118fd6c391130cd1fa7690ff8fc2f9; user_status=0; utk=57d89fc8e7dc2893e546aff057a8a937; PHPSESSID=b56b60ae919db6e6b85a5bb34affcd0c; v=";
+        String heXinStr = "A12t3_0A5Sz_qIEAeXpRKujuajJUepGfm6_1ih8jmoTjy3Ok58qhnCv-BWms";
+        Header cookie = new BasicHeader("Cookie", cookieValue + heXinStr);
+        Header hexin = new BasicHeader("hexin-v", heXinStr);
+        Header orign =new BasicHeader("Origin", "http://www.iwencai.com");
+        headerList.add(cookie);
+        headerList.add(hexin);
+        headerList.add(orign);
+
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(jsonString, "UTF-8");
+        // post请求是将参数放在请求体里面传过去的;这里将entity放入post请求体中
+        httpPost.setEntity(entity);
+        if (headerList != null && headerList.size() > 0) {
+            List<Header> collect = headerList.stream().filter(item -> item.getName().equals("Content-Type")).collect(Collectors.toList());
+            if (collect.size() == 0) {
+                httpPost.addHeader("Content-Type", "application/json;charset=utf8");
+            }
+        }
+        if (headerList != null && headerList.size() > 0) {
+            for (Header headerTemp : headerList) {
+                httpPost.addHeader(headerTemp);
+            }
+        }
+        httpPost.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36");
+        Integer sockTimeout=5000;
+        RequestConfig defaultRequestConfig=  RequestConfig.custom().setConnectTimeout(sockTimeout).setConnectionRequestTimeout(sockTimeout).setSocketTimeout(sockTimeout).build();
+
+        CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build();
+
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+
+        //设置状态码
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            //返回json格式
+            String res = EntityUtils.toString(response.getEntity());
+            return res;
+        }else {
+            return null;
+        }
+
+
+    }
+
+
+    public String doPostTemp(String url, String jsonString, List<Header> headerList, boolean isProxy) throws ConnectTimeoutException {
+
+        String res="";
+        //创建HttpClient对象
+        HttpConfigBo httpConfigBo = getHttpConfig(isProxy);
+        //设置请求头
+        setHttpPost(url, jsonString, headerList, httpConfigBo);
+
+
+        HttpResponseInfo result = new HttpResponseInfo();
+
+        HttpRequestBase httpRequestBase = httpConfigBo.getHttpRequestBase();
+
+        HttpHost proxy = proxyIpService.getRandomProxyHttpHost();
+
+
+
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(jsonString, "UTF-8");
+        // post请求是将参数放在请求体里面传过去的;这里将entity放入post请求体中
+        httpPost.setEntity(entity);
+        if (headerList != null && headerList.size() > 0) {
+            List<Header> collect = headerList.stream().filter(item -> item.getName().equals("Content-Type")).collect(Collectors.toList());
+            if (collect.size() == 0) {
+                httpPost.addHeader("Content-Type", "application/json;charset=utf8");
+            }
+        }
+        if (headerList != null && headerList.size() > 0) {
+            for (Header headerTemp : headerList) {
+                httpPost.addHeader(headerTemp);
+            }
+        }
+        httpPost.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36");
+        Integer sockTimeout=5000;
+        RequestConfig defaultRequestConfig=  RequestConfig.custom().setConnectTimeout(sockTimeout).setConnectionRequestTimeout(sockTimeout).setSocketTimeout(sockTimeout).build();
+
+        CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build();
+
+        try {
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            httpConfigBo.setCloseableHttpResponse(response);
+            log.info("结果响应：" + httpRequestBase.toString() + "响应状态为:" + response.getStatusLine());
+            //设置状态码
+            result.setHttpStatus(response.getStatusLine().getStatusCode());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                //返回json格式
+                 res = EntityUtils.toString(response.getEntity());
+                result.setResponseStr(res);
+                if(org.apache.commons.lang3.StringUtils.isNotBlank(res)&&res.contains("Nginx forbidden")){
+                    if (isProxy) {
+                        //删除当前ip，重试
+                        proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                        log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
+                    }
+                    log.error("Nginx forbidden");
+                }
+            }
+            //407 Proxy Authentication Required
+//            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
+//                //返回json格式
+//                throw new  ConnectTimeoutException();
+//            }
+        } catch (ConnectTimeoutException | HttpHostConnectException e) {
+            if (isProxy) {
+                //删除当前ip，重试
+                proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
+            }
+            log.error("httpclient超时异常" + e.getMessage());
+        } catch (ClientProtocolException e) {
+            log.error("ClientProtocolException" + e.getMessage());
+        } catch (IOException e) {
+            if (isProxy) {
+                //删除当前ip，重试
+                proxyIpService.deleteByIp(httpConfigBo.getProxy().getHostName());
+                log.error("删除代理ip：" + httpConfigBo.getProxy().getHostName() + " 端口：" + httpConfigBo.getProxy().getPort());
+            }
+//            result.setHttpStatus(HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
+            log.error("httpclient请求IO异常" + e.getMessage());
+        } finally {
+            closeStream(httpConfigBo);
+        }
+        return res;
+
+
     }
 
     public String doPost(String url, String jsonString, List<Header> headerList, boolean isProxy) throws ConnectTimeoutException {

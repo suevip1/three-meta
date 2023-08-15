@@ -195,7 +195,7 @@ public class DongFangPlateService {
 
     private static String getCodeUrl(String code) {
         String codeUrl = null;
-        if (code.substring(0, 2).equals("00") || code.substring(0, 3).equals("300")) {
+        if (code.substring(0, 2).equals("00") || code.substring(0, 2).equals("30")) {
             codeUrl = "0$" + code;
         } else {
             codeUrl = "1$" + code;

@@ -179,6 +179,45 @@ public class StockTradeService {
         }
     }
 
+    public JSONArray getDealData( int pageSize) {
+        JSONArray hisDealData = getDealData( pageSize, "");
+        if (hisDealData.size() == pageSize) {
+            JSONArray dwc = getDealData( pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+            hisDealData.addAll(dwc);
+            while (dwc.size() == pageSize) {
+                dwc = getDealData( pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+                hisDealData.addAll(dwc);
+            }
+        }
+        return hisDealData;
+    }
+    public JSONArray getDealData( int pageSize, String dwc) {
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        String userName = stockUserBaseService.getCurrUserName(request);
+        //账号信息
+        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_TRADE.getType());
+        //路径信息
+        List<StockTradeUrl> stockTradeUrls = stockTradeUrlMapper.selectAllBySign(TradeSignEnum.DEAL_DATA.getSign());
+        if (stockTradeUrls == null || stockTradeUrls.size() == 0) {
+            return new JSONArray();
+        }
+        StockTradeUrl stockTradeUrl = stockTradeUrls.get(0);
+        String url = stockTradeUrl.getUrl().replace("${validatekey}", accountBase.getParam1());
+        String param = "qqhs=" + pageSize + "&dwc=" + dwc;
+        try {
+            String result = stockTradeBaseService.tradeByString(url, param, userName);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            String status = jsonObject.getString("Status");
+            if ("0".equals(status)) {
+                return jsonObject.getJSONArray("Data");
+            } else {
+                throw new BusinessException("登陆异常");
+            }
+        } catch (ConnectTimeoutException e) {
+            throw new BusinessException("登陆异常");
+        }
+    }
+
 
     private String bugSellCommon(StockTradeBO dto, String userName) {
 

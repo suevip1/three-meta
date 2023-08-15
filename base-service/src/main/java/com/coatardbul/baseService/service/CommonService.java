@@ -121,9 +121,9 @@ public abstract class CommonService {
             map.put("subMinIncreaseRate", (new BigDecimal(map.get("minIncreaseRate").toString())).subtract(new BigDecimal(map.get("auctionIncreaseRate").toString())));
         }
         //实时换手率
-        map.put("turnOverRate",
-                new BigDecimal(map.get("tradeAmount").toString()).multiply(new BigDecimal(100)).
-                        divide(new BigDecimal(map.get("circulationMarketValue").toString()), 4, BigDecimal.ROUND_HALF_UP));
+//        map.put("turnOverRate",
+//                new BigDecimal(map.get("tradeAmount").toString()).multiply(new BigDecimal(100)).
+//                        divide(new BigDecimal(map.get("circulationMarketValue").toString()), 4, BigDecimal.ROUND_HALF_UP));
     }
 
     public Map updateStockInfo(String code, String response, String dateFormat) {

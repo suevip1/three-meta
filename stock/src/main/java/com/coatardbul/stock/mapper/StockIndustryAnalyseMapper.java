@@ -1,9 +1,6 @@
 package com.coatardbul.stock.mapper;
-import org.apache.ibatis.annotations.Param;
 
-import com.coatardbul.stock.model.entity.StockIndustryAnalyse;
-
-import java.util.List;
+import com.coatardbul.stock.model.entity.StockIndustryAnalyse;import org.apache.ibatis.annotations.Param;import java.util.List;
 
 public interface StockIndustryAnalyseMapper {
     int deleteByPrimaryKey(String date);
@@ -18,11 +15,7 @@ public interface StockIndustryAnalyseMapper {
 
     int updateByPrimaryKey(StockIndustryAnalyse record);
 
-
     List<StockIndustryAnalyse> selectByAll();
 
-    List<StockIndustryAnalyse> selectAllByDateBetweenEqual(@Param("minDate")String minDate,@Param("maxDate")String maxDate);
-
-
-
+    List<StockIndustryAnalyse> selectAllByDateBetweenEqual(@Param("minDate") String minDate, @Param("maxDate") String maxDate);
 }

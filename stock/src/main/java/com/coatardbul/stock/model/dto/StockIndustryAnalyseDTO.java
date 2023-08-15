@@ -14,7 +14,9 @@ public class StockIndustryAnalyseDTO {
     /**
     * 竞价信息，数组，字符串数组json
     */
-    private List<String> callAuction;
+    private List<String> callAuctionGreate5Info;
+
+    private List<String> callAuctionGreate2Info;
 
     /**
     * 大于比例标准
@@ -40,6 +42,9 @@ public class StockIndustryAnalyseDTO {
     * 涨停信息
     */
     private List<String> uplimitInfo;
+
+
+    private List<String> increaseGreate5Info;
 
     /**
     * 备注

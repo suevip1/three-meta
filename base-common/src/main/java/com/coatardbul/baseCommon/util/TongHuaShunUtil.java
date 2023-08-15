@@ -28,9 +28,9 @@ public class TongHuaShunUtil {
         // 是否可调用
         if (se instanceof Invocable) {
             Invocable in = (Invocable) se;
-             result = (String) in.invokeFunction("v");
+             result = (String) in.invokeFunction("Get_v");
         }
-        return  result;
+        return result;
     }
 
     public static String getTrans(String chinaName) throws ScriptException, NoSuchMethodException, FileNotFoundException {

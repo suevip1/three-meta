@@ -1,6 +1,5 @@
 package com.coatardbul.stock.task;
 
-import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.dto.ProxyIpQueryDTO;
 import com.coatardbul.baseService.service.ProxyIpService;
@@ -11,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Calendar;
 
 /**
  * <p>
@@ -37,7 +34,7 @@ public class ProxyIpXxlJob {
         if (StringUtils.isNotBlank(param)) {
             ProxyIpQueryDTO proxyIpQueryDTO = JsonUtil.readToValue(param, ProxyIpQueryDTO.class);
             //删除两分钟之前的数据
-            proxyIpMapper.deleteByCreateTimeLessThanEqual(DateTimeUtil.getBeforeDate(2, Calendar.MINUTE));
+//            proxyIpMapper.deleteByCreateTimeLessThanEqual(DateTimeUtil.getBeforeDate(7, Calendar.MINUTE));
             proxyIpService.addIpProcess(proxyIpQueryDTO);
         }
         log.info("代理ip定时任务结束");

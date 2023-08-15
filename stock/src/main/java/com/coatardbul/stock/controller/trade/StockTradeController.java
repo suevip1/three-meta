@@ -61,6 +61,16 @@ StockTradeBuyTaskService stockTradeBuyTaskService;
             return CommonResult.failed(e.getMessage());
         }
     }
+    @RequestMapping(path = "/getDealData", method = RequestMethod.POST)
+    public CommonResult getDealData(@RequestBody Map map) {
+        try {
+            int pageSize =Integer.valueOf( map.get("pageSize").toString());
+            Object result = stockTradeService.getDealData(pageSize);
+            return CommonResult.success(result);
+        }catch (Exception e){
+            return CommonResult.failed(e.getMessage());
+        }
+    }
     /**
      * 查询持仓
      *

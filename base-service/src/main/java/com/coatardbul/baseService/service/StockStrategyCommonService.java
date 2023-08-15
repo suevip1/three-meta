@@ -42,7 +42,7 @@ public abstract class StockStrategyCommonService {
 
 
     @Autowired
-    HttpPoolService httpService;
+    HttpService httpService;
 
 
 
@@ -361,15 +361,23 @@ public abstract class StockStrategyCommonService {
         headerList.add(cookie);
         headerList.add(hexin);
         headerList.add(orign);
+
+
         log.info("策略查询传递参数" + jsonString);
         String result = null;
         int retryNum = 5;
         while (retryNum > 0) {
             try {
-                result = httpService.doPost(STRATEGY_URL, jsonString, headerList);
+                result = httpService.doPost(STRATEGY_URL, jsonString,headerList);
+                if(org.apache.commons.lang3.StringUtils.isNotBlank(result)&&result.contains("Nginx forbidden")){
+                    retryNum--;
+                    continue;
+                }
             } catch (ConnectTimeoutException e) {
                 retryNum--;
                 continue;
+            } catch (Exception e) {
+               log.error(e.getMessage(),e);
             }
             if (StringUtils.isNotBlank(result)) {
                 break;
@@ -422,8 +430,8 @@ public abstract class StockStrategyCommonService {
 
         StringBuffer sb = new StringBuffer();
         sb.append("query=").append(dto.getQueryStr());
-        sb.append("&urp_sort_way=desc");
-        sb.append("&urp_sort_index=最新涨跌幅");
+//        sb.append("&urp_sort_way=desc");
+//        sb.append("&urp_sort_index=最新涨跌幅");
         sb.append("&page=").append(dto.getPage());
         sb.append("&perpage=").append(dto.getPageSize());
         sb.append("&comp_id=6734520");

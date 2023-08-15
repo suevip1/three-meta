@@ -446,12 +446,21 @@ public class StockPredictService {
         return getNextInfo(dateFormat, "", num, code);
     }
 
+    private BigDecimal convert(Object obj){
+        if(obj==null){
+            return BigDecimal.ZERO;
+        }else {
+            return new BigDecimal(obj.toString());
+        }
+    }
+
+
     private StockDetail convert(Map nextInfo) {
         StockDetail stockDetail = new StockDetail();
         stockDetail.setDateStr(nextInfo.get("dateStr").toString());
         stockDetail.setCode(nextInfo.get("code").toString());
         stockDetail.setName(nextInfo.get("name").toString());
-        stockDetail.setTradeAmount(new BigDecimal(nextInfo.get("tradeAmount").toString()));
+        stockDetail.setTradeAmount(convert(nextInfo.get("tradeAmount")));
         stockDetail.setMarketValue(new BigDecimal(nextInfo.get("circulationMarketValue").toString()));
         stockDetail.setNewPrice(new BigDecimal(nextInfo.get("newPrice").toString()));
         stockDetail.setAuctionIncreaseRate(new BigDecimal(nextInfo.get("auctionIncreaseRate").toString()));

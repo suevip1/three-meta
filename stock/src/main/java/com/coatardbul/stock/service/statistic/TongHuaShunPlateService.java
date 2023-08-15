@@ -59,14 +59,14 @@ public class TongHuaShunPlateService {
         String heXinStr = TongHuaShunUtil.getHeXinStr();
         Header cookie = httpService.getHead("Cookie", stockStrategyCommonService.getCookieValue() + heXinStr);
         Header hexin = httpService.getHead("hexin-v", heXinStr);
-        Header orign =httpService.getHead ("Origin", "http://www.iwencai.com");
+        Header orign = httpService.getHead("Origin", "http://www.iwencai.com");
 
         headerList.add(cookie);
         headerList.add(hexin);
         headerList.add(orign);
         long l = System.currentTimeMillis();
         String response = null;
-        String url = "http://www.iwencai.com/unifiedwap/self-stock/plate/list" ;
+        String url = "http://www.iwencai.com/unifiedwap/self-stock/plate/list";
         try {
             response = httpService.doGet(url, headerList, false);
         } catch (ConnectTimeoutException e) {
@@ -86,12 +86,12 @@ public class TongHuaShunPlateService {
     public TongHuaShunPlateDTO getPlateStock(TongHuaShunPlateDTO dto) throws ScriptException, FileNotFoundException, NoSuchMethodException {
         Assert.notNull(dto.getSn(), "id不能为空");
         Object allPlate = getAllPlate();
-        if(allPlate instanceof  JSONArray){
+        if (allPlate instanceof JSONArray) {
             JSONArray allPlate1 = (JSONArray) allPlate;
-            for(int i=0;i<allPlate1.size();i++){
+            for (int i = 0; i < allPlate1.size(); i++) {
                 JSONArray list = allPlate1.getJSONObject(i).getJSONArray("list");
-                List<String> codeArr=new ArrayList<>();
-                for(int j=0;j<list.size();j++){
+                List<String> codeArr = new ArrayList<>();
+                for (int j = 0; j < list.size(); j++) {
                     String stock = list.getJSONObject(j).getString("stock");
                     codeArr.add(stock);
                 }
@@ -102,15 +102,14 @@ public class TongHuaShunPlateService {
     }
 
 
-
     public Object deletePlateStock(TongHuaShunPlateDTO dto) {
         Assert.notNull(dto.getSn(), "id不能为空");
 
-        List<String>newCodeArr=new ArrayList<String>();
-        for(String code:dto.getCodeArr()){
+        List<String> newCodeArr = new ArrayList<String>();
+        for (String code : dto.getCodeArr()) {
             newCodeArr.add(getCodeUrl(code));
         }
-        String codeScs=  StringUtils.join(newCodeArr,",");
+        String codeScs = StringUtils.join(newCodeArr, ",");
 
 
         List<Header> headerList = new ArrayList<>();
@@ -118,12 +117,13 @@ public class TongHuaShunPlateService {
         String userName = stockUserBaseService.getCurrUserName(request);
         AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_NORMAL.getType());
 
-        Header cookie = httpService.getHead("Cookie", accountBase.getCookie());        Header referer = httpService.getHead("Referer", "http://quote.eastmoney.com/");
+        Header cookie = httpService.getHead("Cookie", accountBase.getCookie());
+        Header referer = httpService.getHead("Referer", "http://quote.eastmoney.com/");
         headerList.add(cookie);
         headerList.add(referer);
         long l = System.currentTimeMillis();
         String response = null;
-        String url = "" ;
+        String url = "";
         try {
             response = httpService.doGet(url, headerList, false);
         } catch (ConnectTimeoutException e) {
@@ -138,43 +138,39 @@ public class TongHuaShunPlateService {
         String heXinStr = TongHuaShunUtil.getHeXinStr();
         Header cookie = httpService.getHead("Cookie", stockStrategyCommonService.getCookieValue() + heXinStr);
         Header hexin = httpService.getHead("hexin-v", heXinStr);
-        Header orign =httpService.getHead ("Origin", "http://www.iwencai.com");
+        Header orign = httpService.getHead("Origin", "http://www.iwencai.com");
 
         headerList.add(cookie);
         headerList.add(hexin);
         headerList.add(orign);
 
-        List<String>newCodeArr=new ArrayList<>();
+        List<String> newCodeArr = new ArrayList<>();
         for (String code : dto.getCodeArr()) {
-            newCodeArr.add( covertCode(code));
+            newCodeArr.add(covertCode(code));
         }
         String join = String.join("|", newCodeArr);
         dto.setCodes(join);
         String response = null;
-        String url = "http://www.iwencai.com/iwencai/userinfo/iwc/userinfo/self-stock/plate/add" ;
+        String url = "http://www.iwencai.com/iwencai/userinfo/iwc/userinfo/self-stock/plate/add";
         try {
-            response = httpService.doPost(url,JsonUtil.toJson(dto), headerList, false);
+            response = httpService.doPost(url, JsonUtil.toJson(dto), headerList, false);
         } catch (ConnectTimeoutException e) {
             throw new BusinessException("链接异常");
         }
         int i = 1;
     }
 
-    private String covertCode(String code){
-        if("00".equals(code.substring(0,2))){
-            return code+"_33";
-        }
-        else if("30".equals(code.substring(0,2))){
-            return code+"_33";
-        }
-        else if("60".equals(code.substring(0,2))){
-            return code+"_22";
-        }
-       else if("68".equals(code.substring(0,2))){
-            return code+"_17";
-        }
-        else {
-            return code+"_151";
+    private String covertCode(String code) {
+        if ("00".equals(code.substring(0, 2))) {
+            return code + "_33";
+        } else if ("30".equals(code.substring(0, 2))) {
+            return code + "_33";
+        } else if ("60".equals(code.substring(0, 2))) {
+            return code + "_22";
+        } else if ("68".equals(code.substring(0, 2))) {
+            return code + "_17";
+        } else {
+            return code + "_151";
         }
     }
 
@@ -225,7 +221,6 @@ public class TongHuaShunPlateService {
         }
         return plateCodeArr;
     }
-
 
 
     public Object clearPlateStock(TongHuaShunPlateDTO dto) throws ScriptException, FileNotFoundException, NoSuchMethodException {

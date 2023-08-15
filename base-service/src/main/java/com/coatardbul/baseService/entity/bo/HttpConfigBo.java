@@ -4,8 +4,6 @@ import lombok.Data;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -27,6 +25,9 @@ public class HttpConfigBo {
     private CloseableHttpClient httpClient;
 
 
+    /**
+     * httpPost,httpGet
+     */
     private HttpRequestBase httpRequestBase;
 
 

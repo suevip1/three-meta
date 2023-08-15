@@ -62,7 +62,7 @@ public class ProxyIpService {
                 proxyIp.setCity((String) jsonObject.get("city_cn"));
                 proxyIp.setCreateTime(new Date());
                 String key = PROXY_IP + "_" + proxyIp.getIp() + "_" + proxyIp.getPort();
-                redisTemplate.opsForValue().set(key, JsonUtil.toJson(proxyIp), 1, TimeUnit.MINUTES);
+                redisTemplate.opsForValue().set(key, JsonUtil.toJson(proxyIp), 3, TimeUnit.MINUTES);
             }
         }
     }

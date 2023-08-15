@@ -124,6 +124,13 @@ public class StockBaseService {
             stockBase.setCode(stockBaseDetail.getCode());
             stockBase.setName(stockBaseDetail.getName());
             stockBase.setNameAbbr(getNameAbbr(stockBaseDetail.getName()));
+            if(StringUtils.isNotBlank(stockBaseDetail.getConvertCode())){
+                StockBase stockBase1 = stockBaseMapper.selectByPrimaryKey(stockBaseDetail.getConvertCode());
+                if(stockBase1!=null){
+                    stockBase.setIndustry(stockBase1.getIndustry());
+                    stockBase.setTheme(stockBase1.getTheme());
+                }
+            }
 
             try {
                 stockBaseMapper.insert(stockBase);

@@ -5,18 +5,20 @@
     <!--@mbg.generated-->
     <!--@Table stock_industry_analyse-->
     <id column="date" jdbcType="VARCHAR" property="date" />
-    <result column="call_auction" jdbcType="LONGVARCHAR" property="callAuction" />
+    <result column="call_auction_greate5_info" jdbcType="LONGVARCHAR" property="callAuctionGreate5Info" />
+    <result column="call_auction_greate2_info" jdbcType="LONGVARCHAR" property="callAuctionGreate2Info" />
     <result column="greate_than_line" jdbcType="LONGVARCHAR" property="greateThanLine" />
     <result column="big_increase" jdbcType="LONGVARCHAR" property="bigIncrease" />
     <result column="next_call_auction_buy" jdbcType="LONGVARCHAR" property="nextCallAuctionBuy" />
     <result column="small_increase" jdbcType="LONGVARCHAR" property="smallIncrease" />
     <result column="uplimit_info" jdbcType="LONGVARCHAR" property="uplimitInfo" />
+    <result column="increase_greate5_info" jdbcType="LONGVARCHAR" property="increaseGreate5Info" />
     <result column="remark" jdbcType="LONGVARCHAR" property="remark" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    `date`, call_auction, greate_than_line, big_increase, next_call_auction_buy, small_increase, 
-    uplimit_info, remark
+    `date`, call_auction_greate5_info, call_auction_greate2_info, greate_than_line, big_increase, 
+    next_call_auction_buy, small_increase, uplimit_info, increase_greate5_info, remark
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -32,14 +34,16 @@
   </delete>
   <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
     <!--@mbg.generated-->
-    insert into stock_industry_analyse (`date`, call_auction, greate_than_line, 
+    insert into stock_industry_analyse (`date`, call_auction_greate5_info, 
+      call_auction_greate2_info, greate_than_line, 
       big_increase, next_call_auction_buy, 
-      small_increase, uplimit_info, remark
-      )
-    values (#{date,jdbcType=VARCHAR}, #{callAuction,jdbcType=LONGVARCHAR}, #{greateThanLine,jdbcType=LONGVARCHAR}, 
+      small_increase, uplimit_info, increase_greate5_info, 
+      remark)
+    values (#{date,jdbcType=VARCHAR}, #{callAuctionGreate5Info,jdbcType=LONGVARCHAR}, 
+      #{callAuctionGreate2Info,jdbcType=LONGVARCHAR}, #{greateThanLine,jdbcType=LONGVARCHAR}, 
       #{bigIncrease,jdbcType=LONGVARCHAR}, #{nextCallAuctionBuy,jdbcType=LONGVARCHAR}, 
-      #{smallIncrease,jdbcType=LONGVARCHAR}, #{uplimitInfo,jdbcType=LONGVARCHAR}, #{remark,jdbcType=LONGVARCHAR}
-      )
+      #{smallIncrease,jdbcType=LONGVARCHAR}, #{uplimitInfo,jdbcType=LONGVARCHAR}, #{increaseGreate5Info,jdbcType=LONGVARCHAR}, 
+      #{remark,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
     <!--@mbg.generated-->
@@ -48,8 +52,11 @@
       <if test="date != null and date != ''">
         `date`,
       </if>
-      <if test="callAuction != null and callAuction != ''">
-        call_auction,
+      <if test="callAuctionGreate5Info != null and callAuctionGreate5Info != ''">
+        call_auction_greate5_info,
+      </if>
+      <if test="callAuctionGreate2Info != null and callAuctionGreate2Info != ''">
+        call_auction_greate2_info,
       </if>
       <if test="greateThanLine != null and greateThanLine != ''">
         greate_than_line,
@@ -66,6 +73,9 @@
       <if test="uplimitInfo != null and uplimitInfo != ''">
         uplimit_info,
       </if>
+      <if test="increaseGreate5Info != null and increaseGreate5Info != ''">
+        increase_greate5_info,
+      </if>
       <if test="remark != null and remark != ''">
         remark,
       </if>
@@ -74,8 +84,11 @@
       <if test="date != null and date != ''">
         #{date,jdbcType=VARCHAR},
       </if>
-      <if test="callAuction != null and callAuction != ''">
-        #{callAuction,jdbcType=LONGVARCHAR},
+      <if test="callAuctionGreate5Info != null and callAuctionGreate5Info != ''">
+        #{callAuctionGreate5Info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="callAuctionGreate2Info != null and callAuctionGreate2Info != ''">
+        #{callAuctionGreate2Info,jdbcType=LONGVARCHAR},
       </if>
       <if test="greateThanLine != null and greateThanLine != ''">
         #{greateThanLine,jdbcType=LONGVARCHAR},
@@ -92,6 +105,9 @@
       <if test="uplimitInfo != null and uplimitInfo != ''">
         #{uplimitInfo,jdbcType=LONGVARCHAR},
       </if>
+      <if test="increaseGreate5Info != null and increaseGreate5Info != ''">
+        #{increaseGreate5Info,jdbcType=LONGVARCHAR},
+      </if>
       <if test="remark != null and remark != ''">
         #{remark,jdbcType=LONGVARCHAR},
       </if>
@@ -101,8 +117,11 @@
     <!--@mbg.generated-->
     update stock_industry_analyse
     <set>
-      <if test="callAuction != null and callAuction != ''">
-        call_auction = #{callAuction,jdbcType=LONGVARCHAR},
+      <if test="callAuctionGreate5Info != null and callAuctionGreate5Info != ''">
+        call_auction_greate5_info = #{callAuctionGreate5Info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="callAuctionGreate2Info != null and callAuctionGreate2Info != ''">
+        call_auction_greate2_info = #{callAuctionGreate2Info,jdbcType=LONGVARCHAR},
       </if>
       <if test="greateThanLine != null and greateThanLine != ''">
         greate_than_line = #{greateThanLine,jdbcType=LONGVARCHAR},
@@ -119,6 +138,9 @@
       <if test="uplimitInfo != null and uplimitInfo != ''">
         uplimit_info = #{uplimitInfo,jdbcType=LONGVARCHAR},
       </if>
+      <if test="increaseGreate5Info != null and increaseGreate5Info != ''">
+        increase_greate5_info = #{increaseGreate5Info,jdbcType=LONGVARCHAR},
+      </if>
       <if test="remark != null and remark != ''">
         remark = #{remark,jdbcType=LONGVARCHAR},
       </if>
@@ -128,12 +150,14 @@
   <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockIndustryAnalyse">
     <!--@mbg.generated-->
     update stock_industry_analyse
-    set call_auction = #{callAuction,jdbcType=LONGVARCHAR},
+    set call_auction_greate5_info = #{callAuctionGreate5Info,jdbcType=LONGVARCHAR},
+      call_auction_greate2_info = #{callAuctionGreate2Info,jdbcType=LONGVARCHAR},
       greate_than_line = #{greateThanLine,jdbcType=LONGVARCHAR},
       big_increase = #{bigIncrease,jdbcType=LONGVARCHAR},
       next_call_auction_buy = #{nextCallAuctionBuy,jdbcType=LONGVARCHAR},
       small_increase = #{smallIncrease,jdbcType=LONGVARCHAR},
       uplimit_info = #{uplimitInfo,jdbcType=LONGVARCHAR},
+      increase_greate5_info = #{increaseGreate5Info,jdbcType=LONGVARCHAR},
       remark = #{remark,jdbcType=LONGVARCHAR}
     where `date` = #{date,jdbcType=VARCHAR}
   </update>
@@ -141,7 +165,7 @@
 <!--auto generated by MybatisCodeHelper on 2023-06-14-->
   <select id="selectByAll" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from stock_industry_analyse
 
     </select>
@@ -149,7 +173,7 @@
 <!--auto generated by MybatisCodeHelper on 2023-06-14-->
   <select id="selectAllByDateBetweenEqual" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List"/>
+    <include refid="Base_Column_List" />
     from stock_industry_analyse
     <where>
 
