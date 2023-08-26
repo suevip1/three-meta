@@ -434,7 +434,7 @@ public abstract class StockStrategyCommonService {
 //        sb.append("&urp_sort_index=最新涨跌幅");
         sb.append("&page=").append(dto.getPage());
         sb.append("&perpage=").append(dto.getPageSize());
-        sb.append("&comp_id=6734520");
+        sb.append("&comp_id=6836372");
         sb.append("&uuid=24087");
         return sb.toString();
     }
