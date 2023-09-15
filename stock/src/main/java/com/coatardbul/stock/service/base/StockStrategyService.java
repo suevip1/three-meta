@@ -81,6 +81,7 @@ public class StockStrategyService  extends StockStrategyCommonService {
             stockTemplateQueryDto.setDateStr(dto.getDateStr());
             stockTemplateQueryDto.setTimeStr(dto.getTimeStr());
             stockTemplateQueryDto.setStockCode(dto.getStockCode());
+            stockTemplateQueryDto.setStockName(dto.getStockName());
             stockTemplateQueryDto.setObjectSign(dto.getRiverStockTemplateSign());
             stockTemplateQueryDto.setThemeStr(dto.getThemeStr());
             stockTemplateQueryDto.setStockScript(dto.getStockTemplateScript());

@@ -60,9 +60,16 @@ public class StockTemplateService {
     /**
      * 股票代码  包含001001
      */
-    private static final String STOCK_CODE_STR = "包含{{stockCode}}";
+    private static final String STOCK_CODE_STR = "代码包含{{stockCode}}";
+
+
+    private static final String STOCK_NAME_STR = "股票名称包含{{stockName}}";
+
 
     private static final String STOCK_CODE_REGEX = "\\{\\{stockCode}}";
+
+
+    private static final String STOCK_NAME_REGEX = "\\{\\{stockName}}";
 
     /**
      * 题材
@@ -77,7 +84,9 @@ public class StockTemplateService {
 
     private static final String LAST_DAY_STRING = "lastDay";
 
-    private static final String STOCK_CODE = "[包]{1}[含]{1}[0-9]{6}";
+    private static final String STOCK_CODE = "[代]{1}[码]{1}[包]{1}[含]{1}[0-9]{6}";
+
+    private static final String STOCK_NAME = "[股]{1}[票]{1}[名]{1}[称]{1}[包]{1}[含][\u4e00-\u9fa5]{0,6}";
 
 
     /**
@@ -171,7 +180,7 @@ public class StockTemplateService {
      */
     private String getMatchStockCodeScript(String exampleStr) {
         //包含001001 共6位
-        int strLength = 8;
+        int strLength = 10;
         String stockCodeMatchStr = "";
         for (int i = 0; i <= exampleStr.length() - strLength; i++) {
             String substring = exampleStr.substring(i, i + strLength);
@@ -180,11 +189,23 @@ public class StockTemplateService {
                 break;
             }
         }
-        if (StringUtils.isNotBlank(stockCodeMatchStr)) {
-            return exampleStr.replace(stockCodeMatchStr, STOCK_CODE_STR);
-        } else {
-            return exampleStr;
+        String stockNameMatchStr = "";
+        if(exampleStr.contains("，")){
+            String[] split = exampleStr.split("，");
+            for(int i=0;i<split.length;i++){
+                if(split[i].matches(STOCK_NAME)){
+                    stockNameMatchStr=split[i];
+                    break;
+                }
+            }
         }
+        if (StringUtils.isNotBlank(stockCodeMatchStr)) {
+            exampleStr= exampleStr.replace(stockCodeMatchStr, STOCK_CODE_STR);
+        }
+        if (StringUtils.isNotBlank(stockNameMatchStr)) {
+            exampleStr= exampleStr.replace(stockNameMatchStr, STOCK_NAME_STR);
+        }
+        return exampleStr;
     }
 
 
@@ -415,14 +436,14 @@ public class StockTemplateService {
             String[] idArray = getIdArray(dto.getId());
             String matchDateInfo = getFinalMatchDate(dto, idArray);
             matchDateInfo = getMatchTimeInfo(dto.getTimeStr(), matchDateInfo);
-            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(), matchDateInfo);
+            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(), dto.getStockName(),matchDateInfo);
             matchDateInfo = getMatchThemeInfo(dto.getThemeStr(), matchDateInfo);
             matchDateInfo = getFilterTemplateQuery(matchDateInfo);
             return matchDateInfo;
         } else if (StringUtils.isNotBlank(dto.getStockScript())) {
             String matchDateInfo = getMatchDateInfo(dto.getStockScript(), dto.getDateStr());
             matchDateInfo = getMatchTimeInfo(dto.getTimeStr(), matchDateInfo);
-            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(), matchDateInfo);
+            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(),dto.getStockName(), matchDateInfo);
             matchDateInfo = getMatchThemeInfo(dto.getThemeStr(), matchDateInfo);
             matchDateInfo = getFilterTemplateQuery(matchDateInfo);
             return matchDateInfo;
@@ -430,7 +451,7 @@ public class StockTemplateService {
             StockQueryTemplate stockQueryTemplate = stockQueryTemplateMapper.selectByTemplateSign(dto.getObjectSign());
             String matchDateInfo = getMatchDateInfo(stockQueryTemplate.getScriptStr(), dto.getDateStr());
             matchDateInfo = getMatchTimeInfo(dto.getTimeStr(), matchDateInfo);
-            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(), matchDateInfo);
+            matchDateInfo = getMatchStockCodeInfo(dto.getStockCode(), dto.getStockName(),matchDateInfo);
             matchDateInfo = getMatchThemeInfo(dto.getThemeStr(), matchDateInfo);
             matchDateInfo = getFilterTemplateQuery(matchDateInfo);
             return matchDateInfo;
@@ -501,12 +522,14 @@ public class StockTemplateService {
      * @param matchDateInfo
      * @return
      */
-    private String getMatchStockCodeInfo(String stockCode, String matchDateInfo) {
+    private String getMatchStockCodeInfo(String stockCode, String stockName,String matchDateInfo) {
         if (StringUtils.isNotBlank(stockCode)) {
-            return matchDateInfo.replaceAll(STOCK_CODE_REGEX, stockCode);
-        } else {
-            return matchDateInfo;
+            matchDateInfo= matchDateInfo.replaceAll(STOCK_CODE_REGEX, stockCode);
         }
+        if (StringUtils.isNotBlank(stockName)) {
+            matchDateInfo= matchDateInfo.replaceAll(STOCK_NAME_REGEX, stockName);
+        }
+        return matchDateInfo;
     }
 
     /**

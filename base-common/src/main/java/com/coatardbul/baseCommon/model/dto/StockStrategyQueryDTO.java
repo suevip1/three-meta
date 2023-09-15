@@ -44,6 +44,8 @@ public class StockStrategyQueryDTO {
      *股票代码
      */
     private String stockCode;
+
+    private String stockName;
     /**
      * 查询字符串
      */

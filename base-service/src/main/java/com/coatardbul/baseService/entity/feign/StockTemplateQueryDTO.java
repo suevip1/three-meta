@@ -22,6 +22,9 @@ public class StockTemplateQueryDTO {
     private String objectSign;
 
     private String stockCode;
+
+    private String stockName;
+
     /**
     * 模板名称
     */
@@ -37,5 +40,6 @@ public class StockTemplateQueryDTO {
      * 股票脚本
      */
     private String stockScript;
+
 
 }
