@@ -3,7 +3,7 @@ package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.constants.CommonStatusEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.river.common.constants.DateTypeEnum;
 import com.coatardbul.river.mapper.AuthCalendarMapper;
 import com.coatardbul.river.model.dto.CalendarDTO;
@@ -47,7 +47,7 @@ public class CalendarService {
     @Autowired
     AuthCalendarMapper authCalendarMapper;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
     public void widerCalendar(CalendarDTO calendarDTO) {
         List<String> rangeMonth = DateTimeUtil.getRangeMonth(calendarDTO.getBeginMonth(), calendarDTO.getEndMonth());
@@ -99,7 +99,7 @@ public class CalendarService {
             }
             if ("wnrl_riqi".equals(nodes.get(i).attr("class"))) {
                 AuthCalendar authCalendar = new AuthCalendar();
-                authCalendar.setId(baseServerFeign.getSnowflakeId());
+                authCalendar.setId(snowFlakeService.getSnowId());
                 authCalendar.setWeek(week % 7);
                 authCalendar.setStatus(CommonStatusEnum.VALID.getCode().intValue());
                 String solarDay = nodes.get(i).childNodes().get(0).childNodes().get(0).childNodes().get(0).toString();

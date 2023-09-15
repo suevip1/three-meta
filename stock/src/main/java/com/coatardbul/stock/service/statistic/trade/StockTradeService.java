@@ -10,10 +10,11 @@ import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
+import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTradeBuyConfigMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
@@ -22,6 +23,7 @@ import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.AccountBase;
+import com.coatardbul.stock.model.entity.StockBase;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
@@ -68,7 +70,7 @@ public class StockTradeService {
     @Autowired
     StockTradeBaseService stockTradeBaseService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockTradeSellJobMapper stockTradeSellJobMapper;
     @Autowired
@@ -91,7 +93,8 @@ public class StockTradeService {
     @Autowired
     StockParseAndConvertService stockParseAndConvertService;
 
-
+    @Autowired
+    StockBaseMapper stockBaseMapper;
     @Autowired
     StockTradeAssetPositionService stockTradeAssetPositionService;
     @Autowired
@@ -170,7 +173,7 @@ public class StockTradeService {
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
-                return jsonObject.getJSONArray("Data");
+                return renderData(jsonObject);
             } else {
                 throw new BusinessException("登陆异常");
             }
@@ -179,19 +182,34 @@ public class StockTradeService {
         }
     }
 
-    public JSONArray getDealData( int pageSize) {
-        JSONArray hisDealData = getDealData( pageSize, "");
+    private JSONArray renderData(JSONObject jsonObject) {
+        JSONArray data = jsonObject.getJSONArray("Data");
+        for (int i = 0; i < data.size(); i++) {
+            JSONObject jsonObject1 = data.getJSONObject(i);
+            String zqdm = jsonObject1.getString("Zqdm");
+            StockBase stockBase = stockBaseMapper.selectByPrimaryKey(zqdm);
+            if(stockBase!=null){
+                jsonObject1.put("theme", stockBase.getTheme());
+                jsonObject1.put("industry", stockBase.getIndustry());
+            }
+        }
+        return data;
+    }
+
+    public JSONArray getDealData(int pageSize) {
+        JSONArray hisDealData = getDealData(pageSize, "");
         if (hisDealData.size() == pageSize) {
-            JSONArray dwc = getDealData( pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+            JSONArray dwc = getDealData(pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
             hisDealData.addAll(dwc);
             while (dwc.size() == pageSize) {
-                dwc = getDealData( pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
+                dwc = getDealData(pageSize, hisDealData.getJSONObject(hisDealData.size() - 1).getString("Dwc"));
                 hisDealData.addAll(dwc);
             }
         }
         return hisDealData;
     }
-    public JSONArray getDealData( int pageSize, String dwc) {
+
+    public JSONArray getDealData(int pageSize, String dwc) {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         String userName = stockUserBaseService.getCurrUserName(request);
         //账号信息
@@ -209,7 +227,7 @@ public class StockTradeService {
             JSONObject jsonObject = JSONObject.parseObject(result);
             String status = jsonObject.getString("Status");
             if ("0".equals(status)) {
-                return jsonObject.getJSONArray("Data");
+                return renderData(jsonObject);
             } else {
                 throw new BusinessException("登陆异常");
             }
@@ -263,7 +281,7 @@ public class StockTradeService {
     }
 
     public void addSellInfo(StockTradeSellJob dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         dto.setStatus(1);
         stockTradeSellJobMapper.insert(dto);
     }
@@ -288,7 +306,7 @@ public class StockTradeService {
                 StockTradeBuyConfig stbc = stockTradeBuyConfigMapper.selectAllByTemplateId(ssw.getTemplatedId());
                 if (stbc == null) {
                     StockTradeBuyConfig stockTradeBuyConfig = new StockTradeBuyConfig();
-                    stockTradeBuyConfig.setId(baseServerFeign.getSnowflakeId());
+                    stockTradeBuyConfig.setId(snowFlakeService.getSnowId());
                     stockTradeBuyConfig.setTemplateId(ssw.getTemplatedId());
                     stockTradeBuyConfig.setTemplateName(riverRemoteService.getTemplateNameById(ssw.getTemplatedId()));
                     stockTradeBuyConfigMapper.insertSelective(stockTradeBuyConfig);

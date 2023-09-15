@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockWarnLogMapper;
 import com.coatardbul.stock.model.dto.StockWarnLogQueryDto;
@@ -41,7 +41,7 @@ public class StockWarnLogService {
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
     public void insertFilterHistory(StrategyBO strategy, StockStrategyQueryDTO query) throws ParseException {
         insertFilter(strategy, query, false);
@@ -90,7 +90,7 @@ public class StockWarnLogService {
         if (stockCodeMap.size() > 0) {
             for (Map.Entry<String, StockWarnLog> entry : stockCodeMap.entrySet()) {
                 StockWarnLog stockWarnLog = new StockWarnLog();
-                stockWarnLog.setId(baseServerFeign.getSnowflakeId());
+                stockWarnLog.setId(snowFlakeService.getSnowId());
                 stockWarnLog.setStockCode(entry.getKey());
                 stockWarnLog.setStockName(entry.getValue().getStockName());
                 stockWarnLog.setTemplateId(query.getRiverStockTemplateId());

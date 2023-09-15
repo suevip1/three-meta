@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.mapper.StockTradeAiStrategyMapper;
@@ -25,14 +25,14 @@ public class StockTradeAiStrategyService {
     StockTradeAiStrategyMapper stockTradeAiStrategyMapper;
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
     RedisTemplate redisTemplate;
 
     public void add(StockTradeAiStrategy dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         stockTradeAiStrategyMapper.insert(dto);
         redisTemplate.opsForValue().set(RedisKeyUtils.getAiStrategyParam(dto.getStrategySign()), dto.getParamObject());
     }

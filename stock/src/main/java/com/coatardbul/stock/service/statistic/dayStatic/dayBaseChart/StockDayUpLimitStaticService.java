@@ -4,8 +4,8 @@ import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseCommon.util.ReflexUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
@@ -41,7 +41,7 @@ import java.util.Map;
 @Service
 public class StockDayUpLimitStaticService extends BaseChartDayAbstractService{
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -70,7 +70,7 @@ public class StockDayUpLimitStaticService extends BaseChartDayAbstractService{
 
         if (templateIdList != null && templateIdList.size() > 0) {
             StockDayEmotion addStockDayEmotion = new StockDayEmotion();
-            addStockDayEmotion.setId(baseServerFeign.getSnowflakeId());
+            addStockDayEmotion.setId(snowFlakeService.getSnowId());
             addStockDayEmotion.setDate(dto.getDateStr());
             addStockDayEmotion.setObjectSign(dto.getObjectEnumSign());
 

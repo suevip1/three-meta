@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockTradeCronMapper;
 import com.coatardbul.stock.model.entity.StockTradeCron;
@@ -24,16 +24,16 @@ public class StockTradeCronService {
     StockTradeCronMapper stockTradeCronMapper;
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
 
     public void add(StockTradeCron  stockTradeCron){
-        stockTradeCron.setId(baseServerFeign.getSnowflakeId());
+        stockTradeCron.setId(snowFlakeService.getSnowId());
         stockTradeCronMapper.insert(stockTradeCron);
     }
     public void modify(StockTradeCron  stockTradeCron){
-        stockTradeCron.setId(baseServerFeign.getSnowflakeId());
+        stockTradeCron.setId(snowFlakeService.getSnowId());
         stockTradeCronMapper.updateByPrimaryKeySelective(stockTradeCron);
     }
     public void delete(StockTradeCron  stockTradeCron){

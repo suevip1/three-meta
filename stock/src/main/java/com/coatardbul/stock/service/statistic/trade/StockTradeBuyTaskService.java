@@ -1,7 +1,7 @@
 package com.coatardbul.stock.service.statistic.trade;
 
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockTradeBuyTaskMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
@@ -32,7 +32,7 @@ public class StockTradeBuyTaskService {
     StockTradeBuyTaskMapper stockTradeBuyTaskMapper;
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -48,7 +48,7 @@ public class StockTradeBuyTaskService {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
 
         String userName = stockUserBaseService.getCurrUserName(request);
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         dto.setJobName(stockTradeService.getJobName(dto));
         dto.setTradeUserId(userName);
         stockTradeBuyTaskMapper.insert(dto);

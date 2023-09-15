@@ -2,7 +2,7 @@ package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.river.common.constants.DateTypeEnum;
 import com.coatardbul.river.mapper.AuthCalendarMapper;
 import com.coatardbul.river.mapper.StockQueryTemplateMapper;
@@ -115,7 +115,7 @@ public class StockTemplateService {
 
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockQueryTemplateMapper stockQueryTemplateMapper;
     @Autowired
@@ -137,7 +137,7 @@ public class StockTemplateService {
             throw new BusinessException("当前模板重复");
         }
         StockQueryTemplate addStockQueryTemplate = convert(dto, templateScript);
-        addStockQueryTemplate.setId(baseServerFeign.getSnowflakeId());
+        addStockQueryTemplate.setId(snowFlakeService.getSnowId());
         addStockQueryTemplate.setHotValue(1);
         stockQueryTemplateMapper.insert(addStockQueryTemplate);
 

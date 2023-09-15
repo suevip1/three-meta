@@ -4,11 +4,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.SimulateTypeEnum;
 import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
+import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.entity.bo.PreTradeDetail;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.DataServiceBridge;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
@@ -19,7 +20,6 @@ import com.coatardbul.stock.mapper.StockTradeDetailMapper;
 import com.coatardbul.stock.mapper.StockTradeSellJobMapper;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
-import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.stock.model.bo.trade.TradeAllConfigDetail;
 import com.coatardbul.stock.model.entity.StockTradeConfig;
 import com.coatardbul.stock.model.entity.StockTradeDateSwitch;
@@ -58,7 +58,7 @@ public class TradeBaseService {
     @Autowired
     StockTradeBaseService stockTradeBaseService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockTradeSellJobMapper stockTradeSellJobMapper;
     @Autowired
@@ -144,7 +144,7 @@ public class TradeBaseService {
     private void saveStockTradeDetail(TradeAllConfigDetail commonTradeInfo, PreTradeDetail preTradeDetail) {
         // 记录详情
         StockTradeDetail stockTradeDetail = new StockTradeDetail();
-        stockTradeDetail.setId(baseServerFeign.getSnowflakeId());
+        stockTradeDetail.setId(snowFlakeService.getSnowId());
         stockTradeDetail.setCode(preTradeDetail.getCode());
         stockTradeDetail.setName(preTradeDetail.getName());
         stockTradeDetail.setTradeType(preTradeDetail.getTradeType());

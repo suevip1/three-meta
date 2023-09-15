@@ -9,7 +9,7 @@ import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
@@ -54,7 +54,7 @@ public class StockStrategyWatchService {
     @Autowired
     StockWarnLogService stockWarnLogService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -328,7 +328,7 @@ public class StockStrategyWatchService {
     }
 
     public void add(StockStrategyWatch dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         stockStrategyWatchMapper.insert(dto);
     }
 

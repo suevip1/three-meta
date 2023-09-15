@@ -1,7 +1,7 @@
 package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.util.IPUtils;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.river.mapper.LoginDetailMapper;
 import com.coatardbul.river.model.entity.LoginDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class LoginDetailService {
     @Autowired
     private LoginDetailMapper loginDetailMapper;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
 
     public void logLoginInfo(HttpServletRequest request) {
@@ -38,7 +38,7 @@ public class LoginDetailService {
         String requestURI = request.getRequestURI();
 
         LoginDetail record=new LoginDetail();
-        record.setId(baseServerFeign.getSnowflakeId());
+        record.setId(snowFlakeService.getSnowId());
         record.setIp(clientIp);
         record.setUserAgent(userGent);
         record.setClientPort(String.valueOf(clientPort));

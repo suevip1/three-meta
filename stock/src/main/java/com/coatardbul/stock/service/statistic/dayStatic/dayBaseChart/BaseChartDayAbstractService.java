@@ -1,8 +1,8 @@
 package com.coatardbul.stock.service.statistic.dayStatic.dayBaseChart;
 
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
@@ -42,7 +42,7 @@ public abstract class BaseChartDayAbstractService implements DayService {
     @Autowired
     StockStaticTemplateMapper stockStaticTemplateMapper;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired

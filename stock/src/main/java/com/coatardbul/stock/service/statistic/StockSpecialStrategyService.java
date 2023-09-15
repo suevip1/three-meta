@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.LimitStrongWeakBO;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockParseAndConvertService;
 import com.coatardbul.baseService.service.UpLimitStrongWeakService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
@@ -51,7 +51,7 @@ public class StockSpecialStrategyService {
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
     @Autowired
     StockParseAndConvertService stockParseAndConvertService;

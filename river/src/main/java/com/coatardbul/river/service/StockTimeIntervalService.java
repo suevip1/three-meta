@@ -1,7 +1,7 @@
 package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.util.DateTimeUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.river.mapper.StockTimeIntervalMapper;
 import com.coatardbul.river.model.bo.IntervalStaticBo;
 import com.coatardbul.river.model.entity.StockTimeInterval;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class StockTimeIntervalService {
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockTimeIntervalMapper stockTimeIntervalMapper;
     public List<String> getList(StockTimeInterval dto) {
@@ -43,7 +43,7 @@ public class StockTimeIntervalService {
         result.addAll(rangeMinute);
         result.forEach(v->{
             StockTimeInterval addInfo=new StockTimeInterval();
-            addInfo.setId(baseServerFeign.getSnowflakeId());
+            addInfo.setId(snowFlakeService.getSnowId());
             addInfo.setTimeStr(v);
             addInfo.setIntervalType(dto.getIntervalType());
             stockTimeIntervalMapper.insert(addInfo);

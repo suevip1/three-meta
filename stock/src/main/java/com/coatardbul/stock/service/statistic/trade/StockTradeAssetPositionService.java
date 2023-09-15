@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockTradeAssetPositionMapper;
 import com.coatardbul.stock.model.entity.StockTradeAssetPosition;
@@ -26,12 +26,12 @@ public class StockTradeAssetPositionService {
     private StockTradeAssetPositionMapper stockTradeAssetPositionMapper;
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
 
     public void add(StockTradeAssetPosition dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
 
         StockTradeAssetPosition stockTradeAssetPosition = stockTradeAssetPositionMapper.selectAllByCode(dto.getCode());
         if (stockTradeAssetPosition == null) {
@@ -73,7 +73,7 @@ public class StockTradeAssetPositionService {
         BigDecimal bugAmount = buyNum.multiply(price);
         if (stockTradeAssetPosition == null) {
             StockTradeAssetPosition addInfo = new StockTradeAssetPosition();
-            addInfo.setId(baseServerFeign.getSnowflakeId());
+            addInfo.setId(snowFlakeService.getSnowId());
             addInfo.setName(name);
             addInfo.setCode(code);
             addInfo.setCurrPosition(bugAmount.toString());

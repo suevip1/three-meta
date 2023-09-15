@@ -18,6 +18,9 @@ public interface DictInfoMapper {
 
     int updateByPrimaryKey(DictInfo record);
 
+    List<DictInfo> selectAllByBusiType(@Param("busiType")String busiType);
+
+
     List<DictInfo> selectAllByBusiTypeAndSignKey(@Param("busiType")String busiType,@Param("signKey")String signKey);
 
 

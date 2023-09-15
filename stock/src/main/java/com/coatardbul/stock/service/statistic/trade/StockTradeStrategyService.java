@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockTradeStrategyMapper;
 import com.coatardbul.stock.model.dto.StockTradeStrategyDTO;
@@ -27,11 +27,11 @@ public class StockTradeStrategyService {
     StockTradeStrategyMapper stockTradeStrategyMapper;
 
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     public void add(StockTradeStrategy stockTradeStrategy){
-        stockTradeStrategy.setId(baseServerFeign.getSnowflakeId());
+        stockTradeStrategy.setId(snowFlakeService.getSnowId());
         stockTradeStrategyMapper.insert(stockTradeStrategy);
     }
 

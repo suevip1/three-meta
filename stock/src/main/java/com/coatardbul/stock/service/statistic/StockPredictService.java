@@ -11,7 +11,6 @@ import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.AiStrategyUplimitAmbushBo;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.DongFangCommonService;
 import com.coatardbul.baseService.service.SnowFlakeService;
@@ -58,7 +57,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StockPredictService {
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockStrategyCommonService stockStrategyCommonService;
     @Autowired
@@ -75,8 +74,7 @@ public class StockPredictService {
     StockMinuterEmotionMapper stockMinuterEmotionMapper;
     @Autowired
     StockVerifyService stockVerifyService;
-    @Autowired
-    SnowFlakeService snowFlakeService;
+
     @Autowired
     DongFangCommonService dongFangCommonService;
 
@@ -533,7 +531,7 @@ public class StockPredictService {
         Map dateBuyInfoMap = getNextInfo(dateStr, 0, code);
         StockDetail dateBuyInfoDetail = convert(dateBuyInfoMap);
         StockTemplatePredict addInfo = new StockTemplatePredict();
-        addInfo.setId(baseServerFeign.getSnowflakeId());
+        addInfo.setId(snowFlakeService.getSnowId());
         addInfo.setDate(dateStr);
         addInfo.setTemplatedId(dto.getId());
         addInfo.setHoldDay(dto.getHoleDay());

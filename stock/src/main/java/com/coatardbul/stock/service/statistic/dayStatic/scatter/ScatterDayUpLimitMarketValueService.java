@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
@@ -38,7 +38,7 @@ import java.util.Set;
 @Slf4j
 public class ScatterDayUpLimitMarketValueService extends ScatterDayAbstractService {
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -61,7 +61,7 @@ public class ScatterDayUpLimitMarketValueService extends ScatterDayAbstractServi
 
         if (templateIdList != null && templateIdList.size() > 0) {
             StockScatterStatic stockScatterStatic = new StockScatterStatic();
-            stockScatterStatic.setId(baseServerFeign.getSnowflakeId());
+            stockScatterStatic.setId(snowFlakeService.getSnowId());
             stockScatterStatic.setDate(dto.getDateStr());
 //            stockScatterStatic.setObjectStaticArray();
             stockScatterStatic.setObjectSign(dto.getObjectEnumSign());

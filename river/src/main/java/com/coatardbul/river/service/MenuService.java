@@ -1,7 +1,7 @@
 package com.coatardbul.river.service;
 
 import com.coatardbul.baseCommon.constants.CommonStatusEnum;
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.river.mapper.AuthMenuMapper;
 import com.coatardbul.river.model.dto.UserDto;
 import com.coatardbul.river.model.entity.AuthMenu;
@@ -28,10 +28,10 @@ public class MenuService {
     @Autowired
     AuthMenuMapper authMenuMapper;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
     public void add(AuthMenu dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         if(!StringUtils.isNotBlank(dto.getParentMenuId())){
             dto.setParentMenuId("0");
         }

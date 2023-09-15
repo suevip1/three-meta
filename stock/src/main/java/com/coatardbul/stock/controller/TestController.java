@@ -11,7 +11,6 @@ import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.service.DongFangCommonService;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.SnowFlakeService;
@@ -120,8 +119,7 @@ public class TestController {
     HttpPoolService httpService;
     @Autowired
     StockQuartzService stockQuartzService;
-    @Autowired
-    BaseServerFeign baseServerFeign;
+
     @Autowired
 
     StockCronRefreshService stockCronRefreshService;

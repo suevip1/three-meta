@@ -1,8 +1,8 @@
 package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.constants.CookieTypeEnum;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.SailServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.model.dto.StockCookieDTO;
 import com.coatardbul.stock.model.entity.AccountBase;
@@ -32,7 +32,7 @@ public class StockCookieService {
     @Autowired
     StockUserBaseService stockUserBaseService;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     StockStrategyService stockStrategyService;
     @Autowired

@@ -1,8 +1,8 @@
 package com.coatardbul.stock.service.statistic.dayStatic.scatter;
 
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @Service
 public abstract class ScatterDayAbstractService implements DayService {
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired

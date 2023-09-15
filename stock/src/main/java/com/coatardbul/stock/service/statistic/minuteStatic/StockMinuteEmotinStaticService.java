@@ -5,8 +5,8 @@ import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.constants.Constant;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StockMinuteEmotinStaticService {
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -291,7 +291,7 @@ public class StockMinuteEmotinStaticService {
 
     private StockMinuterEmotion getDefaultAddStockMinuterEmotion(String dateStr, String objectEnumSign, String templatedId) {
         StockMinuterEmotion addStockMinuterEmotion = new StockMinuterEmotion();
-        addStockMinuterEmotion.setId(baseServerFeign.getSnowflakeId());
+        addStockMinuterEmotion.setId(snowFlakeService.getSnowId());
         addStockMinuterEmotion.setDate(dateStr);
         addStockMinuterEmotion.setObjectSign(objectEnumSign);
         addStockMinuterEmotion.setTemplateId(templatedId);

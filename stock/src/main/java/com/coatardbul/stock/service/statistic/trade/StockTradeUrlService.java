@@ -1,6 +1,6 @@
 package com.coatardbul.stock.service.statistic.trade;
 
-import com.coatardbul.baseService.feign.BaseServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.entity.StockTradeUrl;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,10 @@ public class StockTradeUrlService {
     @Autowired
     StockTradeUrlMapper stockTradeUrlMapper;
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
 
     public void add(StockTradeUrl dto) {
-        dto.setId(baseServerFeign.getSnowflakeId());
+        dto.setId(snowFlakeService.getSnowId());
         stockTradeUrlMapper.insert(dto);
 
     }

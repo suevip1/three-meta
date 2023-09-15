@@ -2,8 +2,8 @@ package com.coatardbul.stock.service.statistic;
 
 import com.coatardbul.baseCommon.constants.StaticLatitudeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
-import com.coatardbul.baseService.feign.BaseServerFeign;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.model.dto.StockStaticTemplateBaseDTO;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StockStaticTemplateService {
     @Autowired
-    BaseServerFeign baseServerFeign;
+    SnowFlakeService snowFlakeService;
     @Autowired
     RiverServerFeign riverServerFeign;
     @Autowired
@@ -52,7 +52,7 @@ public class StockStaticTemplateService {
         if (StringUtils.isNotBlank(dto.getId())) {
             result.setId(dto.getId());
         } else {
-            result.setId(baseServerFeign.getSnowflakeId());
+            result.setId(snowFlakeService.getSnowId());
         }
         //严格判断纬度是否为枚举里面的数据
         if (StaticLatitudeEnum.isHaveCode(dto.getStaticLatitude())) {
