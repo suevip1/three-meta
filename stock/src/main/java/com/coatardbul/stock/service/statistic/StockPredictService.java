@@ -20,12 +20,14 @@ import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.common.constants.Constant;
+import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.mapper.StockDayEmotionMapper;
 import com.coatardbul.stock.mapper.StockMinuterEmotionMapper;
 import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.model.dto.StockPredictDto;
+import com.coatardbul.stock.model.entity.StockBase;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +79,8 @@ public class StockPredictService {
 
     @Autowired
     DongFangCommonService dongFangCommonService;
-
+@Autowired
+    StockBaseMapper stockBaseMapper;
     @Autowired
     StockUpLimitAnalyzeCommonService stockUpLimitAnalyzeCommonService;
     @Autowired
@@ -424,7 +427,12 @@ public class StockPredictService {
             dto.setTimeStr(timeStr);
         }
         dto.setDateStr(specialDay);
-        dto.setStockCode(code);
+        StockBase stockBase = stockBaseMapper.selectByPrimaryKey(code);
+        if(stockBase!=null){
+            dto.setStockName(stockBase.getName().substring(0,stockBase.getName().length()-1));
+        }else {
+            dto.setStockCode(code);
+        }
         StrategyBO strategy = null;
         try {
             strategy = stockStrategyCommonService.strategy(dto);
@@ -462,7 +470,7 @@ public class StockPredictService {
         stockDetail.setMarketValue(new BigDecimal(nextInfo.get("circulationMarketValue").toString()));
         stockDetail.setNewPrice(new BigDecimal(nextInfo.get("newPrice").toString()));
         stockDetail.setAuctionIncreaseRate(new BigDecimal(nextInfo.get("auctionIncreaseRate").toString()));
-        stockDetail.setTurnOverRate(new BigDecimal(nextInfo.get("turnOverRate").toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
+//        stockDetail.setTurnOverRate(new BigDecimal(nextInfo.get("turnOverRate").toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
         stockDetail.setNewIncreaseRate(
                 new BigDecimal(nextInfo.get("newPrice").toString()).subtract(new BigDecimal(nextInfo.get("lastClosePrice").toString())).multiply(new BigDecimal(100)).
                         divide(new BigDecimal(nextInfo.get("lastClosePrice").toString()), 4, BigDecimal.ROUND_HALF_UP));
@@ -579,6 +587,7 @@ public class StockPredictService {
             addInfo.setConcept(timeSaleInfoMap.get("theirConcept").toString());
         } catch (Exception e) {
             log.error("获取当前" + dto.getSaleTime() + "数据出错" + e.getMessage());
+            log.error(e.getMessage(), e);
         }
     }
 

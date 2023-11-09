@@ -6,6 +6,7 @@ import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.stock.service.statistic.StockBaseService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
@@ -155,6 +156,31 @@ public class DayStatisticJob {
         stockCronRefreshService.addHisTwoUpLimitAbovePlateInfo(dateStr);
         stockCronRefreshService.ambushCallauctionRob(dateStr);
 
+
+    }
+
+    @Autowired
+    StockBaseService stockBaseService;
+
+    /**
+     * 定量新增股票信息
+     */
+    @XxlJob("extraAllStockBaseJobHandle")
+    public void extraAllStockBaseJobHandle() {
+        log.info("定量新增股票信息开始" );
+        stockBaseService.extraAddProcess();
+        log.info("定量新增股票信息结束");
+
+    }
+
+    /**
+     * 定量增加转债信息
+     */
+    @XxlJob("addConvertBondProcessJobHandle")
+    public void addConvertBondProcessJobHandle() {
+        log.info("定量增加转债信息开始" );
+        stockBaseService.addConvertBondProcess();
+        log.info("定量增加转债信息结束" );
 
     }
 

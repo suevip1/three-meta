@@ -33,7 +33,7 @@ public class StockBaseController {
     @ApiOperation("新增股票信息")
     @RequestMapping(path = "/addProcess", method = RequestMethod.GET)
     public CommonResult addProcess() {
-        stockBaseService.addProcess();
+        stockBaseService.allAddProcess();
         return CommonResult.success(null);
     }
     @ApiOperation("新增转债信息")

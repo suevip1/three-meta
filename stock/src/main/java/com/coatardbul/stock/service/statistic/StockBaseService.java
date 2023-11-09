@@ -34,6 +34,9 @@ import java.util.List;
 @Slf4j
 public class StockBaseService {
 
+    private static final String EXTRA="extra";
+    private static final String ALL="all";
+
     @Autowired
     private StockBaseMapper stockBaseMapper;
     @Resource
@@ -41,7 +44,15 @@ public class StockBaseService {
     @Autowired
     private StockStrategyService stockStrategyService;
 
-    public void addProcess() {
+
+
+    public void extraAddProcess() {
+        addProcessCommon(EXTRA);
+    }
+    public void allAddProcess(){
+        addProcessCommon(ALL);
+    }
+    public void addProcessCommon(String sign) {
             StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
             dto.setRiverStockTemplateSign(StockTemplateEnum.FOR_EACH_STOCK.getSign());
             dto.setPageSize(100);
@@ -49,7 +60,12 @@ public class StockBaseService {
             dto.setDateStr(DateTimeUtil.getDateFormat(new Date(),DateTimeUtil.YYYY_MM_DD));
             StrategyBO strategy = null;
             try {
-                strategy = stockStrategyService.strategy(dto);
+                if(ALL.equals(sign)){
+                    strategy = stockStrategyService.strategy(dto);
+                }
+                if(EXTRA.equals(sign)){
+                    strategy = stockStrategyService.strategyFirstProcess(dto);
+                }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }

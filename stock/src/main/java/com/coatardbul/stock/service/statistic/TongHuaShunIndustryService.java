@@ -172,7 +172,14 @@ public class TongHuaShunIndustryService {
             String[] lastInfo = split[i - 1].split(",");
             BigDecimal bigDecimal= new BigDecimal(currInfo[4]).subtract(new BigDecimal(lastInfo[4])).multiply(new BigDecimal(100)).divide(new BigDecimal(lastInfo[4]), 2, BigDecimal.ROUND_CEILING);
             map.put("increaseRate", bigDecimal.toString());
-            BigDecimal bigDecimal1= new BigDecimal(currInfo[2]).subtract(new BigDecimal(lastInfo[4])).multiply(new BigDecimal(100)).divide(new BigDecimal(lastInfo[4]), 2, BigDecimal.ROUND_CEILING);
+            BigDecimal sb=null;
+            try {
+                sb= new BigDecimal(currInfo[2]);
+            }catch (NumberFormatException e){
+                sb=BigDecimal.ZERO;
+                log.error(e.getMessage(),e);
+            }
+            BigDecimal bigDecimal1= sb.subtract(new BigDecimal(lastInfo[4])).multiply(new BigDecimal(100)).divide(new BigDecimal(lastInfo[4]), 2, BigDecimal.ROUND_CEILING);
             map.put("maxIncreaseRate", bigDecimal1.toString());
             map.put("dateStr",currInfo[0]);
             list.add(map);

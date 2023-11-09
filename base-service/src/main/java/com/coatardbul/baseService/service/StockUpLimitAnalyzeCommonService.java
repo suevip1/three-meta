@@ -319,9 +319,9 @@ public class StockUpLimitAnalyzeCommonService {
                     .divide(convert(jsonMap.get("lastVolRate")), 2, BigDecimal.ROUND_HALF_UP);
             jsonMap.put("compressionDivision", divide);
             //竞价动能比例，今日竞价金额/昨日成交额
-            BigDecimal divide1 = convert(jsonMap.get("auctionTradeAmount")).multiply(new BigDecimal(100))
-                    .divide(convert(jsonMap.get("lasttradeAmount")), 2, BigDecimal.ROUND_HALF_UP);
-            jsonMap.put("auctionPowerRate", divide1);
+//            BigDecimal divide1 = convert(jsonMap.get("auctionTradeAmount")).multiply(new BigDecimal(100))
+//                    .divide(convert(jsonMap.get("lasttradeAmount")), 2, BigDecimal.ROUND_HALF_UP);
+//            jsonMap.put("auctionPowerRate", divide1);
             jsonMap.put("objectSign", StockTemplateEnum.FIRST_UP_LIMIT_WATCH_TWO.getSign());
             BigDecimal bigDecimal = convert(jsonMap.get("lastAuctionIncreaseRate"));
         }catch (Exception e){
