@@ -33,6 +33,15 @@ spring:
       org.quartz.jobStore.acquireTriggersWithinLock: true
 
 
+elasticsearch:
+  ip: 43.142.151.181
+  port: 9200
+  username: elastic
+  password: MBDcbneAh1OmE53IkwzL
+  pool: 5
+  cluster:
+    name: elasticsearch
+
 eureka:
   client:
     serviceUrl:

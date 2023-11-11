@@ -274,7 +274,7 @@ public class TradeBaseService {
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

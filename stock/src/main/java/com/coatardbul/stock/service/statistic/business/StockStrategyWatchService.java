@@ -106,7 +106,7 @@ public class StockStrategyWatchService {
             query.setDateStr(dto.getDateStr());
             query.setTimeStr(dto.getTimeStr());
             try {
-                StrategyBO strategy = stockStrategyService.strategy(query);
+                StrategyBO strategy = stockStrategyService.comprehensiveStrategy(query);
                 //发送邮件
                 if (strategy.getTotalNum() > 0) {
                     JSONArray data = strategy.getData();
@@ -183,7 +183,7 @@ public class StockStrategyWatchService {
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyService.strategy(dto);
+            strategy = stockStrategyService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -257,7 +257,7 @@ public class StockStrategyWatchService {
             query.setDateStr(dto.getDateStr());
             query.setTimeStr(dto.getTimeStr());
             try {
-                StrategyBO strategy = stockStrategyService.strategy(query);
+                StrategyBO strategy = stockStrategyService.comprehensiveStrategy(query);
                 //去重存入日志中
                 if (strategy.getTotalNum() > 0) {
                     stockWarnLogService.insertFilterHistory(strategy, query);
@@ -293,7 +293,7 @@ public class StockStrategyWatchService {
             query.setDateStr(dto.getDateStr());
             query.setTimeStr(dto.getTimeStr());
             try {
-                StrategyBO strategy = stockStrategyService.strategy(query);
+                StrategyBO strategy = stockStrategyService.comprehensiveStrategy(query);
                 //去重存入日志中
                 if (strategy.getTotalNum() > 0) {
                     if (isNow) {

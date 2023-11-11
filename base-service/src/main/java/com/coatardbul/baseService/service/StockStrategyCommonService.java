@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,11 +41,11 @@ public abstract class StockStrategyCommonService {
     private static final String ID_SPLIT = ",";
 
 
-
     @Autowired
     HttpService httpService;
 
-
+    @Autowired
+    EsTemplateDataService esTemplateDataService;
 
     @Autowired
     UpLimitStrongWeakService upLimitStrongWeakService;
@@ -62,7 +63,6 @@ public abstract class StockStrategyCommonService {
 
 
     public String cookieValue;
-
 
 
     /**
@@ -85,12 +85,16 @@ public abstract class StockStrategyCommonService {
         result.setAdd_info("");
         return result;
     }
-    public String getCookieValue(){
+
+    public String getCookieValue() {
         return cookieValue;
     }
 
     /**
-     * 策略查询，支持两种模式
+     * 策略综合查询，
+     * 1.首选查询es数据，目前支持时间+模板，其他参数不支持
+     * 2.最后查询问财
+     * 支持两种模式
      * 1.传入id，日期，时间
      * 2.直接传入问句
      *
@@ -98,7 +102,26 @@ public abstract class StockStrategyCommonService {
      * @return
      * @throws BusinessException
      */
-    public StrategyBO strategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+    public StrategyBO comprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException {
+        Long count = esTemplateDataService.getCount(dto);
+        if (count >0) {
+           return esTemplateDataService.getEsStrategyResult(dto);
+        }else {
+            return wenCaiStrategy(dto);
+        }
+    }
+
+    /**
+     * 问财策略
+     *
+     * @param dto
+     * @return
+     * @throws BusinessException
+     * @throws NoSuchMethodException
+     * @throws ScriptException
+     * @throws FileNotFoundException
+     */
+    public StrategyBO wenCaiStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
         List<StrategyBO> list = batchStrategy(dto);
         if (list.size() == 1) {
             return list.get(0);
@@ -107,6 +130,11 @@ public abstract class StockStrategyCommonService {
             return calcStrategy(list);
         }
         return new StrategyBO();
+    }
+
+    public Integer strategyCount(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
+        StrategyBO strategyBO = strategyFirstProcess(dto);
+        return strategyBO.getTotalNum();
     }
 
     /**
@@ -285,9 +313,9 @@ public abstract class StockStrategyCommonService {
     public StrategyBO strategyCommon(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
         StrategyBO strategyBO = strategyFirstProcess(dto);
 
-        if(strategyBO.getTotalNum()>strategyBO.getData().size()){
+        if (strategyBO.getTotalNum() > strategyBO.getData().size()) {
             int totalTime = strategyBO.getTotalNum() / 100;
-            for(int i=2;i<=totalTime+1;i++){
+            for (int i = 2; i <= totalTime + 1; i++) {
                 dto.setPage(i);
                 dto.setPageSize(100);
                 StrategyBO strategyTemp = strategyNextProcess(dto);
@@ -298,12 +326,11 @@ public abstract class StockStrategyCommonService {
     }
 
 
-
-        /**
-         * 添加涨停描述
-         *
-         * @param strategyBO
-         */
+    /**
+     * 添加涨停描述
+     *
+     * @param strategyBO
+     */
     private void addUpLimitDescribe(StrategyBO strategyBO) {
         JSONArray jsonArray = strategyBO.getData();
         if (jsonArray == null || jsonArray.size() == 0) {
@@ -356,7 +383,7 @@ public abstract class StockStrategyCommonService {
         String heXinStr = TongHuaShunUtil.getHeXinStr();
         Header cookie = httpService.getHead("Cookie", cookieValue + heXinStr);
         Header hexin = httpService.getHead("hexin-v", heXinStr);
-        Header orign =httpService.getHead ("Origin", "http://www.iwencai.com");
+        Header orign = httpService.getHead("Origin", "http://www.iwencai.com");
 
         headerList.add(cookie);
         headerList.add(hexin);
@@ -368,8 +395,8 @@ public abstract class StockStrategyCommonService {
         int retryNum = 5;
         while (retryNum > 0) {
             try {
-                result = httpService.doPost(STRATEGY_URL, jsonString,headerList);
-                if(org.apache.commons.lang3.StringUtils.isNotBlank(result)&&result.contains("Nginx forbidden")){
+                result = httpService.doPost(STRATEGY_URL, jsonString, headerList);
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(result) && result.contains("Nginx forbidden")) {
                     retryNum--;
                     continue;
                 }
@@ -377,7 +404,7 @@ public abstract class StockStrategyCommonService {
                 retryNum--;
                 continue;
             } catch (Exception e) {
-               log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
             if (StringUtils.isNotBlank(result)) {
                 break;
@@ -387,7 +414,6 @@ public abstract class StockStrategyCommonService {
     }
 
 
-
     private String getStrategyNextResponseStr(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, FileNotFoundException {
         //默认信息
         StrategyQueryBO defaultStrategyQuery = new StrategyQueryBO();
@@ -395,12 +421,12 @@ public abstract class StockStrategyCommonService {
         setRequestInfo(dto, defaultStrategyQuery);
         dto.setQueryStr(defaultStrategyQuery.getQuestion());
         //请求dto信息
-        String  paramStr=getNextParam(dto);
+        String paramStr = getNextParam(dto);
         List<Header> headerList = new ArrayList<>();
         String heXinStr = TongHuaShunUtil.getHeXinStr();
         Header cookie = httpService.getHead("Cookie", cookieValue + heXinStr);
         Header hexin = httpService.getHead("hexin-v", heXinStr);
-        Header orign =httpService.getHead ("Origin", "http://www.iwencai.com");
+        Header orign = httpService.getHead("Origin", "http://www.iwencai.com");
         Header contentType = httpService.getHead("Content-Type", "application/x-www-form-urlencoded");
 
         headerList.add(cookie);
@@ -445,7 +471,7 @@ public abstract class StockStrategyCommonService {
      * @param dto                  抽象请求数据
      * @param defaultStrategyQuery 策略对象
      */
-    public  abstract void setRequestInfo(StockStrategyQueryDTO dto, StrategyQueryBO defaultStrategyQuery) ;
+    public abstract void setRequestInfo(StockStrategyQueryDTO dto, StrategyQueryBO defaultStrategyQuery);
 
 
 }

@@ -28,7 +28,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -298,12 +298,12 @@ public class StockMinuteEmotinStaticService {
         return addStockMinuterEmotion;
     }
 
-    private AxiosBaseBo getAxiosBaseBo(String dateStr, String templateId, String timeStr) throws NoSuchMethodException, ScriptException, FileNotFoundException {
+    private AxiosBaseBo getAxiosBaseBo(String dateStr, String templateId, String timeStr) throws NoSuchMethodException, ScriptException, IOException {
         StockStrategyQueryDTO stockStrategyQueryDTO = new StockStrategyQueryDTO();
         stockStrategyQueryDTO.setRiverStockTemplateId(templateId);
         stockStrategyQueryDTO.setDateStr(dateStr);
         stockStrategyQueryDTO.setTimeStr(timeStr);
-        StrategyBO strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+        StrategyBO strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
         AxiosBaseBo axiosBaseBo = new AxiosBaseBo();
         axiosBaseBo.setDateTimeStr(timeStr);
         if (strategy.getTotalNum() != null) {

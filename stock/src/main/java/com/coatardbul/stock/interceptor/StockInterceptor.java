@@ -3,6 +3,7 @@ package com.coatardbul.stock.interceptor;
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.interceptor.InterfaceURLInterceptor;
 import com.coatardbul.baseService.feign.RiverServerFeign;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,12 +25,20 @@ public class StockInterceptor extends InterfaceURLInterceptor {
     public Boolean
     verifyUserValid(String token) {
         try {
-            CommonResult<Boolean> booleanCommonResult = riverServerFeign.verifyUserValid(token);
-            return booleanCommonResult.getData();
+            int retryNum = 5;
+            while (retryNum > 0) {
+                try {
+                    CommonResult<Boolean> booleanCommonResult = riverServerFeign.verifyUserValid(token);
+                    return booleanCommonResult.getData();
+                } catch (RetryableException e) {
+                    retryNum--;
+                }
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;
         }
+        return false;
     }
 
     @Override

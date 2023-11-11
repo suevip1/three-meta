@@ -116,4 +116,14 @@ public class SellTask extends QuartzJobBean {
         }
         return new BigDecimal(ojb.toString());
     }
+
+    /**
+     * <p>
+     * Note:
+     * <p>
+     * Date: 2023/11/11
+     *
+     * @author Su Xiaolei
+     */
+
 }

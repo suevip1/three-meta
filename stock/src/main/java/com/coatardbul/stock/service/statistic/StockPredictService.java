@@ -179,7 +179,7 @@ public class StockPredictService {
         dto.setDateStr(dateFormat);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -191,7 +191,7 @@ public class StockPredictService {
             dto.setRiverStockTemplateSign(StockTemplateEnum.SIMILAR_HAVE_UP_LIMIT_SUPPLEMENT.getSign());
             StrategyBO strategyTemp = null;
             try {
-                strategyTemp = stockStrategyCommonService.strategy(dto);
+                strategyTemp = stockStrategyCommonService.comprehensiveStrategy(dto);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -403,7 +403,7 @@ public class StockPredictService {
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -435,7 +435,7 @@ public class StockPredictService {
         }
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -496,7 +496,7 @@ public class StockPredictService {
         stockStrategyQueryDTO.setRiverStockTemplateId(dto.getId());
         stockStrategyQueryDTO.setDateStr(dateStr);
         try {
-            StrategyBO strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+            StrategyBO strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
             //动态结果解析
             if (strategy != null && strategy.getTotalNum() > 0) {
                 parseStrategyResult(result, strategy, dateStr);

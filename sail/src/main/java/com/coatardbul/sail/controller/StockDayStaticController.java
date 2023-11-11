@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.ScriptException;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * <p>
@@ -44,8 +44,8 @@ public class StockDayStaticController {
      * @return
      */
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
-    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
-        return CommonResult.success(stockStrategyService.strategy(dto));
+    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+        return CommonResult.success(stockStrategyService.comprehensiveStrategy(dto));
     }
 
 

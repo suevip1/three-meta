@@ -8,16 +8,18 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.config.ElasticSearchConfig;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
 import com.coatardbul.baseService.service.DongFangCommonService;
+import com.coatardbul.baseService.service.ElasticsearchService;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.service.StockStrategyCommonService;
 import com.coatardbul.baseService.service.StockUpLimitAnalyzeCommonService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.common.annotation.WebLog;
+import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
@@ -50,6 +52,13 @@ import io.swagger.annotations.Api;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,11 +72,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -94,7 +102,8 @@ public class TestController {
     SnowFlakeService snowFlakeService;
     @Autowired
     StockStrategyService stockStrategyService;
-
+@Autowired
+    ElasticSearchConfig elasticSearchConfig;
     @Autowired
     StockTemplatePredictMapper stockTemplatePredictMapper;
     @Autowired
@@ -107,6 +116,11 @@ public class TestController {
     CosService cosService;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    ElasticsearchService elasticsearchService;
+
+    @Autowired
+    StockBaseMapper stockBaseMapper;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -331,47 +345,58 @@ public class TestController {
 
     }
 
+    @Autowired
+    RestHighLevelClient restHighLevelClient;
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
-        dto.setRiverStockTemplateId("1567739221362475008");
-        dto.setPageSize(100);
-        dto.setPage(1);
-        dto.setDateStr(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD));
-        StrategyBO strategy = null;
-        try {
-            strategy = stockStrategyService.strategy(dto);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        Map<String,Integer> parameters = new HashMap<String,Integer>();
-        if (strategy != null && strategy.getTotalNum() > 0) {
-            JSONArray data = strategy.getData();
-            for (int j = 0; j < data.size(); j++) {
-                JSONObject jsonObject = data.getJSONObject(j);
-                String code = jsonObject.getString("code");
-                String name = jsonObject.getString("股票简称");
-                String theme = jsonObject.getString("所属概念");
-                String industry = jsonObject.getString("所属同花顺行业");
-                if(StringUtils.isNotBlank(industry)){
-                    String str = industry.split("-")[0]+"-"+industry.split("-")[1];
-                    if(parameters.containsKey(str)){
-                        parameters.put(str,parameters.get(str)+1);
-                    }else {
-                        parameters.put(str,1);
-                    }
-                }
-            }
-        }
-        for (Map.Entry<String, Integer> map : parameters.entrySet()) {
+        String indexName = "hello0";
 
-            log.info(map.getKey() + "=" + map.getValue());
-        }
+//        List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
+//
+//        boolean b = elasticsearchService.checkIndexExist(indexName);
+//        if(!b){
+//            elasticsearchService.indexCreate(indexName);
+//            elasticsearchService.defaultAsyncBatchInsertData(indexName,stockBases,"name");
+//        }else {
+//            elasticsearchService.defaultAsyncBatchInsertData(indexName,stockBases,"name");
+//        }
+
+        elasticsearchService.indexDelete(indexName);
+
+//        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
+
+//        List<StockBase> list = elasticsearchService.queryPageSyn(indexName,1,200, queryBuilder, StockBase.class);
+
+//
+//        List<StockBase> list = elasticsearchService.queryAllSyn(indexName, queryBuilder, StockBase.class);
+
+//        List<StockBase> stockBases1 = stockBases.subList(70, 100);
+//        for(StockBase s:stockBases){
+//            elasticsearchService.deleteSingleData(indexName, ReflexUtil.readValueByName("name",s).toString());
+//        }
+
+//        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
+//        query(indexName,queryBuilder);
 
         return null;
-
     }
+
+    public void query(String indexName,QueryBuilder queryBuilder )throws IOException {
+        SearchRequest searchRequest=new SearchRequest();
+        searchRequest.indices(indexName);
+        searchRequest.source(new SearchSourceBuilder().query(queryBuilder));
+        System.out.println("查询DSL为:"+searchRequest.source().toString());
+        SearchResponse searchRes = elasticSearchConfig.getR().search(searchRequest, RequestOptions.DEFAULT);
+        System.out.println("返回结果为:"+searchRes.toString());
+        System.out.println("总条数为:"+searchRes.getHits().getTotalHits().value);
+        System.out.println("最大分数为:"+searchRes.getHits().getMaxScore());
+        SearchHit[] hits = searchRes.getHits().getHits();
+        for (SearchHit hit: hits) {
+            System.out.println("id:为"+hit.getId()+",数据为:"+hit.getSourceAsString());
+        }
+    }
+
 
     private List<String> getStockCodeArr(String dateStr, String templateSign) {
         List<String> result = new ArrayList<>();
@@ -382,7 +407,7 @@ public class TestController {
         int retryNum = 5;
         while (retryNum > 0) {
             try {
-                strategy = stockStrategyCommonService.strategy(stockStrategyQueryDTO);
+                strategy = stockStrategyCommonService.comprehensiveStrategy(stockStrategyQueryDTO);
                 break;
             } catch (Exception e) {
                 retryNum--;
@@ -443,7 +468,7 @@ public class TestController {
         dto.setDateStr(dateFormat);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -502,7 +527,7 @@ public class TestController {
         dto.setStockCode(code);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

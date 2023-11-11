@@ -464,7 +464,7 @@ public class StockCronRefreshService {
         int retryNum = 5;
         while (retryNum > 0) {
             try {
-                strategy = stockStrategyCommonService.strategy(stockStrategyQueryDTO);
+                strategy = stockStrategyCommonService.comprehensiveStrategy(stockStrategyQueryDTO);
                 break;
             } catch (Exception e) {
                 retryNum--;
@@ -973,7 +973,7 @@ public class StockCronRefreshService {
         dto.setDateStr(specialDateStr);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyCommonService.strategy(dto);
+            strategy = stockStrategyCommonService.comprehensiveStrategy(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
 
 /**
@@ -66,8 +67,22 @@ public class StockDayStaticController {
      */
     @WebLog(value = "同花顺新版问财功能")
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
-    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
-        return CommonResult.success(stockStrategyService.strategy(dto));
+    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+        return CommonResult.success(stockStrategyService.comprehensiveStrategy(dto));
+    }
+
+    /**
+     * 问财实时总数
+     * @param dto
+     * @return
+     * @throws NoSuchMethodException
+     * @throws ScriptException
+     * @throws FileNotFoundException
+     */
+    @WebLog(value = "问财实时总数")
+    @RequestMapping(path = "/strategyCount", method = RequestMethod.POST)
+    public CommonResult strategyCount(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
+        return CommonResult.success(stockStrategyService.strategyCount(dto));
     }
 
 

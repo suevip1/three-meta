@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ public class StockSpecialStrategyService {
                 StrategyBO strategy = null;
                 try {
                     //策略查询
-                    strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
                     JSONArray data = strategy.getData();
                     List<String> nameList = new ArrayList<>();
                     for (int j = 0; j < data.size(); j++) {
@@ -121,7 +122,7 @@ public class StockSpecialStrategyService {
                 StrategyBO strategy = null;
                 try {
                     //策略查询
-                    strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
                     JSONArray data = strategy.getData();
                     List<String> codeList = new ArrayList<>();
                     for (int j = 0; j < data.size(); j++) {
@@ -180,8 +181,8 @@ public class StockSpecialStrategyService {
      * @throws ScriptException
      * @throws FileNotFoundException
      */
-    public List<StockUpLimitInfoBO> getUpLimitTheme(StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
-        StrategyBO strategy = stockStrategyService.strategy(dto);
+    public List<StockUpLimitInfoBO> getUpLimitTheme(StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+        StrategyBO strategy = stockStrategyService.comprehensiveStrategy(dto);
         if (strategy.getTotalNum() > 0) {
             JSONArray data = strategy.getData();
             return rebuildThemeInfo(data);
@@ -275,7 +276,7 @@ public class StockSpecialStrategyService {
         stockStrategyQueryDTO.setRiverStockTemplateId(riverStockTemplateId);
         StrategyBO strategy = null;
         try {
-            strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+            strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
             JSONArray data = strategy.getData();
             for (Object jo : data) {
                 codeList.add(((String) ((JSONObject) jo).get("code")));

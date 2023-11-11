@@ -61,7 +61,7 @@ public class StockBaseService {
             StrategyBO strategy = null;
             try {
                 if(ALL.equals(sign)){
-                    strategy = stockStrategyService.strategy(dto);
+                    strategy = stockStrategyService.comprehensiveStrategy(dto);
                 }
                 if(EXTRA.equals(sign)){
                     strategy = stockStrategyService.strategyFirstProcess(dto);

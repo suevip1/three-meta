@@ -12,7 +12,7 @@ public class CallBackLogInterceptor {
 
 
 
-    @Before("execution(* com.coatardbul.stock.service.base.StockStrategyService.strategy(..))")
+    @Before("execution(* com.coatardbul.stock.service.base.StockStrategyService.comprehensiveStrategy(..))")
     public void strategyWait(){
 //        try {
 //            int i = new Random().nextInt(9999) + 1000;

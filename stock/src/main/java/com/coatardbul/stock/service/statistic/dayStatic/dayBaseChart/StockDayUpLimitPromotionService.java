@@ -83,7 +83,7 @@ public class StockDayUpLimitPromotionService extends BaseChartDayAbstractService
                 stockStrategyQueryDTO.setDateStr(specialDay);
                 StrategyBO strategy = null;
                 try {
-                    strategy = stockStrategyService.strategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

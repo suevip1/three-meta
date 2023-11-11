@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.ScriptException;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * <p>
@@ -54,7 +54,7 @@ StockSpecialStrategyService stockSpecialStrategyService;
      */
     @WebLog(value = "")
     @RequestMapping(path = "/getUpLimitTheme", method = RequestMethod.POST)
-    public CommonResult getUpLimitTheme(@Validated @RequestBody StockStrategyQueryDTO dto) throws  NoSuchMethodException, ScriptException, FileNotFoundException {
+    public CommonResult getUpLimitTheme(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
         return CommonResult.success( stockSpecialStrategyService.getUpLimitTheme(dto));
     }
 
