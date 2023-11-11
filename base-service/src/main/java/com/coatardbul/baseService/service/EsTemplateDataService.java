@@ -59,9 +59,7 @@ public class EsTemplateDataService {
      */
     public StrategyBO getEsStrategyResult(StockStrategyQueryDTO dto) throws IOException {
         BoolQueryBuilder queryBuilder = getQueryBuilder(dto);
-        if (StringUtils.isNotBlank(dto.getThemeStr())) {
-            queryBuilder.must(QueryBuilders.termQuery("industryPrefix", dto.getThemeStr()));
-        }
+
         List<EsTemplateDataBo> list = elasticsearchService.queryAllSyn(ES_TEMPLATE_INDEX_NAME, queryBuilder, EsTemplateDataBo.class);
         StrategyBO ret = new StrategyBO();
         ret.setTotalNum(list.size());
@@ -75,10 +73,13 @@ public class EsTemplateDataService {
     }
 
     private BoolQueryBuilder getQueryBuilder(StockStrategyQueryDTO dto) {
-        BoolQueryBuilder queryBuilder1 = QueryBuilders.boolQuery()
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("templateId", dto.getRiverStockTemplateId()))
                 .must(QueryBuilders.termQuery("dateStr", dto.getDateStr()));
-        return queryBuilder1;
+        if (StringUtils.isNotBlank(dto.getThemeStr())) {
+            queryBuilder.must(QueryBuilders.termQuery("industryPrefix.keyword", dto.getThemeStr()));
+        }
+        return queryBuilder;
     }
 
     /**
