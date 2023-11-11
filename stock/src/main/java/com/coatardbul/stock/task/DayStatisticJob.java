@@ -1,7 +1,10 @@
 package com.coatardbul.stock.task;
 
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.service.EsTemplateDataService;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
 import com.coatardbul.stock.service.StockUserBaseService;
@@ -9,6 +12,7 @@ import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockBaseService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
+import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.ScatterDayUpLimitCallAuctionService;
 import com.coatardbul.stock.service.statistic.dayStatic.scatter.StockScatterService;
@@ -20,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -50,6 +56,8 @@ public class DayStatisticJob {
     StockTradeUserService stockTradeUserService;
 
     @Autowired
+    StockVerifyService stockVerifyService;
+    @Autowired
     StockUserBaseService stockUserBaseService;
     @Autowired
     StockCronRefreshService stockCronRefreshService;
@@ -58,6 +66,8 @@ public class DayStatisticJob {
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
 
+    @Autowired
+    EsTemplateDataService esTemplateDataService;
     @XxlJob("dayUpDownJobHandler")
     public void dayUpDownJobHandler() throws IllegalAccessException, ParseException {
         String param = XxlJobHelper.getJobParam();
@@ -183,5 +193,30 @@ public class DayStatisticJob {
         log.info("定量增加转债信息结束" );
 
     }
+
+    /**
+     * 竞价数据同步es
+     */
+    @XxlJob("auctionSyncEsJobHandle")
+    public void auctionSyncEsJobHandle() throws ScriptException, IOException, NoSuchMethodException, InterruptedException, ParseException {
+        log.info("竞价数据同步es开始" );
+        String dateStr  = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        if (stockVerifyService.isIllegalDate(dateStr)) {
+            return;
+        }
+        auctionSync(dateStr, StockTemplateEnum.AUCTION_GREATE5.getId());
+        Thread.sleep(15000);
+        auctionSync(dateStr, StockTemplateEnum.AUCTION_GREATE2.getId());
+        Thread.sleep(15000);
+        auctionSync(dateStr, StockTemplateEnum.AUCTION_LESS_F2.getId());
+        log.info("竞价数据同步es结束" );
+    }
+    private void auctionSync(String dateStr,String templateId) throws ScriptException, IOException, NoSuchMethodException {
+        StockStrategyQueryDTO s1=new StockStrategyQueryDTO();
+        s1.setDateStr(dateStr);
+        s1.setRiverStockTemplateSign(templateId);
+        esTemplateDataService.syncData(s1);
+    }
+
 
 }

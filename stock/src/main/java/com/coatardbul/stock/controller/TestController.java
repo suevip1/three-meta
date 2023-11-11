@@ -350,7 +350,7 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        String indexName = "hello0";
+        String indexName = "template_data";
 
 //        List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
 //

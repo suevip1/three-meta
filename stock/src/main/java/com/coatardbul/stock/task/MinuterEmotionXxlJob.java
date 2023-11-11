@@ -1,8 +1,11 @@
 package com.coatardbul.stock.task;
 
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
+import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseService.service.EsTemplateDataService;
 import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.model.bo.UpLimitScanStrategyBo;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
@@ -20,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -42,7 +47,8 @@ public class MinuterEmotionXxlJob {
     @Autowired
     StockCronRefreshService stockCronRefreshService;
 
-
+    @Autowired
+    EsTemplateDataService esTemplateDataService;
     @Autowired
     RiverRemoteService riverRemoteService;
     @Autowired
@@ -178,10 +184,40 @@ public class MinuterEmotionXxlJob {
             stockCronRefreshService.addZcPlateInfo(dateStr);
             stockCronRefreshService.addDkdxcsyPlateInfo(dateStr);
             stockCronRefreshService.addXlPlateInfo(dateStr);
-
-
         }
         log.info("低开下影线，低开短下长上影，其他结束");
+    }
+
+
+    /**
+     * 涨幅同步到es上
+     * @throws ScriptException
+     * @throws IOException
+     * @throws NoSuchMethodException
+     * @throws InterruptedException
+     * @throws ParseException
+     */
+    @XxlJob("increaseSyncEsJobHandle")
+    public void increaseSyncEsJobHandle() throws ScriptException, IOException, NoSuchMethodException, InterruptedException, ParseException {
+        log.info("涨幅数据同步es开始" );
+        String dateStr  = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        if (stockVerifyService.isIllegalDate(dateStr)) {
+            return;
+        }
+        auctionSync(dateStr, StockTemplateEnum.INCREASE_GREATE5.getId());
+        Thread.sleep(30000);
+        auctionSync(dateStr, StockTemplateEnum.INCREASE_GREATE9_5.getId());
+        Thread.sleep(30000);
+        auctionSync(dateStr, StockTemplateEnum.INCREASE_LESS_F5.getId());
+        Thread.sleep(30000);
+        auctionSync(dateStr, StockTemplateEnum.INDUSTRY.getId());
+        log.info("涨幅数据同步es结束" );
+    }
+    private void auctionSync(String dateStr,String templateId) throws ScriptException, IOException, NoSuchMethodException {
+        StockStrategyQueryDTO s1=new StockStrategyQueryDTO();
+        s1.setDateStr(dateStr);
+        s1.setRiverStockTemplateSign(templateId);
+        esTemplateDataService.syncData(s1);
     }
 
 }
