@@ -211,6 +211,8 @@ public class MinuterEmotionXxlJob {
         auctionSync(dateStr, StockTemplateEnum.INCREASE_LESS_F5.getId());
         Thread.sleep(30000);
         auctionSync(dateStr, StockTemplateEnum.INDUSTRY.getId());
+        Thread.sleep(30000);
+        auctionSync(dateStr, StockTemplateEnum.INDUSTRY_UPLIMIT.getId());
         log.info("涨幅数据同步es结束" );
     }
     private void auctionSync(String dateStr,String templateId) throws ScriptException, IOException, NoSuchMethodException {
