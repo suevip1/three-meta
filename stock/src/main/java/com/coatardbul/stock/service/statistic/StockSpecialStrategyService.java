@@ -181,7 +181,7 @@ public class StockSpecialStrategyService {
      * @throws ScriptException
      * @throws FileNotFoundException
      */
-    public List<StockUpLimitInfoBO> getUpLimitTheme(StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+    public List<StockUpLimitInfoBO> getUpLimitTheme(StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         StrategyBO strategy = stockStrategyService.comprehensiveStrategy(dto);
         if (strategy.getTotalNum() > 0) {
             JSONArray data = strategy.getData();

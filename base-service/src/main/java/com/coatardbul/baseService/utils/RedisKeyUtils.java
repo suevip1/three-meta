@@ -111,4 +111,19 @@ public class RedisKeyUtils {
     public static String getStockPool(String dateStr){
         return dateStr+"_pool";
     }
+
+
+
+    public static String getEsTemplateConfig(String id){
+        return "es_template_config_"+id;
+    }
+
+    public static String getEsTemplateConfig(String templateId,String esDataType){
+        return "es_template_config_"+templateId+"_"+esDataType;
+    }
+
+
+
+
+
 }

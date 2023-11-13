@@ -54,7 +54,7 @@ StockSpecialStrategyService stockSpecialStrategyService;
      */
     @WebLog(value = "")
     @RequestMapping(path = "/getUpLimitTheme", method = RequestMethod.POST)
-    public CommonResult getUpLimitTheme(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+    public CommonResult getUpLimitTheme(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         return CommonResult.success( stockSpecialStrategyService.getUpLimitTheme(dto));
     }
 

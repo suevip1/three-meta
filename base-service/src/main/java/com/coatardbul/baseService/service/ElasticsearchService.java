@@ -89,8 +89,6 @@ public class ElasticsearchService<T> {
         request.settings(Settings.builder()
                 .put("index.number_of_shards", 5)
                 .put("index.number_of_replicas", 0)
-                .put("index.lifecycle.name", "ilm-history-ilm-policy")
-
         );
         restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
     }

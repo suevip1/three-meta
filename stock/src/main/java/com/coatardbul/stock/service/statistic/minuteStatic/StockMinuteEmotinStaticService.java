@@ -298,7 +298,7 @@ public class StockMinuteEmotinStaticService {
         return addStockMinuterEmotion;
     }
 
-    private AxiosBaseBo getAxiosBaseBo(String dateStr, String templateId, String timeStr) throws NoSuchMethodException, ScriptException, IOException {
+    private AxiosBaseBo getAxiosBaseBo(String dateStr, String templateId, String timeStr) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         StockStrategyQueryDTO stockStrategyQueryDTO = new StockStrategyQueryDTO();
         stockStrategyQueryDTO.setRiverStockTemplateId(templateId);
         stockStrategyQueryDTO.setDateStr(dateStr);

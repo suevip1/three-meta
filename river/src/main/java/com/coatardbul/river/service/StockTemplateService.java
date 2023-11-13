@@ -414,7 +414,7 @@ public class StockTemplateService {
     public void delete(StockTemplateDTO dto) throws BusinessException {
         Assert.notNull(dto.getId(), "id不能为空");
         StockQueryTemplate stockQueryTemplate = stockQueryTemplateMapper.selectByPrimaryKey(dto.getId());
-        if (stockQueryTemplate.getHotValue() > 20) {
+        if (stockQueryTemplate.getHotValue()!=null && stockQueryTemplate.getHotValue() > 20) {
             throw new BusinessException("常用问句禁止删除");
         }
         if (StringUtils.isNotBlank(stockQueryTemplate.getTemplateSign())) {

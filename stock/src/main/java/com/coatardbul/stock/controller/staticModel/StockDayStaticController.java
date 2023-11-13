@@ -67,8 +67,14 @@ public class StockDayStaticController {
      */
     @WebLog(value = "同花顺新版问财功能")
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
-    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         return CommonResult.success(stockStrategyService.comprehensiveStrategy(dto));
+    }
+
+    @WebLog(value = "同花顺新版问财功能第一页")
+    @RequestMapping(path = "/strategyFirstPage", method = RequestMethod.POST)
+    public CommonResult strategyFirstPage(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+        return CommonResult.success(stockStrategyService.strategyFirstProcess(dto));
     }
 
     /**

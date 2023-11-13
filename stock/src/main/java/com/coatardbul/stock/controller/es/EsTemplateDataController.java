@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller.es;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseService.service.EsTemplateDataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,14 +34,14 @@ public class EsTemplateDataController {
 
     @ApiOperation("获取es总数")
     @RequestMapping(path = "/getCount", method = RequestMethod.POST)
-    public CommonResult<Long> getCount(@Validated @RequestBody StockStrategyQueryDTO dto) {
+    public CommonResult<Long> getCount(@Validated @RequestBody EsTemplateConfigDTO dto) {
        long count= esTemplateDataService.getCount(dto);
         return CommonResult.success(count);
     }
 
     @ApiOperation("同步到es上")
     @RequestMapping(path = "/syncData", method = RequestMethod.POST)
-    public CommonResult syncData(@Validated @RequestBody StockStrategyQueryDTO dto) {
+    public CommonResult syncData(@Validated @RequestBody EsTemplateConfigDTO dto) {
         try {
             esTemplateDataService.syncData(dto);
             return CommonResult.success(null);
@@ -53,8 +53,8 @@ public class EsTemplateDataController {
 
     @ApiOperation("删除es上数据")
     @RequestMapping(path = "/delete", method = RequestMethod.POST)
-    public CommonResult<Integer> delete(@Validated @RequestBody StockStrategyQueryDTO dto) {
-        esTemplateDataService.delete(dto);
+    public CommonResult<Integer> delete(@Validated @RequestBody EsTemplateConfigDTO dto) {
+        esTemplateDataService.deleteEsSync(dto);
         return CommonResult.success(null);
     }
 

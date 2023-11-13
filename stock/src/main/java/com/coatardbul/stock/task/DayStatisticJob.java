@@ -1,12 +1,14 @@
 package com.coatardbul.stock.task;
 
-import com.coatardbul.baseCommon.constants.StockTemplateEnum;
-import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
+import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.EsTemplateDataService;
+import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockTradeLoginDTO;
+import com.coatardbul.stock.model.entity.EsTemplateConfig;
 import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.StockBaseService;
@@ -21,6 +23,7 @@ import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +31,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -66,6 +70,8 @@ public class DayStatisticJob {
     @Autowired
     StockSpecialStrategyService stockSpecialStrategyService;
 
+    @Autowired
+    EsTemplateConfigMapper esTemplateConfigMapper;
     @Autowired
     EsTemplateDataService esTemplateDataService;
     @XxlJob("dayUpDownJobHandler")
@@ -204,17 +210,18 @@ public class DayStatisticJob {
         if (stockVerifyService.isIllegalDate(dateStr)) {
             return;
         }
-        auctionSync(dateStr, StockTemplateEnum.AUCTION_GREATE5.getId());
-        Thread.sleep(15000);
-        auctionSync(dateStr, StockTemplateEnum.AUCTION_GREATE2.getId());
-        Thread.sleep(15000);
-        auctionSync(dateStr, StockTemplateEnum.AUCTION_LESS_F2.getId());
+        List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_AUCTION.getSign());
+        for(int i=0;i<esTemplateConfigs.size();i++){
+            auctionSync(dateStr,esTemplateConfigs.get(i) );
+            Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
+        }
         log.info("竞价数据同步es结束" );
     }
-    private void auctionSync(String dateStr,String templateId) throws ScriptException, IOException, NoSuchMethodException {
-        StockStrategyQueryDTO s1=new StockStrategyQueryDTO();
+    private void auctionSync(String dateStr,EsTemplateConfig esTemplateConfig) throws ScriptException, IOException, NoSuchMethodException {
+        EsTemplateConfigDTO s1=new EsTemplateConfigDTO();
+        BeanUtils.copyProperties(esTemplateConfig,s1);
         s1.setDateStr(dateStr);
-        s1.setRiverStockTemplateSign(templateId);
+        s1.setRiverStockTemplateSign(esTemplateConfig.getTemplateId());
         esTemplateDataService.syncData(s1);
     }
 

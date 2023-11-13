@@ -44,7 +44,7 @@ public class StockDayStaticController {
      * @return
      */
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
-    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException {
+    public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         return CommonResult.success(stockStrategyService.comprehensiveStrategy(dto));
     }
 

@@ -41,10 +41,23 @@ public class EsTemplateDataBo {
 
 
     /**
+     * 时间 09:30
+     */
+    private String timeStr;
+    /**
      * 参数
      */
     private String params;
 
 
+    /**
+     * json 数据
+     */
     private String jsonStr;
+
+
+    /**
+     * 总数
+     */
+    private Long count;
 }

@@ -4,18 +4,23 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.Constant;
+import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.bo.StrategyQueryBO;
+import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.baseCommon.util.JsonUtil;
+import com.coatardbul.baseCommon.util.ReflexUtil;
 import com.coatardbul.baseCommon.util.TongHuaShunUtil;
+import com.coatardbul.baseService.utils.RedisKeyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -47,6 +52,8 @@ public abstract class StockStrategyCommonService {
     @Autowired
     EsTemplateDataService esTemplateDataService;
 
+    @Autowired
+    RedisTemplate redisTemplate;
     @Autowired
     UpLimitStrongWeakService upLimitStrongWeakService;
     //同花顺问财地址
@@ -102,13 +109,59 @@ public abstract class StockStrategyCommonService {
      * @return
      * @throws BusinessException
      */
-    public StrategyBO comprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException {
-        Long count = esTemplateDataService.getCount(dto);
-        if (count >0) {
-           return esTemplateDataService.getEsStrategyResult(dto);
-        }else {
+    public StrategyBO comprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+        if (StringUtils.isNotBlank(dto.getTimeStr())) {
             return wenCaiStrategy(dto);
         }
+        //存在配置
+        String existRedisKey = getExistRedisKey(dto);
+        if(StringUtils.isNotBlank(existRedisKey)){
+            String jsonStr = (String) redisTemplate.opsForValue().get(existRedisKey);
+            Map map = JsonUtil.readToValue(jsonStr, Map.class);
+            EsTemplateConfigDTO convert=new EsTemplateConfigDTO();
+            ReflexUtil.setMaptoObject(map,convert);
+            Long count = esTemplateDataService.getCount(convert);
+            if (count > 0) {
+                return esTemplateDataService.getEsStrategyResult(convert);
+            }
+        }
+        return wenCaiStrategy(dto);
+
+
+    }
+
+    private String getExistRedisKey(StockStrategyQueryDTO dto) {
+        //分钟
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(dto.getTimeStr())) {
+            String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_MINUTER.getSign());
+            if(redisTemplate.hasKey(esTemplateConfig)){
+                return esTemplateConfig;
+            }
+        } else {
+            //日
+            String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_DAY.getSign());
+            if(redisTemplate.hasKey(esTemplateConfig)){
+                return esTemplateConfig;
+            }
+
+            String esTemplateConfig1 = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_AUCTION.getSign());
+            if(redisTemplate.hasKey(esTemplateConfig1)){
+                return esTemplateConfig1;
+            }
+        }
+        return null;
+    }
+
+    private EsTemplateConfigDTO convert(StockStrategyQueryDTO dto) {
+
+        EsTemplateConfigDTO builder = new EsTemplateConfigDTO();
+        BeanUtils.copyProperties(dto, builder);
+        if (StringUtils.isNotBlank(dto.getTimeStr())) {
+            builder.setEsDataType(EsTemplateConfigEnum.TYPE_MINUTER.getSign());
+        } else {
+            builder.setEsDataType(EsTemplateConfigEnum.TYPE_DAY.getSign());
+        }
+        return builder;
     }
 
     /**
