@@ -1,8 +1,6 @@
 package com.coatardbul.stock.task;
 
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
-import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
-import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.EsTemplateDataService;
@@ -11,7 +9,7 @@ import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
 import com.coatardbul.stock.model.bo.UpLimitScanStrategyBo;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockPredictDto;
-import com.coatardbul.stock.model.entity.EsTemplateConfig;
+import com.coatardbul.stock.service.es.EsTaskService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockPredictService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
@@ -29,7 +27,6 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -192,6 +189,8 @@ public class MinuterEmotionXxlJob {
         log.info("低开下影线，低开短下长上影，其他结束");
     }
 
+    @Autowired
+    EsTaskService esTaskService;
 
     /**
      * 涨幅同步到es上
@@ -204,23 +203,8 @@ public class MinuterEmotionXxlJob {
     @XxlJob("increaseSyncEsJobHandle")
     public void increaseSyncEsJobHandle() throws ScriptException, IOException, NoSuchMethodException, InterruptedException, ParseException {
         log.info("涨幅数据同步es开始" );
-        String dateStr  = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
-        if (stockVerifyService.isIllegalDate(dateStr)) {
-            return;
-        }
-        List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_DAY.getSign());
-        for(int i=0;i<esTemplateConfigs.size();i++){
-            auctionSync(dateStr,esTemplateConfigs.get(i) );
-            Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
-        }
+        esTaskService.increaseSyncEsJobHandle();
         log.info("涨幅数据同步es结束" );
-    }
-    private void auctionSync(String dateStr,EsTemplateConfig esTemplateConfig) throws ScriptException, IOException, NoSuchMethodException {
-        EsTemplateConfigDTO s1=new EsTemplateConfigDTO();
-        BeanUtils.copyProperties(esTemplateConfig,s1);
-        s1.setDateStr(dateStr);
-        s1.setRiverStockTemplateSign(esTemplateConfig.getTemplateId());
-        esTemplateDataService.syncData(s1);
     }
 
 }

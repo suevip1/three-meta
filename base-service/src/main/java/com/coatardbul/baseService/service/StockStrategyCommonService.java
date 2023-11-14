@@ -114,38 +114,122 @@ public abstract class StockStrategyCommonService {
             return wenCaiStrategy(dto);
         }
         //存在配置
-        String existRedisKey = getExistRedisKey(dto);
-        if(StringUtils.isNotBlank(existRedisKey)){
+        String existRedisKey = getExistRedisKeyStrategyQuery(dto);
+        if (StringUtils.isNotBlank(existRedisKey)) {
             String jsonStr = (String) redisTemplate.opsForValue().get(existRedisKey);
             Map map = JsonUtil.readToValue(jsonStr, Map.class);
-            EsTemplateConfigDTO convert=new EsTemplateConfigDTO();
-            ReflexUtil.setMaptoObject(map,convert);
+            EsTemplateConfigDTO convert = new EsTemplateConfigDTO();
+            BeanUtils.copyProperties(dto,convert);
+            ReflexUtil.setMaptoObject(map, convert);
             Long count = esTemplateDataService.getCount(convert);
             if (count > 0) {
                 return esTemplateDataService.getEsStrategyResult(convert);
+            }else {
+                return getDefaultStrategy();
             }
         }
         return wenCaiStrategy(dto);
-
-
     }
 
-    private String getExistRedisKey(StockStrategyQueryDTO dto) {
+    public Object optimizeStrategyFirstPage(StockStrategyQueryDTO dto) throws IllegalAccessException, ScriptException, IOException, NoSuchMethodException {
+        //存在配置
+        String existRedisKey = getExistRedisKeyStrategyQuery(dto);
+        if (StringUtils.isNotBlank(existRedisKey)) {
+            String jsonStr = (String) redisTemplate.opsForValue().get(existRedisKey);
+            Map map = JsonUtil.readToValue(jsonStr, Map.class);
+            EsTemplateConfigDTO convert = new EsTemplateConfigDTO();
+            BeanUtils.copyProperties(dto,convert);
+            ReflexUtil.setMaptoObject(map, convert);
+            //redis有配置，默认数据已经读取，防止有些本来就没有数据再次查询
+            if(EsTemplateConfigEnum.MODE_FIRST.getSign().equals(convert.getEsDataMode())){
+                Long count = esTemplateDataService.getCount(convert);
+                if (count > 0) {
+                    return esTemplateDataService.getEsStrategyResult(convert);
+                }else {
+                    return getDefaultStrategy();
+                }
+            }
+        }
+        StrategyBO strategyBO = strategyFirstProcess(dto);
+        return strategyBO;
+    }
+
+    private StrategyBO getDefaultStrategy(){
+        StrategyBO strategyBO=new StrategyBO();
+        strategyBO.setData(new JSONArray());
+        strategyBO.setTotalNum(0);
+        return strategyBO;
+    }
+
+
+    public Long optimizeStrategyCount(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+        //存在配置
+        String existRedisKey = getExistRedisKeyCountQuery(dto);
+        if (StringUtils.isNotBlank(existRedisKey)) {
+            String jsonStr = (String) redisTemplate.opsForValue().get(existRedisKey);
+            Map map = JsonUtil.readToValue(jsonStr, Map.class);
+            EsTemplateConfigDTO convert = new EsTemplateConfigDTO();
+            BeanUtils.copyProperties(dto,convert);
+            ReflexUtil.setMaptoObject(map, convert);
+            //redis有配置，默认数据已经读取，防止有些本来就没有数据再次查询
+            Long count = esTemplateDataService.getCount(convert);
+            return count;
+        }
+        StrategyBO strategyBO = strategyFirstProcess(dto);
+        return strategyBO.getTotalNum().longValue();
+    }
+
+
+    /**
+     * 策略查询key
+     * @param dto
+     * @return
+     */
+    private String getExistRedisKeyStrategyQuery(StockStrategyQueryDTO dto) {
         //分钟
         if (org.apache.commons.lang3.StringUtils.isNotBlank(dto.getTimeStr())) {
             String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_MINUTER.getSign());
-            if(redisTemplate.hasKey(esTemplateConfig)){
+            if (redisTemplate.hasKey(esTemplateConfig)) {
                 return esTemplateConfig;
             }
         } else {
             //日
             String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_DAY.getSign());
-            if(redisTemplate.hasKey(esTemplateConfig)){
+            if (redisTemplate.hasKey(esTemplateConfig)) {
                 return esTemplateConfig;
             }
 
             String esTemplateConfig1 = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_AUCTION.getSign());
-            if(redisTemplate.hasKey(esTemplateConfig1)){
+            if (redisTemplate.hasKey(esTemplateConfig1)) {
+                return esTemplateConfig1;
+            }
+        }
+        return null;
+    }
+
+
+    private String getExistRedisKeyCountQuery(StockStrategyQueryDTO dto) {
+        //分钟
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(dto.getTimeStr())) {
+            String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign());
+            if (redisTemplate.hasKey(esTemplateConfig)) {
+                return esTemplateConfig;
+            }
+        } else {
+            //日计数
+            String esTemplateConfig2 = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign());
+            if (redisTemplate.hasKey(esTemplateConfig2)) {
+                return esTemplateConfig2;
+            }
+
+            //日
+            String esTemplateConfig = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_DAY.getSign());
+            if (redisTemplate.hasKey(esTemplateConfig)) {
+                return esTemplateConfig;
+            }
+
+            String esTemplateConfig1 = RedisKeyUtils.getEsTemplateConfig(dto.getRiverStockTemplateId(), EsTemplateConfigEnum.TYPE_AUCTION.getSign());
+            if (redisTemplate.hasKey(esTemplateConfig1)) {
                 return esTemplateConfig1;
             }
         }
@@ -189,6 +273,7 @@ public abstract class StockStrategyCommonService {
         StrategyBO strategyBO = strategyFirstProcess(dto);
         return strategyBO.getTotalNum();
     }
+
 
     /**
      * 合并list数据，取交集
@@ -525,6 +610,7 @@ public abstract class StockStrategyCommonService {
      * @param defaultStrategyQuery 策略对象
      */
     public abstract void setRequestInfo(StockStrategyQueryDTO dto, StrategyQueryBO defaultStrategyQuery);
+
 
 
 }

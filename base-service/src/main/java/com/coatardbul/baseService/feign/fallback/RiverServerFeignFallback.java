@@ -3,6 +3,7 @@ package com.coatardbul.baseService.feign.fallback;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.entity.DictInfo;
 import com.coatardbul.baseService.entity.feign.CalendarDateDTO;
 import com.coatardbul.baseService.entity.feign.CalendarSpecialDTO;
 import com.coatardbul.baseService.entity.feign.StockTemplateDto;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: suxiaolei
@@ -81,6 +83,12 @@ public class RiverServerFeignFallback implements FallbackFactory<RiverServerFeig
             public CommonResult<String> getCurrUserName() {
                 log.error("调用失败", throwable);
                 return null;            }
+
+            @Override
+            public CommonResult<List<DictInfo>> getInfoByType(Map map) {
+                log.error("调用失败", throwable);
+                return null;
+            }
         };
     }
 }

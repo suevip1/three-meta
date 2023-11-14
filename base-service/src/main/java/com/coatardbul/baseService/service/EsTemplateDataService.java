@@ -53,7 +53,9 @@ public class EsTemplateDataService {
             if (EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())) {
                 //todo 分钟数据
             }
-            if (EsTemplateConfigEnum.TYPE_COUNT.getSign().equals(dto.getEsDataType())) {
+            if (EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign().equals(dto.getEsDataType())
+                    || EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign().equals(dto.getEsDataType())
+            ) {
                 //count总数
                 List<EsTemplateDataBo> list = elasticsearchService.queryAllSyn(dto.getEsIndexName(), queryBuilder, EsTemplateDataBo.class);
                 if(list!=null &&list.size()>0){
@@ -97,7 +99,7 @@ public class EsTemplateDataService {
             queryBuilder.must(QueryBuilders.termQuery("industryPrefix.keyword", dto.getThemeStr()));
         }
         if (StringUtils.isNotBlank(dto.getTimeStr())) {
-            queryBuilder.must(QueryBuilders.termQuery("timeStr", dto.getTimeStr()));
+            queryBuilder.must(QueryBuilders.termQuery("timeStr.keyword", dto.getTimeStr()));
         }
         return queryBuilder;
     }
@@ -138,19 +140,21 @@ public class EsTemplateDataService {
         if (EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())) {
             //todo 分钟数据
         }
-        if (EsTemplateConfigEnum.TYPE_COUNT.getSign().equals(dto.getEsDataType())) {
+        if (EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign().equals(dto.getEsDataType())
+                ||EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign().equals(dto.getEsDataType())
+        ) {
             //count总数
             StrategyBO strategyBO = stockStrategyCommonService.strategyFirstProcess(dto);
             EsTemplateDataBo convert = convert(strategyBO.getTotalNum(), dto);
             deleteEsSync(dto);
-            elasticsearchService.insertData(dto.getEsIndexName(), convert, "id");
+            elasticsearchService.insertData(dto.getEsIndexName(), convert, convert.getId());
         }
 
     }
 
     private EsTemplateDataBo convert(Integer count, EsTemplateConfigDTO dto) {
 
-        EsTemplateDataBo convert = convert(count, dto.getRiverStockTemplateId(), dto.getDateStr());
+        EsTemplateDataBo convert = convert(count, dto.getRiverStockTemplateId(), dto.getDateStr(),dto.getTimeStr());
 
         return convert;
     }
@@ -164,13 +168,14 @@ public class EsTemplateDataService {
         }
         return result;
     }
-    private EsTemplateDataBo convert(Integer count, String templateId, String dateStr) {
+    private EsTemplateDataBo convert(Integer count, String templateId, String dateStr,String timeStr) {
         EsTemplateDataBo esTemplateDataBo = new EsTemplateDataBo();
         esTemplateDataBo.setTemplateId(templateId);
         esTemplateDataBo.setDateStr(dateStr);
+        esTemplateDataBo.setTimeStr(timeStr);
         esTemplateDataBo.setCount(Long.valueOf(count));
         esTemplateDataBo.setParams("");
-        esTemplateDataBo.setId(getEsId(esTemplateDataBo));
+        esTemplateDataBo.setId(getEsCountId(esTemplateDataBo));
         return esTemplateDataBo;
     }
 
@@ -196,6 +201,14 @@ public class EsTemplateDataService {
 
     private String getEsId(EsTemplateDataBo esTemplateDataBo) {
         String baseStr= esTemplateDataBo.getDateStr() + ID_SPLIT + esTemplateDataBo.getTemplateId() + ID_SPLIT + esTemplateDataBo.getStockCode();
+        if(StringUtils.isNotBlank(esTemplateDataBo.getTimeStr())){
+            return baseStr+ID_SPLIT+esTemplateDataBo.getTimeStr();
+        }else {
+            return baseStr;
+        }
+    }
+    private String getEsCountId(EsTemplateDataBo esTemplateDataBo) {
+        String baseStr= esTemplateDataBo.getDateStr() + ID_SPLIT + esTemplateDataBo.getTemplateId() ;
         if(StringUtils.isNotBlank(esTemplateDataBo.getTimeStr())){
             return baseStr+ID_SPLIT+esTemplateDataBo.getTimeStr();
         }else {

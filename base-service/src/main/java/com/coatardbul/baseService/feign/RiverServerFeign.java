@@ -3,8 +3,8 @@ package com.coatardbul.baseService.feign;
 
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.entity.DictInfo;
 import com.coatardbul.baseService.config.FeignLogConfig;
-
 import com.coatardbul.baseService.entity.feign.CalendarDateDTO;
 import com.coatardbul.baseService.entity.feign.CalendarSpecialDTO;
 import com.coatardbul.baseService.entity.feign.StockTemplateDto;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 
 @FeignClient(name = "river", url="124.222.217.230:9002", configuration = FeignLogConfig.class, fallbackFactory = String.class)
@@ -88,6 +89,11 @@ public interface RiverServerFeign {
     @RequestMapping(value = "river/user/getCurrUserName", method = RequestMethod.POST)
     @Headers("Content-Type: application/json")
     public CommonResult<String> getCurrUserName();
+
+
+    @RequestMapping(value = "river/dict/getInfoByType", method = RequestMethod.POST)
+    @Headers("Content-Type: application/json")
+    public CommonResult<List<DictInfo>> getInfoByType(Map map);
 
 
 }

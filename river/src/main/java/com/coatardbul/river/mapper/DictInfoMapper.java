@@ -1,6 +1,6 @@
 package com.coatardbul.river.mapper;
 
-import com.coatardbul.river.model.entity.DictInfo;
+import com.coatardbul.baseCommon.model.entity.DictInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

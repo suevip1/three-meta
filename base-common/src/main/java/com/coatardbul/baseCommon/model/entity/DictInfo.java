@@ -1,4 +1,4 @@
-package com.coatardbul.river.model.entity;
+package com.coatardbul.baseCommon.model.entity;
 
 import lombok.Data;
 

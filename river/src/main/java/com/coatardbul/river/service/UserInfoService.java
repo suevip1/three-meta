@@ -8,7 +8,7 @@ import com.coatardbul.river.mapper.AuthUserMapper;
 import com.coatardbul.river.mapper.DictInfoMapper;
 import com.coatardbul.river.model.dto.UserDto;
 import com.coatardbul.baseCommon.model.entity.AuthUser;
-import com.coatardbul.river.model.entity.DictInfo;
+import com.coatardbul.baseCommon.model.entity.DictInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

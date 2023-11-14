@@ -26,6 +26,7 @@ import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
 import com.coatardbul.stock.service.statistic.RedisService;
+import com.coatardbul.stock.service.statistic.StockBaseService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockQuartzService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
@@ -128,7 +129,8 @@ public class TestController {
 
     @Autowired
     StockTradeService stockTradeService;
-
+@Autowired
+    StockBaseService stockBaseService;
     @Autowired
     HttpPoolService httpService;
     @Autowired
@@ -350,34 +352,7 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        String indexName = "hello";
-
-//        List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
-//
-//        boolean b = elasticsearchService.checkIndexExist(indexName);
-//        if(!b){
-//            elasticsearchService.indexCreate(indexName);
-//            elasticsearchService.defaultAsyncBatchInsertData(indexName,stockBases,"name");
-//        }else {
-//            elasticsearchService.defaultAsyncBatchInsertData(indexName,stockBases,"name");
-//        }
-
-        elasticsearchService.indexDelete(indexName);
-
-//        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
-
-//        List<StockBase> list = elasticsearchService.queryPageSyn(indexName,1,200, queryBuilder, StockBase.class);
-
-//
-//        List<StockBase> list = elasticsearchService.queryAllSyn(indexName, queryBuilder, StockBase.class);
-
-//        List<StockBase> stockBases1 = stockBases.subList(70, 100);
-//        for(StockBase s:stockBases){
-//            elasticsearchService.deleteSingleData(indexName, ReflexUtil.readValueByName("name",s).toString());
-//        }
-
-//        QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
-//        query(indexName,queryBuilder);
+        stockBaseService.addConvertBondProcess();
 
         return null;
     }

@@ -77,6 +77,12 @@ public class StockDayStaticController {
         return CommonResult.success(stockStrategyService.strategyFirstProcess(dto));
     }
 
+    @WebLog(value = "同花顺新版问财功能第一页")
+    @RequestMapping(path = "/optimizeStrategyFirstPage", method = RequestMethod.POST)
+    public CommonResult optimizeStrategyFirstPage(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+        return CommonResult.success(stockStrategyService.optimizeStrategyFirstPage(dto));
+    }
+
     /**
      * 问财实时总数
      * @param dto
@@ -89,6 +95,12 @@ public class StockDayStaticController {
     @RequestMapping(path = "/strategyCount", method = RequestMethod.POST)
     public CommonResult strategyCount(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {
         return CommonResult.success(stockStrategyService.strategyCount(dto));
+    }
+
+    @WebLog(value = "优化实时总数")
+    @RequestMapping(path = "/optimizeStrategyCount", method = RequestMethod.POST)
+    public CommonResult optimizeStrategyCount(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+        return CommonResult.success(stockStrategyService.optimizeStrategyCount(dto));
     }
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coatardbul.river.mapper.DictInfoMapper">
-  <resultMap id="BaseResultMap" type="com.coatardbul.river.model.entity.DictInfo">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseCommon.model.entity.DictInfo">
     <!--@mbg.generated-->
     <!--@Table dict_Info-->
     <id column="id" jdbcType="VARCHAR" property="id" />
@@ -26,14 +26,14 @@
     delete from dict_Info
     where id = #{id,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.coatardbul.river.model.entity.DictInfo">
+  <insert id="insert" parameterType="com.coatardbul.baseCommon.model.entity.DictInfo">
     <!--@mbg.generated-->
     insert into dict_Info (id, busi_type, sign_key, 
       sign_value, remark)
     values (#{id,jdbcType=VARCHAR}, #{busiType,jdbcType=VARCHAR}, #{signKey,jdbcType=VARCHAR}, 
       #{signValue,jdbcType=LONGVARCHAR}, #{remark,jdbcType=LONGVARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.coatardbul.river.model.entity.DictInfo">
+  <insert id="insertSelective" parameterType="com.coatardbul.baseCommon.model.entity.DictInfo">
     <!--@mbg.generated-->
     insert into dict_Info
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -71,7 +71,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.river.model.entity.DictInfo">
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseCommon.model.entity.DictInfo">
     <!--@mbg.generated-->
     update dict_Info
     <set>
@@ -90,7 +90,7 @@
     </set>
     where id = #{id,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.coatardbul.river.model.entity.DictInfo">
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseCommon.model.entity.DictInfo">
     <!--@mbg.generated-->
     update dict_Info
     set busi_type = #{busiType,jdbcType=VARCHAR},

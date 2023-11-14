@@ -154,8 +154,8 @@ public class TongHuaShunIndustryService {
         return BigDecimal.ZERO;
     }
 
-    public List getYearIncreaseRate(String bkCode, String yearStr) {
-        List list=new ArrayList<>();
+    public List<Map<String, String>> getYearIncreaseRate(String bkCode, String yearStr) {
+        List<Map<String, String>>list=new ArrayList<>();
         JSONObject yearResult = getYearResult(yearStr, bkCode);
         if (yearResult == null) {
             return list;

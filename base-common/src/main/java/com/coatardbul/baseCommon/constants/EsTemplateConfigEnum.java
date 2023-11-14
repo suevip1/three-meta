@@ -4,7 +4,9 @@ public enum EsTemplateConfigEnum {
     TYPE_DAY("day", "每日数据", 0),
     TYPE_AUCTION("auction", "竞价数据", 0),
     TYPE_MINUTER("minuter", "分钟数据", 0),
-    TYPE_COUNT("count", "分钟数据", 0),
+    TYPE_DAY_COUNT("dayCount", "日个数", 0),
+    TYPE_MINUTER_COUNT("minuterCount", "分钟个数", 0),
+
     MODE_FIRST("first", "第一页", 0),
     MODE_ALL("all", "全部", 0),
     LEVEL_SMALL("small", "少量数据", 10*1000),
