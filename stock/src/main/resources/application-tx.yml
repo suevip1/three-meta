@@ -33,6 +33,19 @@ spring:
       org.quartz.jobStore.acquireTriggersWithinLock: true
 
 
+powerjob:
+  worker:
+    enabled: true
+    allow-lazy-connect-server: false
+    port: 27777
+    app-name: sxl14459048
+    server-address: 127.0.0.1:7700,127.0.0.1:7701
+    protocol: http
+    store-strategy: disk
+    max-result-length: 8192
+    max-appended-wf-context-length: 8192
+
+
 elasticsearch:
   ip: 43.142.151.181
   port: 9200

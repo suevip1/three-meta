@@ -66,7 +66,7 @@ public class EsTaskService {
         EsTemplateConfigDTO s1 = new EsTemplateConfigDTO();
         BeanUtils.copyProperties(esTemplateConfig, s1);
         s1.setDateStr(dateStr);
-        s1.setRiverStockTemplateSign(esTemplateConfig.getTemplateId());
+        s1.setRiverStockTemplateId(esTemplateConfig.getTemplateId());
         esTemplateDataService.syncData(s1);
     }
 

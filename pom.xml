@@ -109,6 +109,22 @@
             <version>3.6</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.14.0</version>
+        </dependency>
         <!--定时任务 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,7 +169,7 @@
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
-            <version>1.2.5</version>
+            <version>1.4.7</version>
         </dependency>
         <!--MySQL -->
         <dependency>
@@ -236,7 +252,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-
+<!--        <dependency>-->
+<!--            <groupId>tech.powerjob</groupId>-->
+<!--            <artifactId>powerjob-worker-spring-boot-starter</artifactId>-->
+<!--            <version>4.3.6</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>tech.powerjob</groupId>
+            <artifactId>powerjob-worker</artifactId>
+            <version>4.3.6</version>
+        </dependency>
         <!--        xlsx-->
         <dependency>
             <groupId>org.apache.poi</groupId>

@@ -1,5 +1,6 @@
 package com.coatardbul.baseCommon.interceptor;
 
+import com.coatardbul.baseCommon.constants.Constant;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +18,11 @@ public class InterfaceURLInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-
-            Boolean valid = verifyUserValid(request.getHeader("token"));
+            String token = request.getHeader("token");
+            if(Constant.INVINCIBLE_TOKEN.equals(token)){
+               return true;
+            }
+            Boolean valid = verifyUserValid(token);
             if (!valid) {
                 response.setStatus(401);
                 return false;

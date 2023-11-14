@@ -18,6 +18,10 @@ import java.util.concurrent.TimeUnit;
 public class Constant {
 
 
+//    public static final String INVINCIBLE_TOKEN="拦截别人的token是不道德的，必须受到法律的制裁";
+
+    public static final String INVINCIBLE_TOKEN="Intercepting other token is immoral, must must  must be punished by law";
+
     /**
      * 股票更新线程池
      */

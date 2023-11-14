@@ -24,6 +24,7 @@ import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.stock.service.es.EsTaskService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
 import com.coatardbul.stock.service.statistic.RedisService;
 import com.coatardbul.stock.service.statistic.StockBaseService;
@@ -107,6 +108,8 @@ public class TestController {
     ElasticSearchConfig elasticSearchConfig;
     @Autowired
     StockTemplatePredictMapper stockTemplatePredictMapper;
+    @Autowired
+    EsTaskService esTaskService;
     @Autowired
     StockStrategyCommonService stockStrategyCommonService;
     @Autowired
@@ -352,7 +355,7 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        stockBaseService.addConvertBondProcess();
+        esTaskService.auctionSyncEsJobHandle();
 
         return null;
     }

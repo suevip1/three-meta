@@ -1,4 +1,4 @@
-package com.coatardbul.stock.task;
+package com.coatardbul.stock.task.powerJob;
 
 import com.coatardbul.baseCommon.constants.AiStrategyEnum;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
@@ -15,13 +15,13 @@ import com.coatardbul.stock.service.statistic.StockPredictService;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.minuteStatic.StockMinuteEmotinStaticService;
-import com.xxl.job.core.context.XxlJobHelper;
-import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tech.powerjob.worker.annotation.PowerJobHandler;
+import tech.powerjob.worker.core.processor.TaskContext;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.util.Date;
  */
 @Slf4j
 @Component
-public class MinuterEmotionXxlJob {
+public class PowerJobMinuterEmotionXxlJob {
     @Autowired
     StockMinuteEmotinStaticService stockMinuteEmotinStaticService;
     @Autowired
@@ -56,9 +56,9 @@ public class MinuterEmotionXxlJob {
     StockVerifyService stockVerifyService;
     @Autowired
     StockPredictService stockPredictService;
-    @XxlJob("minuterEmotionJobHandler")
-    public void minuterEmotionJobHandler() throws Exception {
-        String param = XxlJobHelper.getJobParam();
+     @PowerJobHandler(name ="minuterEmotionJobHandler")
+    public void minuterEmotionJobHandler(TaskContext context) throws Exception {
+        String param = context.getJobParams();
         log.info("分钟情绪定时任务开始,传递参数为：" + param);
         if (StringUtils.isNotBlank(param)) {
             StockEmotionDayDTO stockEmotionDayDTO = JsonUtil.readToValue(param, StockEmotionDayDTO.class);
@@ -80,9 +80,9 @@ public class MinuterEmotionXxlJob {
      * @throws IllegalAccessException
      * @throws ParseException
      */
-    @XxlJob("dayAddStockJobHandle")
-    public void dayAddStockJobHandle() {
-        String param = XxlJobHelper.getJobParam();
+     @PowerJobHandler(name ="dayAddStockJobHandle")
+    public void dayAddStockJobHandle(TaskContext context) {
+        String param = context.getJobParams();
         log.info("涨幅大于几数据开始" + param);
 
         String dateStr="";
@@ -111,9 +111,9 @@ public class MinuterEmotionXxlJob {
     /**
      * 昨日涨停，涨停
      */
-    @XxlJob("aiStrategyJobHandle")
-    public void aiStrategyJobHandle() {
-        String param = XxlJobHelper.getJobParam();
+     @PowerJobHandler(name ="aiStrategyJobHandle")
+    public void aiStrategyJobHandle(TaskContext context) {
+        String param = context.getJobParams();
         log.info("涨停，昨曾，埋伏开始" + param);
         String dateStr="";
         UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
@@ -160,9 +160,9 @@ public class MinuterEmotionXxlJob {
      * @throws IllegalAccessException
      * @throws ParseException
      */
-    @XxlJob("minuterStrategyScanPlateAddJobHandle")
-    public void minuterStrategyScanPlateAddJobHandle() {
-        String param = XxlJobHelper.getJobParam();
+     @PowerJobHandler(name ="minuterStrategyScanPlateAddJobHandle")
+    public void minuterStrategyScanPlateAddJobHandle(TaskContext context) {
+        String param = context.getJobParams();
         log.info("低开下影线，低开短下长上影，其他开始" + param);
         String dateStr="";
         UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
@@ -200,8 +200,8 @@ public class MinuterEmotionXxlJob {
      * @throws InterruptedException
      * @throws ParseException
      */
-    @XxlJob("increaseSyncEsJobHandle")
-    public void increaseSyncEsJobHandle()  {
+     @PowerJobHandler(name ="increaseSyncEsJobHandle")
+    public void increaseSyncEsJobHandle(TaskContext context)  {
         log.info("涨幅数据同步es开始" );
         try {
             esTaskService.increaseSyncEsJobHandle();

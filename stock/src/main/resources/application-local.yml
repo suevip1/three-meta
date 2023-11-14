@@ -49,6 +49,19 @@ eureka:
       defaultZone: http://124.222.217.230:8001/eureka/
 
 
+powerjob:
+  worker:
+    enabled: true
+    allow-lazy-connect-server: false
+    port: 27777
+    app-name: sxl14459048
+    server-address: 127.0.0.1:7700,127.0.0.1:7701
+    protocol: http
+    store-strategy: disk
+    max-result-length: 8192
+    max-appended-wf-context-length: 8192
+
+
 xxl:
   job:
     admin:
