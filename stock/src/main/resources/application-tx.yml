@@ -39,7 +39,7 @@ powerjob:
     allow-lazy-connect-server: false
     port: 27777
     app-name: sxl14459048
-    server-address: 127.0.0.1:7700,127.0.0.1:7701
+    server-address: 124.222.217.230:7700,124.222.217.230:7701
     protocol: http
     store-strategy: disk
     max-result-length: 8192

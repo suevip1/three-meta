@@ -209,4 +209,12 @@ public class PowerJobMinuterEmotionXxlJob {
         log.info("涨幅数据同步es结束" );
     }
 
+
+    @PowerJobHandler(name ="dayCountSyncEsJobHandle")
+    public void dayCountSyncEsJobHandle(TaskContext context) throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("日计数同步es开始");
+        esTaskService.dayCountSyncEsJobHandle();
+        log.info("日计数同步es结束");
+    }
+
 }

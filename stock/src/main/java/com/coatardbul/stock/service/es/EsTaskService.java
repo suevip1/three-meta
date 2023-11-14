@@ -100,4 +100,16 @@ public class EsTaskService {
             Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
         }
     }
+
+    public void dayCountSyncEsJobHandle() throws ParseException, ScriptException, IOException, NoSuchMethodException, InterruptedException {
+        String dateStr  = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        if (stockVerifyService.isIllegalDate(dateStr)) {
+            return;
+        }
+        List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign());
+        for(int i=0;i<esTemplateConfigs.size();i++){
+            auctionSync(dateStr,esTemplateConfigs.get(i) );
+            Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
+        }
+    }
 }

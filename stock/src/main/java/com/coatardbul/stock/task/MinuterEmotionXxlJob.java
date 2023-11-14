@@ -203,10 +203,15 @@ public class MinuterEmotionXxlJob {
     @XxlJob("increaseSyncEsJobHandle")
     public void increaseSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
         log.info("涨幅数据同步es开始");
-
         esTaskService.increaseSyncEsJobHandle();
-
         log.info("涨幅数据同步es结束");
+    }
+
+    @XxlJob("dayCountSyncEsJobHandle")
+    public void dayCountSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("日计数同步es开始");
+        esTaskService.dayCountSyncEsJobHandle();
+        log.info("日计数同步es结束");
     }
 
 }
