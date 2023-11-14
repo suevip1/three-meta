@@ -201,13 +201,11 @@ public class PowerJobMinuterEmotionXxlJob {
      * @throws ParseException
      */
      @PowerJobHandler(name ="increaseSyncEsJobHandle")
-    public void increaseSyncEsJobHandle(TaskContext context)  {
+    public void increaseSyncEsJobHandle(TaskContext context) throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
         log.info("涨幅数据同步es开始" );
-        try {
+
             esTaskService.increaseSyncEsJobHandle();
-        }catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+
         log.info("涨幅数据同步es结束" );
     }
 

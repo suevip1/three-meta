@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 import tech.powerjob.worker.annotation.PowerJobHandler;
 import tech.powerjob.worker.core.processor.TaskContext;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -68,7 +70,8 @@ public class PowerJobDayStatisticJob {
     EsTemplateConfigMapper esTemplateConfigMapper;
     @Autowired
     EsTemplateDataService esTemplateDataService;
-     @PowerJobHandler(name ="dayUpDownJobHandler")
+
+    @PowerJobHandler(name = "dayUpDownJobHandler")
     public void dayUpDownJobHandler(TaskContext context) throws IllegalAccessException, ParseException {
         String param = context.getJobParams();
         log.info("刷新每日涨跌统计数据开始" + param);
@@ -81,7 +84,7 @@ public class PowerJobDayStatisticJob {
         log.info("刷新每日涨跌统计数据结束");
     }
 
-     @PowerJobHandler(name ="dayCallAuctionIncreaseJobHandler")
+    @PowerJobHandler(name = "dayCallAuctionIncreaseJobHandler")
     public void dayCallAuctionIncreaseJobHandler(TaskContext context) throws IllegalAccessException, ParseException {
         String param = context.getJobParams();
         log.info("刷新每日集合竞价涨幅大于5数据开始" + param);
@@ -95,7 +98,7 @@ public class PowerJobDayStatisticJob {
     }
 
 
-     @PowerJobHandler(name ="dayTwoUpLimitJobHandler")
+    @PowerJobHandler(name = "dayTwoUpLimitJobHandler")
     public void dayTwoUpLimitJobHandler(TaskContext context) throws IllegalAccessException, ParseException {
         String param = context.getJobParams();
         log.info("刷新两板以上集合竞价数据开始" + param);
@@ -109,10 +112,7 @@ public class PowerJobDayStatisticJob {
     }
 
 
-
-
-
-     @PowerJobHandler(name ="dayMarketValueUpLimitJobHandler")
+    @PowerJobHandler(name = "dayMarketValueUpLimitJobHandler")
     public void dayMarketValueUpLimitJobHandler(TaskContext context) throws IllegalAccessException, ParseException {
         String param = context.getJobParams();
         log.info("刷新涨停市值散点数据开始" + param);
@@ -132,12 +132,12 @@ public class PowerJobDayStatisticJob {
      * @throws IllegalAccessException
      * @throws ParseException
      */
-     @PowerJobHandler(name ="dayAutoLoginJobHandler")
+    @PowerJobHandler(name = "dayAutoLoginJobHandler")
     public void dayAutoLoginJobHandler(TaskContext context) {
         int num = 10;
-        while (num>0) {
+        while (num > 0) {
             try {
-                StockTradeLoginDTO dto=new StockTradeLoginDTO();
+                StockTradeLoginDTO dto = new StockTradeLoginDTO();
                 String defaultTradeUser = stockUserBaseService.getDefaultTradeUser();
                 dto.setUserId(defaultTradeUser);
                 stockTradeUserService.login(dto);
@@ -156,7 +156,7 @@ public class PowerJobDayStatisticJob {
      * @throws IllegalAccessException
      * @throws ParseException
      */
-     @PowerJobHandler(name ="hisStrategyScanPlateAddJobHandle")
+    @PowerJobHandler(name = "hisStrategyScanPlateAddJobHandle")
     public void hisStrategyScanPlateAddJobHandle(TaskContext context) {
 
         String dateStr = "";
@@ -174,12 +174,13 @@ public class PowerJobDayStatisticJob {
 
     @Autowired
     EsTaskService esTaskService;
+
     /**
      * 定量新增股票信息
      */
-     @PowerJobHandler(name ="extraAllStockBaseJobHandle")
+    @PowerJobHandler(name = "extraAllStockBaseJobHandle")
     public void extraAllStockBaseJobHandle(TaskContext context) {
-        log.info("定量新增股票信息开始" );
+        log.info("定量新增股票信息开始");
         stockBaseService.extraAddProcess();
         log.info("定量新增股票信息结束");
 
@@ -188,45 +189,39 @@ public class PowerJobDayStatisticJob {
     /**
      * 定量增加转债信息
      */
-     @PowerJobHandler(name ="addConvertBondProcessJobHandle")
+    @PowerJobHandler(name = "addConvertBondProcessJobHandle")
     public void addConvertBondProcessJobHandle(TaskContext context) {
-        log.info("定量增加转债信息开始" );
-        try {
-            stockBaseService.addConvertBondProcess();
-        }catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("定量增加转债信息结束" );
+        log.info("定量增加转债信息开始");
+
+        stockBaseService.addConvertBondProcess();
+
+        log.info("定量增加转债信息结束");
 
     }
 
     /**
      * 竞价数据同步es
      */
-     @PowerJobHandler(name ="auctionSyncEsJobHandle")
-    public void auctionSyncEsJobHandle(TaskContext context)  {
-        log.info("竞价数据同步es开始" );
-        try {
-            esTaskService.auctionSyncEsJobHandle();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("竞价数据同步es结束" );
+    @PowerJobHandler(name = "auctionSyncEsJobHandle")
+    public void auctionSyncEsJobHandle(TaskContext context) throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("竞价数据同步es开始");
+
+        esTaskService.auctionSyncEsJobHandle();
+
+        log.info("竞价数据同步es结束");
     }
 
 
     /**
      * 同花顺行业数据同步es
      */
-     @PowerJobHandler(name ="industryDataSyncEsJobHandle")
-    public void industryDataSyncEsJobHandle(TaskContext context)  {
-        log.info("同花顺行业数据同步es开始" );
-        try {
-            esTaskService.industryDataSyncEsJobHandle();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("同花顺行业数据同步es结束" );
+    @PowerJobHandler(name = "industryDataSyncEsJobHandle")
+    public void industryDataSyncEsJobHandle(TaskContext context) throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("同花顺行业数据同步es开始");
+
+        esTaskService.industryDataSyncEsJobHandle();
+
+        log.info("同花顺行业数据同步es结束");
     }
 
 

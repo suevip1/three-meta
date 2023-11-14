@@ -56,6 +56,7 @@ public class MinuterEmotionXxlJob {
     StockVerifyService stockVerifyService;
     @Autowired
     StockPredictService stockPredictService;
+
     @XxlJob("minuterEmotionJobHandler")
     public void minuterEmotionJobHandler() throws Exception {
         String param = XxlJobHelper.getJobParam();
@@ -85,21 +86,21 @@ public class MinuterEmotionXxlJob {
         String param = XxlJobHelper.getJobParam();
         log.info("涨幅大于几数据开始" + param);
 
-        String dateStr="";
-        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        String dateStr = "";
+        UpLimitScanStrategyBo dto = new UpLimitScanStrategyBo();
         if (StringUtils.isNotBlank(param)) {
             dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
-            dateStr=dto.getDateStr();
-            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+            dateStr = dto.getDateStr();
+            if (!StringUtils.isNotBlank(dto.getTimeBeginStr())) {
                 dto.setTimeBeginStr("10:40");
                 dto.setTimeEndStr("14:40");
             }
-            if(!StringUtils.isNotBlank(dateStr)){
-                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            if (!StringUtils.isNotBlank(dateStr)) {
+                dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
             }
         }
         String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
-        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
+        if (timeStr.compareTo(dto.getTimeBeginStr()) >= 0 && timeStr.compareTo(dto.getTimeEndStr()) <= 0) {
             stockCronRefreshService.dayAddStockJob(dateStr);
         }
 
@@ -115,22 +116,22 @@ public class MinuterEmotionXxlJob {
     public void aiStrategyJobHandle() {
         String param = XxlJobHelper.getJobParam();
         log.info("涨停，昨曾，埋伏开始" + param);
-        String dateStr="";
-        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        String dateStr = "";
+        UpLimitScanStrategyBo dto = new UpLimitScanStrategyBo();
         if (StringUtils.isNotBlank(param)) {
             dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
-            dateStr=dto.getDateStr();
-            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+            dateStr = dto.getDateStr();
+            if (!StringUtils.isNotBlank(dto.getTimeBeginStr())) {
                 dto.setTimeBeginStr("10:40");
                 dto.setTimeEndStr("14:40");
             }
-            if(!StringUtils.isNotBlank(dateStr)){
-                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            if (!StringUtils.isNotBlank(dateStr)) {
+                dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
             }
         }
         String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
-        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
-            log.info("涨停，昨曾，埋伏开始执行"+dateStr+"  "+timeStr);
+        if (timeStr.compareTo(dto.getTimeBeginStr()) >= 0 && timeStr.compareTo(dto.getTimeEndStr()) <= 0) {
+            log.info("涨停，昨曾，埋伏开始执行" + dateStr + "  " + timeStr);
             String specialDay = riverRemoteService.getSpecialDay(dateStr, -3);
             StockPredictDto sdp = new StockPredictDto();
             sdp.setBeginDate(specialDay);
@@ -142,11 +143,9 @@ public class MinuterEmotionXxlJob {
 
 
             StockPredictDto temp = new StockPredictDto();
-            BeanUtils.copyProperties(sdp,temp);
+            BeanUtils.copyProperties(sdp, temp);
             temp.setAiStrategySign(AiStrategyEnum.HAVE_UPLIMIT_AMBUSH.getCode());
             stockPredictService.execute(temp);
-
-
 
 
         }
@@ -164,22 +163,22 @@ public class MinuterEmotionXxlJob {
     public void minuterStrategyScanPlateAddJobHandle() {
         String param = XxlJobHelper.getJobParam();
         log.info("低开下影线，低开短下长上影，其他开始" + param);
-        String dateStr="";
-        UpLimitScanStrategyBo dto=new UpLimitScanStrategyBo();
+        String dateStr = "";
+        UpLimitScanStrategyBo dto = new UpLimitScanStrategyBo();
         if (StringUtils.isNotBlank(param)) {
             dto = JsonUtil.readToValue(param, UpLimitScanStrategyBo.class);
-            dateStr=dto.getDateStr();
-            if(!StringUtils.isNotBlank(dto.getTimeBeginStr())){
+            dateStr = dto.getDateStr();
+            if (!StringUtils.isNotBlank(dto.getTimeBeginStr())) {
                 dto.setTimeBeginStr("10:40");
                 dto.setTimeEndStr("14:40");
             }
-            if(!StringUtils.isNotBlank(dateStr)){
-                dateStr=DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+            if (!StringUtils.isNotBlank(dateStr)) {
+                dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
             }
         }
         String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
-        if(timeStr.compareTo(dto.getTimeBeginStr())>=0 &&timeStr.compareTo(dto.getTimeEndStr())<=0){
-            log.info("低开下影线，低开短下长上影，其他开始执行"+dateStr+"  "+timeStr);
+        if (timeStr.compareTo(dto.getTimeBeginStr()) >= 0 && timeStr.compareTo(dto.getTimeEndStr()) <= 0) {
+            log.info("低开下影线，低开短下长上影，其他开始执行" + dateStr + "  " + timeStr);
 
             stockCronRefreshService.addDksyxPlateInfo(dateStr);
             stockCronRefreshService.addZcPlateInfo(dateStr);
@@ -194,6 +193,7 @@ public class MinuterEmotionXxlJob {
 
     /**
      * 涨幅同步到es上
+     *
      * @throws ScriptException
      * @throws IOException
      * @throws NoSuchMethodException
@@ -201,14 +201,12 @@ public class MinuterEmotionXxlJob {
      * @throws ParseException
      */
     @XxlJob("increaseSyncEsJobHandle")
-    public void increaseSyncEsJobHandle()  {
-        log.info("涨幅数据同步es开始" );
-        try {
-            esTaskService.increaseSyncEsJobHandle();
-        }catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("涨幅数据同步es结束" );
+    public void increaseSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("涨幅数据同步es开始");
+
+        esTaskService.increaseSyncEsJobHandle();
+
+        log.info("涨幅数据同步es结束");
     }
 
 }

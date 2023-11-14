@@ -24,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -68,6 +70,7 @@ public class DayStatisticJob {
     EsTemplateConfigMapper esTemplateConfigMapper;
     @Autowired
     EsTemplateDataService esTemplateDataService;
+
     @XxlJob("dayUpDownJobHandler")
     public void dayUpDownJobHandler() throws IllegalAccessException, ParseException {
         String param = XxlJobHelper.getJobParam();
@@ -109,9 +112,6 @@ public class DayStatisticJob {
     }
 
 
-
-
-
     @XxlJob("dayMarketValueUpLimitJobHandler")
     public void dayMarketValueUpLimitJobHandler() throws IllegalAccessException, ParseException {
         String param = XxlJobHelper.getJobParam();
@@ -135,9 +135,9 @@ public class DayStatisticJob {
     @XxlJob("dayAutoLoginJobHandler")
     public void dayAutoLoginJobHandler() {
         int num = 10;
-        while (num>0) {
+        while (num > 0) {
             try {
-                StockTradeLoginDTO dto=new StockTradeLoginDTO();
+                StockTradeLoginDTO dto = new StockTradeLoginDTO();
                 String defaultTradeUser = stockUserBaseService.getDefaultTradeUser();
                 dto.setUserId(defaultTradeUser);
                 stockTradeUserService.login(dto);
@@ -174,12 +174,13 @@ public class DayStatisticJob {
 
     @Autowired
     EsTaskService esTaskService;
+
     /**
      * 定量新增股票信息
      */
     @XxlJob("extraAllStockBaseJobHandle")
     public void extraAllStockBaseJobHandle() {
-        log.info("定量新增股票信息开始" );
+        log.info("定量新增股票信息开始");
         stockBaseService.extraAddProcess();
         log.info("定量新增股票信息结束");
 
@@ -190,13 +191,10 @@ public class DayStatisticJob {
      */
     @XxlJob("addConvertBondProcessJobHandle")
     public void addConvertBondProcessJobHandle() {
-        log.info("定量增加转债信息开始" );
-        try {
-            stockBaseService.addConvertBondProcess();
-        }catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("定量增加转债信息结束" );
+        log.info("定量增加转债信息开始");
+        stockBaseService.addConvertBondProcess();
+
+        log.info("定量增加转债信息结束");
 
     }
 
@@ -204,14 +202,10 @@ public class DayStatisticJob {
      * 竞价数据同步es
      */
     @XxlJob("auctionSyncEsJobHandle")
-    public void auctionSyncEsJobHandle()  {
-        log.info("竞价数据同步es开始" );
-        try {
-            esTaskService.auctionSyncEsJobHandle();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("竞价数据同步es结束" );
+    public void auctionSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("竞价数据同步es开始");
+        esTaskService.auctionSyncEsJobHandle();
+        log.info("竞价数据同步es结束");
     }
 
 
@@ -219,14 +213,11 @@ public class DayStatisticJob {
      * 同花顺行业数据同步es
      */
     @XxlJob("industryDataSyncEsJobHandle")
-    public void industryDataSyncEsJobHandle()  {
-        log.info("同花顺行业数据同步es开始" );
-        try {
-            esTaskService.industryDataSyncEsJobHandle();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("同花顺行业数据同步es结束" );
+    public void industryDataSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("同花顺行业数据同步es开始");
+        esTaskService.industryDataSyncEsJobHandle();
+
+        log.info("同花顺行业数据同步es结束");
     }
 
 
