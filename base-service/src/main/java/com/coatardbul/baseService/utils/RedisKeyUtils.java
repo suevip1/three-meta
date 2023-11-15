@@ -114,16 +114,23 @@ public class RedisKeyUtils {
 
 
 
-    public static String getEsTemplateConfig(String id){
-        return "es_template_config_"+id;
-    }
+
+
 
     public static String getEsTemplateConfig(String templateId,String esDataType){
         return "es_template_config_"+templateId+"_"+esDataType;
     }
 
 
-
+    /**
+     * cron 是否代理，超时时间，
+     * @param templateId
+     * @param esDataType
+     * @return
+     */
+    public static String getCronSystemConfig(){
+        return "cron_and_system_config";
+    }
 
 
 }

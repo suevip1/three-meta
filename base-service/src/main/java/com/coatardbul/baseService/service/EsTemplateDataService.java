@@ -5,12 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
+import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.es.EsTemplateDataBo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -149,7 +152,41 @@ public class EsTemplateDataService {
             deleteEsSync(dto);
             elasticsearchService.insertData(dto.getEsIndexName(), convert, convert.getId());
         }
+    }
 
+
+    /**
+     * 不支持分钟级别的，分钟级别的最好当天请求，
+     * 支持分钟误操作容易服务器阻塞
+     * @param dateArrInfo
+     * @param filterEsTemplateConfigList
+     */
+    public void syncRangeData(List dateArrInfo, List filterEsTemplateConfigList) {
+        if(dateArrInfo.size()>0){
+            for(Object dateStrObj: dateArrInfo){
+                String dateStr = dateStrObj.toString();
+                for(Object obj:filterEsTemplateConfigList){
+                    String jsonStr = JsonUtil.toJson(obj);
+                    EsTemplateConfig esTemplateConfig = JsonUtil.readToValue(jsonStr, EsTemplateConfig.class);
+                    EsTemplateConfigDTO esTemplateConfigDto=new EsTemplateConfigDTO();
+                    BeanUtils.copyProperties(esTemplateConfig,esTemplateConfigDto);
+                    esTemplateConfigDto.setRiverStockTemplateId(esTemplateConfig.getTemplateId());
+                    esTemplateConfigDto.setDateStr(dateStr);
+                    //分钟级别不操作
+                    if(EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(esTemplateConfigDto.getEsDataType())
+                    ||EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign().equals(esTemplateConfigDto.getEsDataType())){
+                    }else {
+                        try {
+                            syncData(esTemplateConfigDto);
+                            Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigDto.getEsDataLevel()));
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     private EsTemplateDataBo convert(Integer count, EsTemplateConfigDTO dto) {
@@ -221,4 +258,7 @@ public class EsTemplateDataService {
         QueryBuilder queryBuilder = getQueryBuilder(dto);
         elasticsearchService.deleteDataByQuery(dto.getEsIndexName(), queryBuilder);
     }
+
+
+
 }

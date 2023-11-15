@@ -27,7 +27,7 @@ public class FeignConfiguration implements RequestInterceptor {
 			}
 		}catch (Exception e) {
 			template.header("token", Constant.INVINCIBLE_TOKEN);
-			log.error("请求异常"+e.getMessage());
+			log.info("分布任务调用feign标记");
 		}
 
 

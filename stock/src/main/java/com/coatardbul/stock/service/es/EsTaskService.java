@@ -9,7 +9,7 @@ import com.coatardbul.baseService.entity.bo.es.EsIndustryDataBo;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.EsTemplateDataService;
 import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
-import com.coatardbul.stock.model.entity.EsTemplateConfig;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -84,8 +84,9 @@ public class EsTaskService {
             EsIndustryDataBo esIndustryDataBo=new EsIndustryDataBo();
             esIndustryDataBo.setYearStr(yearStr);
             esIndustryDataBo.setBkCode(dictInfo.getSignKey());
+            esIndustryDataBo.setBkName(dictInfo.getSignValue());
             esIndustryDataService.syncData(esIndustryDataBo);
-            Thread.sleep(10*1000);
+            Thread.sleep(5*1000);
         }
     }
 

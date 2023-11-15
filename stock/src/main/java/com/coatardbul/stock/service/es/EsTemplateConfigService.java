@@ -4,7 +4,7 @@ import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.service.SnowFlakeService;
 import com.coatardbul.baseService.utils.RedisKeyUtils;
 import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
-import com.coatardbul.stock.model.entity.EsTemplateConfig;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

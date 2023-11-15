@@ -45,7 +45,7 @@ public class StockCronRefreshController {
     @ApiOperation("设置配置")
     @RequestMapping(path = "/setConfig", method = RequestMethod.POST)
     public CommonResult setConfig(@RequestBody CronRefreshConfigBo bo) {
-        cronRefreshService.setCronRefreshConfigBo(bo);
+        cronRefreshService.modifyCronRefreshConfigBo(bo);
         return CommonResult.success(null);
     }
 

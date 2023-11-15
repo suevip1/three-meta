@@ -177,7 +177,7 @@ public class TongHuaShunIndustryService {
                 sb= new BigDecimal(currInfo[2]);
             }catch (NumberFormatException e){
                 sb=BigDecimal.ZERO;
-                log.error(e.getMessage(),e);
+                log.error("同花顺行业转换涨幅BigDecimal异常，已设置默认值");
             }
             BigDecimal bigDecimal1= sb.subtract(new BigDecimal(lastInfo[4])).multiply(new BigDecimal(100)).divide(new BigDecimal(lastInfo[4]), 2, BigDecimal.ROUND_CEILING);
             map.put("maxIncreaseRate", bigDecimal1.toString());

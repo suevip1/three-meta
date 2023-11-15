@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * <p>
  * Note:es上同步模板数据,日期+模板id+code,模板id，日期，code ,name,概念，行业前缀，行业，参数（保留字段），数据json
@@ -44,6 +47,23 @@ public class EsTemplateDataController {
     public CommonResult syncData(@Validated @RequestBody EsTemplateConfigDTO dto) {
         try {
             esTemplateDataService.syncData(dto);
+            return CommonResult.success(null);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return CommonResult.failed(e.getMessage());
+        }
+    }
+
+
+    @ApiOperation("同步范围数据到es上")
+    @RequestMapping(path = "/syncRangeData", method = RequestMethod.POST)
+    public CommonResult syncRangeData(@Validated @RequestBody Map map) {
+        try {
+            List dateArrInfo = (List) map.get("dateArrInfo");
+            List filterEsTemplateConfigList = (List) map.get("filterEsTemplateConfigList");
+
+            esTemplateDataService.syncRangeData(dateArrInfo, filterEsTemplateConfigList);
+
             return CommonResult.success(null);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

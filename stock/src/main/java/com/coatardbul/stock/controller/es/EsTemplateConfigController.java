@@ -1,7 +1,7 @@
 package com.coatardbul.stock.controller.es;
 
 import com.coatardbul.baseCommon.api.CommonResult;
-import com.coatardbul.stock.model.entity.EsTemplateConfig;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
 import com.coatardbul.stock.service.es.EsTemplateConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
