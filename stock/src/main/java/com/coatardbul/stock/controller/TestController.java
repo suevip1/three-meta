@@ -355,8 +355,32 @@ public class TestController {
 
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
-        esTaskService.auctionSyncEsJobHandle();
 
+        esTaskService.minuterIncreaseSyncEsJobHandle("2023-11-15","10:20",5);
+
+//        SearchRequest searchRequest = new SearchRequest();
+//        String indexName="template_data";
+//        String dateStr="2023-05-08";
+//        searchRequest.indices(indexName);
+//        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+//                .must(QueryBuilders.termQuery("dateStr",dateStr));
+//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+////        searchSourceBuilder.query(queryBuilder);
+//        CardinalityAggregationBuilder cardinalityAggregationBuilder = AggregationBuilders.cardinality("dinstinct_templateId").field("templateId");
+//        searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
+//        searchRequest.source(searchSourceBuilder);
+//
+//        SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+//        SearchHits hits = response.getHits();
+//
+//        if (hits.getTotalHits().value > 0) {
+//            SearchHit[] searchHitsArr = hits.getHits();
+//            for (int i = 0; i < searchHitsArr.length; i++) {
+//                //在Fields属性中可以获取对应字段的值,这里我增加了一个参数key对应distinct的字段名
+//                Object templateId = searchHitsArr[i].getFields().get("templateId").getValue();
+//                log.info(templateId.toString());
+//            }
+//        }
         return null;
     }
 

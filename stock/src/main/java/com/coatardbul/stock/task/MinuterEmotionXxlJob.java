@@ -214,4 +214,22 @@ public class MinuterEmotionXxlJob {
         log.info("日计数同步es结束");
     }
 
+    /**
+     * 分钟数据，默认五分钟
+     * @throws ScriptException
+     * @throws IOException
+     * @throws ParseException
+     * @throws InterruptedException
+     * @throws NoSuchMethodException
+     */
+    @XxlJob("minuterIncreaseSyncEsJobHandle")
+    public void minuterIncreaseSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("分钟涨幅同步es开始");
+        String dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+        Integer interval=5;
+        esTaskService.minuterIncreaseSyncEsJobHandle(dateStr, timeStr,interval);
+        log.info("分钟涨幅同步es结束");
+    }
+
 }

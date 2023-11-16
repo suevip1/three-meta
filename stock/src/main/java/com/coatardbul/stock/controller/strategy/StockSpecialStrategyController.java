@@ -3,6 +3,7 @@ package com.coatardbul.stock.controller.strategy;
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
+import com.coatardbul.stock.model.bo.StockUpLimitNameBO;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import io.swagger.annotations.Api;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.ScriptException;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>
@@ -38,7 +40,13 @@ StockSpecialStrategyService stockSpecialStrategyService;
     @ApiOperation("获取2板以上涨停数据")
     @RequestMapping(path = "/getUpLimitInfo", method = RequestMethod.POST)
     public CommonResult getUpLimitInfo(@Validated @RequestBody StockEmotionDayDTO dto)  {
-        return CommonResult.success( stockSpecialStrategyService.getTwoAboveUpLimitInfo(dto));
+        try {
+            List<StockUpLimitNameBO> stockUpLimitNameBOS = stockSpecialStrategyService.optimizeTwoAboveUpLimitInfo(dto);
+            return CommonResult.success( stockUpLimitNameBOS);
+
+        } catch (IOException e) {
+            return CommonResult.failed("");
+        }
     }
 
 

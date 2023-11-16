@@ -49,12 +49,10 @@ public class EsTemplateDataService {
             Long aLong=0L;
             if (EsTemplateConfigEnum.TYPE_DAY.getSign().equals(dto.getEsDataType())
                     || EsTemplateConfigEnum.TYPE_AUCTION.getSign().equals(dto.getEsDataType())
+                    || EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())
             ) {
                 //每日数据
                  aLong = elasticsearchService.queryCountSyn(dto.getEsIndexName(), queryBuilder, EsTemplateDataBo.class);
-            }
-            if (EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())) {
-                //todo 分钟数据
             }
             if (EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign().equals(dto.getEsDataType())
                     || EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign().equals(dto.getEsDataType())
@@ -122,6 +120,7 @@ public class EsTemplateDataService {
         }
         if (EsTemplateConfigEnum.TYPE_DAY.getSign().equals(dto.getEsDataType())
                 || EsTemplateConfigEnum.TYPE_AUCTION.getSign().equals(dto.getEsDataType())
+                || EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())
         ) {
             //每日数据
             StrategyBO strategyBO = new StrategyBO();
@@ -140,15 +139,12 @@ public class EsTemplateDataService {
                 elasticsearchService.defaultBatchInsertData(dto.getEsIndexName(), convert, "id");
             }
         }
-        if (EsTemplateConfigEnum.TYPE_MINUTER.getSign().equals(dto.getEsDataType())) {
-            //todo 分钟数据
-        }
         if (EsTemplateConfigEnum.TYPE_DAY_COUNT.getSign().equals(dto.getEsDataType())
                 ||EsTemplateConfigEnum.TYPE_MINUTER_COUNT.getSign().equals(dto.getEsDataType())
         ) {
             //count总数
             StrategyBO strategyBO = stockStrategyCommonService.strategyFirstProcess(dto);
-            EsTemplateDataBo convert = convert(strategyBO.getTotalNum(), dto);
+            EsTemplateDataBo convert = convertCount(strategyBO.getTotalNum(), dto);
             deleteEsSync(dto);
             elasticsearchService.insertData(dto.getEsIndexName(), convert, convert.getId());
         }
@@ -189,23 +185,29 @@ public class EsTemplateDataService {
         }
     }
 
-    private EsTemplateDataBo convert(Integer count, EsTemplateConfigDTO dto) {
+    private EsTemplateDataBo convertCount(Integer count, EsTemplateConfigDTO dto) {
 
-        EsTemplateDataBo convert = convert(count, dto.getRiverStockTemplateId(), dto.getDateStr(),dto.getTimeStr());
+        EsTemplateDataBo convert = convertCount(count, dto.getRiverStockTemplateId(), dto.getDateStr(),dto.getTimeStr());
 
         return convert;
     }
 
+    /**
+     * 转换数据，支持 日，竞价，分钟
+     * @param data
+     * @param dto
+     * @return
+     */
     private List<EsTemplateDataBo> convert(JSONArray data, EsTemplateConfigDTO dto) {
         List<EsTemplateDataBo> result = new ArrayList<EsTemplateDataBo>();
         for (int i = 0; i < data.size(); i++) {
             JSONObject jsonObject = data.getJSONObject(i);
-            EsTemplateDataBo convert = convert(jsonObject, dto.getRiverStockTemplateId(), dto.getDateStr());
+            EsTemplateDataBo convert = convertSingle(jsonObject, dto);
             result.add(convert);
         }
         return result;
     }
-    private EsTemplateDataBo convert(Integer count, String templateId, String dateStr,String timeStr) {
+    private EsTemplateDataBo convertCount(Integer count, String templateId, String dateStr,String timeStr) {
         EsTemplateDataBo esTemplateDataBo = new EsTemplateDataBo();
         esTemplateDataBo.setTemplateId(templateId);
         esTemplateDataBo.setDateStr(dateStr);
@@ -216,10 +218,13 @@ public class EsTemplateDataService {
         return esTemplateDataBo;
     }
 
-    private EsTemplateDataBo convert(JSONObject jsonObject, String templateId, String dateStr) {
+    private EsTemplateDataBo convertSingle(JSONObject jsonObject,EsTemplateConfigDTO dto) {
         EsTemplateDataBo esTemplateDataBo = new EsTemplateDataBo();
-        esTemplateDataBo.setTemplateId(templateId);
-        esTemplateDataBo.setDateStr(dateStr);
+        esTemplateDataBo.setTemplateId(dto.getRiverStockTemplateId());
+        esTemplateDataBo.setDateStr(dto.getDateStr());
+        if(StringUtils.isNotBlank(dto.getTimeStr())){
+            esTemplateDataBo.setTimeStr(dto.getTimeStr());
+        }
         esTemplateDataBo.setStockCode(jsonObject.getString("code"));
         esTemplateDataBo.setStockName(jsonObject.getString("股票简称"));
 
@@ -253,6 +258,12 @@ public class EsTemplateDataService {
         }
     }
 
+
+    public List<EsTemplateDataBo> getEsTemplateDataList(EsTemplateConfigDTO dto) throws IOException {
+        QueryBuilder queryBuilder = getQueryBuilder(dto);
+        List<EsTemplateDataBo> list = elasticsearchService.queryAllSyn(dto.getEsIndexName(), queryBuilder, EsTemplateDataBo.class);
+        return list;
+    }
 
     public void deleteEsSync(EsTemplateConfigDTO dto) {
         QueryBuilder queryBuilder = getQueryBuilder(dto);

@@ -163,7 +163,7 @@ public class StockPredictService {
     private void jointAiStrategyQueryAndParse(StockPredictDto stockPredictDto, AiStrategyUplimitAmbushBo aiStrategyParamBo, String dateFormat) {
         StockStrategyQueryDTO dto = new StockStrategyQueryDTO();
         if (AiStrategyEnum.UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {
-            dto.setRiverStockTemplateSign(StockTemplateEnum.FIRST_UP_LIMIT_EQUAL_ABOVE.getSign());
+            dto.setRiverStockTemplateSign(StockTemplateEnum.UP_LIMIT.getSign());
         }
 
         if (AiStrategyEnum.TWO_ABOVE_UPLIMIT_AMBUSH.getCode().equals(stockPredictDto.getAiStrategySign())) {

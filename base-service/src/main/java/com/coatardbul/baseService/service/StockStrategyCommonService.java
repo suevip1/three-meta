@@ -110,9 +110,9 @@ public abstract class StockStrategyCommonService {
      * @throws BusinessException
      */
     public StrategyBO comprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
-        if (StringUtils.isNotBlank(dto.getTimeStr())) {
-            return wenCaiStrategy(dto);
-        }
+//        if (StringUtils.isNotBlank(dto.getTimeStr())) {
+//            return wenCaiStrategy(dto);
+//        }
         //存在配置
         String existRedisKey = getExistRedisKeyStrategyQuery(dto);
         if (StringUtils.isNotBlank(existRedisKey)) {
