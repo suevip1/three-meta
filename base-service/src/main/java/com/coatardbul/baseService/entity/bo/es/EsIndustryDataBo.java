@@ -27,4 +27,16 @@ public class EsIndustryDataBo {
     private String increaseRate;
 
     private String maxIncreaseRate;
+
+    private String openValue;
+
+    private String maxValue;
+
+    private String minValue;
+
+    private String closeValue;
+
+    private String lastCloseValue;
+
+
 }

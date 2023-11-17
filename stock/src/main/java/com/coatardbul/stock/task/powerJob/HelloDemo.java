@@ -7,7 +7,7 @@ import tech.powerjob.worker.core.processor.TaskContext;
 
 /**
  * <p>
- * Note:
+ * Note:TaskContext context  必须
  * <p>
  * Date: 2023/11/14
  *

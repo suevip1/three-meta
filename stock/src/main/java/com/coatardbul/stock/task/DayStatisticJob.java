@@ -210,7 +210,7 @@ public class DayStatisticJob {
 
 
     /**
-     * 同花顺行业数据同步es
+     * 同花顺行业数据同步es,定时任务只同步当日数据
      */
     @XxlJob("industryDataSyncEsJobHandle")
     public void industryDataSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {

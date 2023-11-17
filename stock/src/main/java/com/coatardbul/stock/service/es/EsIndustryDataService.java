@@ -5,6 +5,7 @@ import com.coatardbul.baseService.entity.bo.es.EsIndustryDataBo;
 import com.coatardbul.baseService.service.ElasticsearchService;
 import com.coatardbul.stock.service.statistic.TongHuaShunIndustryService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -43,51 +43,88 @@ public class EsIndustryDataService {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("yearStr", dto.getYearStr()))
                 .must(QueryBuilders.termQuery("bkCode", dto.getBkCode()));
+        if(StringUtils.isNotBlank(dto.getDateStr())){
+            queryBuilder.must(QueryBuilders.termQuery("dateStr", dto.getYearStr()));
+        }
         return queryBuilder;
     }
+
+    /**
+     * 计数方式是按照年计算
+     * @param dto
+     * @return
+     * @throws IOException
+     */
     public long getCount(EsIndustryDataBo dto) throws IOException {
+        dto.setDateStr(null);
         QueryBuilder queryBuilder = getQueryBuilder(dto);
         Long aLong= elasticsearchService.queryCountSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
         return aLong;
     }
 
+    /**
+     * 按照年同步
+     * @param dto
+     * @throws IOException
+     */
     public void syncData(EsIndustryDataBo dto) throws IOException {
+        dto.setDateStr(null);
         boolean indexExist = elasticsearchService.checkIndexExist(INDUSTRY_DATA_INDEX_NAME);
         if (!indexExist) {
             elasticsearchService.indexCreate(INDUSTRY_DATA_INDEX_NAME);
         }
         //count总数
-        List<Map<String, String>> yearIncreaseRate = tongHuaShunIndustryService.getYearIncreaseRate(dto.getBkCode(), dto.getYearStr());
+        List<EsIndustryDataBo> yearIncreaseRate = tongHuaShunIndustryService.getYearIncreaseRate(dto.getBkCode(), dto.getYearStr());
 
         List<EsIndustryDataBo> convert = convert(yearIncreaseRate, dto);
         deleteEsSync(dto);
         elasticsearchService.defaultBatchInsertData(INDUSTRY_DATA_INDEX_NAME, convert, "id");
     }
-    private List<EsIndustryDataBo> convert( List<Map<String, String>> yearIncreaseRate,EsIndustryDataBo dto){
+
+    /**
+     * 同步当日数据
+     * @param dto
+     * @throws IOException
+     */
+    public void syncTodayData(EsIndustryDataBo dto) throws IOException {
+        boolean indexExist = elasticsearchService.checkIndexExist(INDUSTRY_DATA_INDEX_NAME);
+        if (!indexExist) {
+            elasticsearchService.indexCreate(INDUSTRY_DATA_INDEX_NAME);
+        }
+        //count总数
+       EsIndustryDataBo dayIncreaseRate = tongHuaShunIndustryService.getTodayResult(dto.getBkCode());
+        elasticsearchService.insertData(INDUSTRY_DATA_INDEX_NAME, dayIncreaseRate, "id");
+    }
+
+    private List<EsIndustryDataBo> convert( List<EsIndustryDataBo> yearIncreaseRate,EsIndustryDataBo dto){
         List<EsIndustryDataBo>result=new ArrayList<>();
         if(yearIncreaseRate!=null &&yearIncreaseRate.size()>0){
-            for(Map<String, String> map:yearIncreaseRate){
-                result.add(convert(dto,map));
+            for(EsIndustryDataBo map:yearIncreaseRate){
+                BeanUtils.copyProperties(dto,map);
+                map.setId(map.getBkCode()+"_"+map.getDateStr());
+
             }
         }
         return result;
     }
-    private EsIndustryDataBo convert(EsIndustryDataBo dto,Map<String, String> map ){
-        EsIndustryDataBo result=new EsIndustryDataBo();
-        BeanUtils.copyProperties(dto, result);
-        result.setDateStr(map.get("dateStr"));
-        result.setIncreaseRate(map.get("increaseRate"));
-        result.setMaxIncreaseRate(map.get("maxIncreaseRate"));
-        result.setId(result.getBkCode()+"_"+result.getDateStr());
-        return result;
-    }
 
+    /**
+     * 数据纬度是年，删除去除条件
+     * @param dto
+     */
     public void deleteEsSync(EsIndustryDataBo dto) {
+        dto.setDateStr(null);
         QueryBuilder queryBuilder = getQueryBuilder(dto);
         elasticsearchService.deleteDataByQuery(INDUSTRY_DATA_INDEX_NAME, queryBuilder);
     }
 
-    public List getList(EsIndustryDataBo dto) throws IOException {
+    /**
+     * 获取日期数据
+     * @param dto
+     * @return
+     * @throws IOException
+     */
+    public List getDateList(EsIndustryDataBo dto) throws IOException {
         List<EsIndustryDataBo> list=new ArrayList<>();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
 //        if(dateFormat.equals(dto.getDateStr())){
@@ -101,6 +138,21 @@ public class EsIndustryDataService {
                 .must(QueryBuilders.termQuery("dateStr", dto.getDateStr().replaceAll("-","")));
         list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
         return list;
+    }
 
+    /**
+     * 获取单个数据
+     * @param dto
+     * @return
+     * @throws IOException
+     */
+    public EsIndustryDataBo getSingData(EsIndustryDataBo dto) throws IOException {
+        QueryBuilder queryBuilder = getQueryBuilder(dto);
+        List<EsIndustryDataBo> list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else {
+            return new EsIndustryDataBo();
+        }
     }
 }

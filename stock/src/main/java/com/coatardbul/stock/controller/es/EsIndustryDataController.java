@@ -64,7 +64,7 @@ public class EsIndustryDataController {
     @ApiOperation("获取es数据")
     @RequestMapping(path = "/getList", method = RequestMethod.POST)
     public CommonResult getList(@Validated @RequestBody EsIndustryDataBo dto) throws IOException {
-        List list = esIndustryDataService.getList(dto);
+        List list = esIndustryDataService.getDateList(dto);
         return CommonResult.success(list);
     }
 }

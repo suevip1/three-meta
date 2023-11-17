@@ -4,13 +4,14 @@ import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
 import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseCommon.model.entity.DictInfo;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.entity.bo.es.EsIndustryDataBo;
 import com.coatardbul.baseService.entity.feign.StockTimeInterval;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.EsTemplateDataService;
 import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
-import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
+import com.coatardbul.stock.service.statistic.TongHuaShunIndustryService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -47,6 +48,8 @@ public class EsTaskService {
 
 
     @Autowired
+    TongHuaShunIndustryService tongHuaShunIndustryService;
+    @Autowired
     RiverServerFeign riverServerFeign;
     @Autowired
     EsIndustryDataService esIndustryDataService;
@@ -71,22 +74,17 @@ public class EsTaskService {
         esTemplateDataService.syncData(s1);
     }
 
-    public void industryDataSyncEsJobHandle() throws ScriptException, IOException, NoSuchMethodException, InterruptedException, ParseException {
+    public void industryDataSyncEsJobHandle() throws IOException,  InterruptedException, ParseException {
         String dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         if (stockVerifyService.isIllegalDate(dateStr)) {
             return;
         }
-        String yearStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY);
-
         Map<String, String> map = new HashMap<String, String>();
         map.put("busiType", "tongHuaShun_industry_code");
         CommonResult<List<DictInfo>> infoByType = riverServerFeign.getInfoByType(map);
         for (DictInfo dictInfo : infoByType.getData()) {
-            EsIndustryDataBo esIndustryDataBo = new EsIndustryDataBo();
-            esIndustryDataBo.setYearStr(yearStr);
-            esIndustryDataBo.setBkCode(dictInfo.getSignKey());
-            esIndustryDataBo.setBkName(dictInfo.getSignValue());
-            esIndustryDataService.syncData(esIndustryDataBo);
+            EsIndustryDataBo todayResult = tongHuaShunIndustryService.getTodayResult(dictInfo.getSignKey());
+            esIndustryDataService.syncTodayData(todayResult);
             Thread.sleep(5 * 1000);
         }
     }
@@ -115,7 +113,7 @@ public class EsTaskService {
         }
     }
 
-    public void minuterIncreaseSyncEsJobHandle(String dateStr, String timeStr, Integer interval) throws ParseException, ScriptException, IOException, NoSuchMethodException {
+    public void minuterIncreaseSyncEsJobHandle(String dateStr, String timeStr, Integer interval) throws ParseException, ScriptException, IOException, NoSuchMethodException, InterruptedException {
 
         if (timeStr.compareTo("09:30") < 0) {
             return;
@@ -147,6 +145,7 @@ public class EsTaskService {
                     Long count = esTemplateDataService.getCount(s1);
                     if(count==null ||count==0){
                         esTemplateDataService.syncData(s1);
+                        Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
                     }
                 }
 
