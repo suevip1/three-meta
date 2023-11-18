@@ -51,6 +51,10 @@ public class LimitStrongWeakBO {
     private Long highestVol;
 
 
+    private String industry;
+
+    private String theme;
+
     /**
      * 有效的封单量
      */
