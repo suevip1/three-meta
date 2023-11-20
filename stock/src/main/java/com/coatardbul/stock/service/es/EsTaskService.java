@@ -59,7 +59,7 @@ public class EsTaskService {
         if (stockVerifyService.isIllegalDate(dateStr)) {
             return;
         }
-        List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_AUCTION.getSign());
+        List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsFetchTime(EsTemplateConfigEnum.FETCH_TIME_AUCTION.getSign());
         for (int i = 0; i < esTemplateConfigs.size(); i++) {
             auctionSync(dateStr, esTemplateConfigs.get(i));
             Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
@@ -74,18 +74,31 @@ public class EsTaskService {
         esTemplateDataService.syncData(s1);
     }
 
-    public void industryDataSyncEsJobHandle() throws IOException,  InterruptedException, ParseException {
+    /**
+     * 交易时间内同步数据
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws ParseException
+     */
+    public void industryDataSyncEsJobHandle() throws IOException, InterruptedException, ParseException {
         String dateStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
         if (stockVerifyService.isIllegalDate(dateStr)) {
             return;
         }
+        industryDataSyncEs();
+
+    }
+
+    public void industryDataSyncEs() throws IOException, InterruptedException, ParseException {
         Map<String, String> map = new HashMap<String, String>();
         map.put("busiType", "tongHuaShun_industry_code");
         CommonResult<List<DictInfo>> infoByType = riverServerFeign.getInfoByType(map);
         for (DictInfo dictInfo : infoByType.getData()) {
             EsIndustryDataBo todayResult = tongHuaShunIndustryService.getTodayResult(dictInfo.getSignKey());
             esIndustryDataService.syncTodayData(todayResult);
-            Thread.sleep(5 * 1000);
+            Thread.sleep(2 * 1000);
         }
     }
 
@@ -143,7 +156,7 @@ public class EsTaskService {
                     s1.setRiverStockTemplateId(esTemplateConfigs.get(i).getTemplateId());
                     s1.setTimeStr(data.get(j));
                     Long count = esTemplateDataService.getCount(s1);
-                    if(count==null ||count==0){
+                    if (count == null || count == 0) {
                         esTemplateDataService.syncData(s1);
                         Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
                     }

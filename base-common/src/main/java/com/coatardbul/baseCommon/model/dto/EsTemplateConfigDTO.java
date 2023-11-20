@@ -31,6 +31,10 @@ public class EsTemplateConfigDTO extends  StockStrategyQueryDTO{
      */
     @NotBlank(message = "数据级别不能为空")
     private String esDataLevel;
+    /**
+     *取数时间：竞价，盘中
+     */
+    private String esFetchTime;
 
     /**
      * es索引名称

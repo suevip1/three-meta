@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * <p>
- * Note:
+ * Note:涨跌晋级率
  * <p>
  * Date: 2022/2/13
  *

@@ -111,12 +111,12 @@ public class ElasticsearchService<T> {
      *
      * @param indexName
      * @param t
-     * @param id
+     * @param idValue
      * @throws IOException
      */
-    public void insertData(String indexName, T t, String id) throws IOException {
+    public void insertData(String indexName, T t, String idValue) throws IOException {
         IndexRequest request = new IndexRequest(indexName);
-        request.id(id);
+        request.id(idValue);
         request.source(JSONObject.toJSONString(t), XContentType.JSON);
         IndexResponse indexResponse = restHighLevelClient.index(request, RequestOptions.DEFAULT);
         System.out.println(indexResponse.getResult());

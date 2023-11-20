@@ -1,6 +1,9 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;import org.apache.ibatis.annotations.Param;import java.util.List;
+import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface EsTemplateConfigMapper {
     int deleteByPrimaryKey(String id);
@@ -17,8 +20,11 @@ public interface EsTemplateConfigMapper {
 
     Integer selectMaxSequent();
 
+    List<EsTemplateConfig> selectAllByEsDataType(@Param("esDataType") String esDataType);
 
-    List<EsTemplateConfig> selectAllByEsDataType(@Param("esDataType")String esDataType);
+
+    List<EsTemplateConfig> selectAllByEsFetchTime(@Param("esFetchTime")String esFetchTime);
+
 
 
     List<EsTemplateConfig> selectAllByTemplateNameLikeAndEsDataType(@Param("likeTemplateName") String likeTemplateName, @Param("esDataType") String esDataType);

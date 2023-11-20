@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.constants.Constant;
 import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.bo.StrategyQueryBO;
@@ -51,7 +52,8 @@ public abstract class StockStrategyCommonService {
 
     @Autowired
     EsTemplateDataService esTemplateDataService;
-
+    @Autowired
+    EsStockBaseService esStockBaseService;
     @Autowired
     RedisTemplate redisTemplate;
     @Autowired
@@ -98,17 +100,74 @@ public abstract class StockStrategyCommonService {
     }
 
     /**
-     * 策略综合查询，
-     * 1.首选查询es数据，目前支持时间+模板，其他参数不支持
-     * 2.最后查询问财
-     * 支持两种模式
-     * 1.传入id，日期，时间
-     * 2.直接传入问句
-     *
+
      * @param dto
      * @return
      * @throws BusinessException
      */
+    public StockStrategyQueryDTO preComprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+       if(StockTemplateEnum.STOCK_DETAIL.getId().equals(dto.getRiverStockTemplateId())||
+               StockTemplateEnum.STOCK_DETAIL.getSign().equals(dto.getRiverStockTemplateSign())
+       ){
+           StockStrategyQueryDTO result=new StockStrategyQueryDTO();
+           BeanUtils.copyProperties(dto, result);
+           String stockName = dto.getStockName();
+           int length = stockName.length();
+           while (length > 0) {
+               length--;
+               Long aLong = esStockBaseService.queryCount(stockName.substring(0, length));
+               if(aLong>1){
+                   break;
+               }
+           }
+           dto.setStockName(stockName.substring(0,length));
+           return result;
+       }else {
+           return dto;
+       }
+
+    }
+
+
+    /**
+     * 原始请求中的name，与多个结果匹配过滤
+     * @param dto
+     * @param strategyBO
+     * @return
+     * @throws BusinessException
+     * @throws NoSuchMethodException
+     * @throws ScriptException
+     * @throws IOException
+     * @throws IllegalAccessException
+     */
+    public StrategyBO afterComprehensiveStrategy(StockStrategyQueryDTO dto,StrategyBO strategyBO) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
+        if(StockTemplateEnum.STOCK_DETAIL.getId().equals(dto.getRiverStockTemplateId())||
+                StockTemplateEnum.STOCK_DETAIL.getSign().equals(dto.getRiverStockTemplateSign())
+        ){
+            StrategyBO result=new StrategyBO();
+            if(strategyBO!=null &&strategyBO.getData()!=null &&strategyBO.getData().size()>0){
+                JSONArray jsonArray=new JSONArray();
+                for(int i=0;i<strategyBO.getData().size();i++){
+                    JSONObject jsonObject = strategyBO.getData().getJSONObject(i);
+                    if( stockNameMatch(  dto.getStockName(),jsonObject.getString("股票简称"))){
+                        jsonArray.add(jsonObject);
+                    }
+                }
+                result.setTotalNum(jsonArray.size());
+                result.setData(jsonArray);
+                return result;
+            }
+        }
+        return strategyBO;
+    }
+
+    private boolean stockNameMatch(String matchName,String sourceName){
+        if(sourceName.length()>=matchName.length()&&sourceName.substring(0,matchName.length()).equals(matchName)){
+            return true;
+        }
+        return false;
+    }
+
     public StrategyBO comprehensiveStrategy(StockStrategyQueryDTO dto) throws BusinessException, NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
 //        if (StringUtils.isNotBlank(dto.getTimeStr())) {
 //            return wenCaiStrategy(dto);

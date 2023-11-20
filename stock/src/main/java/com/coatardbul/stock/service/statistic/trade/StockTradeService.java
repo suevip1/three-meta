@@ -23,7 +23,7 @@ import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.AccountBase;
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
@@ -398,8 +398,11 @@ public class StockTradeService {
         StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfoNoProxy(code, date);
         stockTradeBO.setPrice(upLimitPrice.getSugSellPrice().toString());
 
-
-        stockTradeBO.setAmount(sellNum.toString());
+        if(sellNum.compareTo(BigDecimal.ZERO)==0){
+            stockTradeBO.setAmount(BigDecimal.ONE.toString());
+        }else {
+            stockTradeBO.setAmount(sellNum.toString());
+        }
         stockTradeBO.setZqmc(name);
         sell(stockTradeBO, userName);
     }

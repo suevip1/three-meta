@@ -1,6 +1,7 @@
 package com.coatardbul.stock.controller.staticModel;
 
 import com.coatardbul.baseCommon.api.CommonResult;
+import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
 import com.coatardbul.stock.common.annotation.WebLog;
 import com.coatardbul.stock.common.util.StockStaticModuleUtil;
@@ -10,7 +11,7 @@ import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockEmotionDayRangeDTO;
 import com.coatardbul.stock.model.dto.StockEmotionQueryDTO;
 import com.coatardbul.stock.model.dto.StockEmotionRangeDayDTO;
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
@@ -68,7 +69,11 @@ public class StockDayStaticController {
     @WebLog(value = "同花顺新版问财功能")
     @RequestMapping(path = "/strategy", method = RequestMethod.POST)
     public CommonResult strategy(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
-        return CommonResult.success(stockStrategyService.comprehensiveStrategy(dto));
+
+        StockStrategyQueryDTO stockStrategyQueryDTO = stockStrategyService.preComprehensiveStrategy(dto);
+        StrategyBO strategyBO = stockStrategyService.comprehensiveStrategy(dto);
+        StrategyBO result = stockStrategyService.afterComprehensiveStrategy(stockStrategyQueryDTO, strategyBO);
+        return CommonResult.success(result);
     }
 
     @WebLog(value = "同花顺新版问财功能第一页")
@@ -102,8 +107,7 @@ public class StockDayStaticController {
     public CommonResult optimizeStrategyCount(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, IOException, IllegalAccessException {
         return CommonResult.success(stockStrategyService.optimizeStrategyCount(dto));
     }
-
-
+    
     @WebLog(value = "获取实时交易信息")
     @RequestMapping(path = "/getImmediateStockBaseInfo", method = RequestMethod.POST)
     public CommonResult getImmediateStockBaseInfo(@Validated @RequestBody StockStrategyQueryDTO dto) throws NoSuchMethodException, ScriptException, FileNotFoundException {

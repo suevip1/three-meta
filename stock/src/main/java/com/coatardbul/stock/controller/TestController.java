@@ -356,7 +356,7 @@ public class TestController {
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
 
-        esTaskService.minuterIncreaseSyncEsJobHandle("2023-11-15","10:20",5);
+        esTaskService.industryDataSyncEsJobHandle();
 
 //        SearchRequest searchRequest = new SearchRequest();
 //        String indexName="template_data";

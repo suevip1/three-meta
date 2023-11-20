@@ -27,7 +27,7 @@ import com.coatardbul.stock.mapper.StockStaticTemplateMapper;
 import com.coatardbul.stock.mapper.StockStrategyWatchMapper;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.model.dto.StockPredictDto;
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import lombok.extern.slf4j.Slf4j;

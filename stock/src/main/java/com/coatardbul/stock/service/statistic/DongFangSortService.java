@@ -10,7 +10,7 @@ import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.model.entity.AccountBase;
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.service.StockUserBaseService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import lombok.extern.slf4j.Slf4j;

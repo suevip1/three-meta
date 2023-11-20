@@ -82,7 +82,7 @@ public class StockDayUpLimitStaticService extends BaseChartDayAbstractService{
                 stockStrategyQueryDTO.setDateStr(dto.getDateStr());
                 StrategyBO strategy = null;
                 try {
-                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.wenCaiStrategy(stockStrategyQueryDTO);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

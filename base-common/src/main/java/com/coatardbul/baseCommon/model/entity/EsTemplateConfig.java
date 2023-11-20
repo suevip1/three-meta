@@ -35,6 +35,11 @@ public class EsTemplateConfig {
     private String esDataLevel;
 
     /**
+     *取数时间：竞价，盘中
+     */
+    private String esFetchTime;
+
+    /**
      * es索引名称
      */
     private String esIndexName;

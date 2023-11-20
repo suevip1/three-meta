@@ -63,7 +63,7 @@ public class MenuService {
 
     public List<AuthMenu> getAllMenuByUser(UserDto dto) {
         AuthMenu authMenu = new AuthMenu();
-        if(dto.getAccount().equals("sxl14459048")){
+        if(dto.getAccount().equals("sxl14459048")||dto.getAccount().equals("nobox")){
             return getAllMenu(authMenu);
         }else {
             List<AuthMenu> allMenu=new ArrayList<>();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.coatardbul.stock.mapper.StockBaseMapper">
-  <resultMap id="BaseResultMap" type="com.coatardbul.stock.model.entity.StockBase">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseCommon.model.entity.StockBase">
     <!--@mbg.generated-->
     <!--@Table stock_base-->
     <id column="code" jdbcType="VARCHAR" property="code" />
@@ -26,14 +26,14 @@
     delete from stock_base
     where code = #{code,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="com.coatardbul.stock.model.entity.StockBase">
+  <insert id="insert" parameterType="com.coatardbul.baseCommon.model.entity.StockBase">
     <!--@mbg.generated-->
     insert into stock_base (code, `name`, name_abbr, 
       industry, theme)
     values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{nameAbbr,jdbcType=VARCHAR}, 
       #{industry,jdbcType=VARCHAR}, #{theme,jdbcType=LONGVARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.coatardbul.stock.model.entity.StockBase">
+  <insert id="insertSelective" parameterType="com.coatardbul.baseCommon.model.entity.StockBase">
     <!--@mbg.generated-->
     insert into stock_base
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -71,7 +71,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.stock.model.entity.StockBase">
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseCommon.model.entity.StockBase">
     <!--@mbg.generated-->
     update stock_base
     <set>
@@ -90,7 +90,7 @@
     </set>
     where code = #{code,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.coatardbul.stock.model.entity.StockBase">
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseCommon.model.entity.StockBase">
     <!--@mbg.generated-->
     update stock_base
     set `name` = #{name,jdbcType=VARCHAR},

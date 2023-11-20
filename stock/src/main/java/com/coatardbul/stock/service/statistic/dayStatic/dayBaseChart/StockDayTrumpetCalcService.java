@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * <p>
- * Note:策略处理
+ * Note:喇叭口
  * <p>
  * Date: 2022/1/5
  *
@@ -92,7 +92,7 @@ public class StockDayTrumpetCalcService extends BaseChartDayAbstractService {
                 stockStrategyQueryDTO.setOrderBy("desc");
                 StrategyBO strategy = null;
                 try {
-                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.wenCaiStrategy(stockStrategyQueryDTO);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

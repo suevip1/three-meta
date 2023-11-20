@@ -18,6 +18,11 @@ public class EsIndustryDataBo {
 
     private String yearStr;
 
+
+    private String beginDateStr;
+
+    private String endDateStr;
+
     private String dateStr;
 
     private String bkCode;

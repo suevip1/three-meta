@@ -10,8 +10,9 @@ import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.TongHuaShunUtil;
 import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.model.dto.StockBaseDTO;
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.baseService.service.EsStockBaseService;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +46,8 @@ public class StockBaseService {
     private StockStrategyService stockStrategyService;
 
 
+    @Autowired
+    EsStockBaseService esStockBaseService;
 
     public void extraAddProcess() {
         addProcessCommon(EXTRA);
@@ -85,9 +88,11 @@ public class StockBaseService {
                     stockBase.setNameAbbr(getNameAbbr(name));
                     try {
                         stockBaseMapper.insert(stockBase);
+                        esStockBaseService.insert(stockBase);
                     } catch (Exception e) {
                         try {
                             stockBaseMapper.updateByPrimaryKeySelective(stockBase);
+                            esStockBaseService.insert(stockBase);
                         }catch (Exception e1){
                             log.error("更新"+name+"失败");
                         }

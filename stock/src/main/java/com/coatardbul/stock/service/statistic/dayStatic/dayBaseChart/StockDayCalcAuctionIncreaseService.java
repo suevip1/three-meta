@@ -92,7 +92,7 @@ public class StockDayCalcAuctionIncreaseService extends BaseChartDayAbstractServ
                 stockStrategyQueryDTO.setOrderBy("desc");
                 StrategyBO strategy = null;
                 try {
-                    strategy = stockStrategyService.comprehensiveStrategy(stockStrategyQueryDTO);
+                    strategy = stockStrategyService.wenCaiStrategy(stockStrategyQueryDTO);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

@@ -205,6 +205,7 @@ public class DayStatisticJob {
     public void auctionSyncEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
         log.info("竞价数据同步es开始");
         esTaskService.auctionSyncEsJobHandle();
+        esTaskService.industryDataSyncEs();
         log.info("竞价数据同步es结束");
     }
 

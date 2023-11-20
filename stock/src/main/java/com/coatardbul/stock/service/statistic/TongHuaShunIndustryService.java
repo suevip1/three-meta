@@ -212,7 +212,7 @@ public class TongHuaShunIndustryService {
         JSONObject jsonObject = null;
         try {
             jsonObject = JSONObject.parseObject(response.split("\\(")[1].split("\\)")[0]);
-            JSONObject newValue = jsonObject.getJSONObject(bkCode);
+            JSONObject newValue = jsonObject.getJSONObject("bk_"+bkCode);
             convert = convert(newValue,bkCode);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -228,7 +228,7 @@ public class TongHuaShunIndustryService {
     private EsIndustryDataBo convert(JSONObject jsonObject, String bkCode) throws IOException {
         EsIndustryDataBo esIndustryDataBo = new EsIndustryDataBo();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYYMMDD);
-        if (StringUtils.isNotBlank(jsonObject.getString(""))) {
+        if (StringUtils.isNotBlank(jsonObject.getString("7"))) {
             esIndustryDataBo.setYearStr(dateFormat.substring(0, 4));
             esIndustryDataBo.setDateStr(dateFormat);
             esIndustryDataBo.setBkCode(bkCode);
@@ -243,9 +243,10 @@ public class TongHuaShunIndustryService {
             //查询昨日es数据
             EsIndustryDataBo esTemplateConfigQuery = new EsIndustryDataBo();
             esTemplateConfigQuery.setYearStr(lastDateStr.substring(0, 4));
+            esTemplateConfigQuery.setDateStr(lastDateStr);
             esTemplateConfigQuery.setBkCode(esIndustryDataBo.getBkCode());
             esTemplateConfigQuery.setBkName(esIndustryDataBo.getBkName());
-            EsIndustryDataBo lastData = esIndustryDataService.getSingData(esIndustryDataBo);
+            EsIndustryDataBo lastData = esIndustryDataService.getSingData(esTemplateConfigQuery);
             esIndustryDataBo.setLastCloseValue(jsonObject.getString("7"));
             String lastCloseValue = null;
             if (lastData != null && lastData.getCloseValue() != null) {
@@ -254,8 +255,8 @@ public class TongHuaShunIndustryService {
                 //  不追求数据的准确性，可以用开盘价代替
                 lastCloseValue = esIndustryDataBo.getOpenValue();
             }
-            esIndustryDataBo.setIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getIncreaseRate(), lastCloseValue));
-            esIndustryDataBo.setMaxIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getMaxIncreaseRate(), lastCloseValue));
+            esIndustryDataBo.setIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getCloseValue(), lastCloseValue));
+            esIndustryDataBo.setMaxIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getMaxValue(), lastCloseValue));
             esIndustryDataBo.setId(esIndustryDataBo.getBkCode() + "_" + esIndustryDataBo.getDateStr());
         }
         return esIndustryDataBo;

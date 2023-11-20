@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +30,7 @@ import java.util.List;
 public class EsIndustryDataService {
 
 
-    private static final String INDUSTRY_DATA_INDEX_NAME="industry_data";
+    private static final String INDUSTRY_DATA_INDEX_NAME = "industry_data";
     @Autowired
     ElasticsearchService elasticsearchService;
 
@@ -40,17 +39,35 @@ public class EsIndustryDataService {
     TongHuaShunIndustryService tongHuaShunIndustryService;
 
     private BoolQueryBuilder getQueryBuilder(EsIndustryDataBo dto) {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("yearStr", dto.getYearStr()))
-                .must(QueryBuilders.termQuery("bkCode", dto.getBkCode()));
-        if(StringUtils.isNotBlank(dto.getDateStr())){
-            queryBuilder.must(QueryBuilders.termQuery("dateStr", dto.getYearStr()));
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        if (StringUtils.isNotBlank(dto.getYearStr())) {
+            queryBuilder.must(QueryBuilders.termQuery("yearStr", dto.getYearStr()));
+        }
+        if (StringUtils.isNotBlank(dto.getBkCode())) {
+            queryBuilder.must(QueryBuilders.termQuery("bkCode", dto.getBkCode()));
+        }
+
+        if (StringUtils.isNotBlank(dto.getDateStr())) {
+            queryBuilder.must(QueryBuilders.termQuery("dateStr", dto.getDateStr()));
+        }
+        return queryBuilder;
+    }
+
+    private BoolQueryBuilder getRangeQueryBuilder(EsIndustryDataBo dto) {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        if (StringUtils.isNotBlank(dto.getBkCode())) {
+            queryBuilder.must(QueryBuilders.termQuery("bkCode", dto.getBkCode()));
+        }
+        if (StringUtils.isNotBlank(dto.getBeginDateStr())) {
+            queryBuilder.must(QueryBuilders.rangeQuery("dateStr").gte(dto.getBeginDateStr()));
+            queryBuilder.must(QueryBuilders.rangeQuery("dateStr").lte(dto.getEndDateStr()));
         }
         return queryBuilder;
     }
 
     /**
      * 计数方式是按照年计算
+     *
      * @param dto
      * @return
      * @throws IOException
@@ -58,12 +75,13 @@ public class EsIndustryDataService {
     public long getCount(EsIndustryDataBo dto) throws IOException {
         dto.setDateStr(null);
         QueryBuilder queryBuilder = getQueryBuilder(dto);
-        Long aLong= elasticsearchService.queryCountSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
+        Long aLong = elasticsearchService.queryCountSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
         return aLong;
     }
 
     /**
      * 按照年同步
+     *
      * @param dto
      * @throws IOException
      */
@@ -83,6 +101,7 @@ public class EsIndustryDataService {
 
     /**
      * 同步当日数据
+     *
      * @param dto
      * @throws IOException
      */
@@ -92,17 +111,16 @@ public class EsIndustryDataService {
             elasticsearchService.indexCreate(INDUSTRY_DATA_INDEX_NAME);
         }
         //count总数
-       EsIndustryDataBo dayIncreaseRate = tongHuaShunIndustryService.getTodayResult(dto.getBkCode());
-        elasticsearchService.insertData(INDUSTRY_DATA_INDEX_NAME, dayIncreaseRate, "id");
+        elasticsearchService.insertData(INDUSTRY_DATA_INDEX_NAME, dto, dto.getId());
     }
 
-    private List<EsIndustryDataBo> convert( List<EsIndustryDataBo> yearIncreaseRate,EsIndustryDataBo dto){
-        List<EsIndustryDataBo>result=new ArrayList<>();
-        if(yearIncreaseRate!=null &&yearIncreaseRate.size()>0){
-            for(EsIndustryDataBo map:yearIncreaseRate){
-                BeanUtils.copyProperties(dto,map);
-                map.setId(map.getBkCode()+"_"+map.getDateStr());
-
+    private List<EsIndustryDataBo> convert(List<EsIndustryDataBo> yearIncreaseRate, EsIndustryDataBo dto) {
+        List<EsIndustryDataBo> result = new ArrayList<>();
+        if (yearIncreaseRate != null && yearIncreaseRate.size() > 0) {
+            for (EsIndustryDataBo map : yearIncreaseRate) {
+                map.setBkName(dto.getBkName());
+                map.setId(map.getBkCode() + "_" + map.getDateStr());
+                result.add(map);
             }
         }
         return result;
@@ -110,6 +128,7 @@ public class EsIndustryDataService {
 
     /**
      * 数据纬度是年，删除去除条件
+     *
      * @param dto
      */
     public void deleteEsSync(EsIndustryDataBo dto) {
@@ -120,12 +139,13 @@ public class EsIndustryDataService {
 
     /**
      * 获取日期数据
+     *
      * @param dto
      * @return
      * @throws IOException
      */
     public List getDateList(EsIndustryDataBo dto) throws IOException {
-        List<EsIndustryDataBo> list=new ArrayList<>();
+        List<EsIndustryDataBo> list = new ArrayList<>();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
 //        if(dateFormat.equals(dto.getDateStr())){
 //            //todo
@@ -135,13 +155,14 @@ public class EsIndustryDataService {
 //             list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
 //        }
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("dateStr", dto.getDateStr().replaceAll("-","")));
+                .must(QueryBuilders.termQuery("dateStr", dto.getDateStr().replaceAll("-", "")));
         list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
         return list;
     }
 
     /**
      * 获取单个数据
+     *
      * @param dto
      * @return
      * @throws IOException
@@ -149,10 +170,16 @@ public class EsIndustryDataService {
     public EsIndustryDataBo getSingData(EsIndustryDataBo dto) throws IOException {
         QueryBuilder queryBuilder = getQueryBuilder(dto);
         List<EsIndustryDataBo> list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
-        if(list.size()>0){
+        if (list.size() > 0) {
             return list.get(0);
-        }else {
+        } else {
             return new EsIndustryDataBo();
         }
+    }
+
+    public List getRangeList(EsIndustryDataBo dto) throws IOException {
+        QueryBuilder queryBuilder = getRangeQueryBuilder(dto);
+        List<EsIndustryDataBo> list = elasticsearchService.queryAllSyn(INDUSTRY_DATA_INDEX_NAME, queryBuilder, EsIndustryDataBo.class);
+        return list;
     }
 }

@@ -1,6 +1,6 @@
 package com.coatardbul.stock.mapper;
 
-import com.coatardbul.stock.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

@@ -9,6 +9,12 @@ public enum EsTemplateConfigEnum {
 
     MODE_FIRST("first", "第一页", 0),
     MODE_ALL("all", "全部", 0),
+
+
+    FETCH_TIME_AUCTION("auction", "竞价时间取数", 0),
+    FETCH_TIME_TRADE("trade", "交易时间取数", 0),
+
+
     LEVEL_SMALL("small", "少量数据", 3*1000),
     LEVEL_MIDDLE("middle", "正常量数据", 5*1000),
     LEVEL_BIG("big", "大量数据", 10*1000);

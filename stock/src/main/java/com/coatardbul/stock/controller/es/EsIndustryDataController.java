@@ -67,4 +67,12 @@ public class EsIndustryDataController {
         List list = esIndustryDataService.getDateList(dto);
         return CommonResult.success(list);
     }
+
+    @ApiOperation("获取es范围数据")
+    @RequestMapping(path = "/getRangeList", method = RequestMethod.POST)
+    public CommonResult getRangeList(@Validated @RequestBody EsIndustryDataBo dto) throws IOException {
+        List list = esIndustryDataService.getRangeList(dto);
+        return CommonResult.success(list);
+    }
+
 }
