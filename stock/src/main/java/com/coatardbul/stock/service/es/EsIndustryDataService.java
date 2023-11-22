@@ -119,7 +119,7 @@ public class EsIndustryDataService {
         if (yearIncreaseRate != null && yearIncreaseRate.size() > 0) {
             for (EsIndustryDataBo map : yearIncreaseRate) {
                 map.setBkName(dto.getBkName());
-                map.setId(map.getBkCode() + "_" + map.getDateStr());
+                map.setId(map.getDateStr() + "_" + map.getBkCode());
                 result.add(map);
             }
         }

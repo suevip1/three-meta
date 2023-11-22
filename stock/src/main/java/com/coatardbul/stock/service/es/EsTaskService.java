@@ -2,6 +2,7 @@ package com.coatardbul.stock.service.es;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseCommon.constants.EsTemplateConfigEnum;
+import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.dto.EsTemplateConfigDTO;
 import com.coatardbul.baseCommon.model.entity.DictInfo;
 import com.coatardbul.baseCommon.model.entity.EsTemplateConfig;
@@ -10,6 +11,7 @@ import com.coatardbul.baseService.entity.bo.es.EsIndustryDataBo;
 import com.coatardbul.baseService.entity.feign.StockTimeInterval;
 import com.coatardbul.baseService.feign.RiverServerFeign;
 import com.coatardbul.baseService.service.EsTemplateDataService;
+import com.coatardbul.baseService.service.romote.RiverRemoteService;
 import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
 import com.coatardbul.stock.service.statistic.TongHuaShunIndustryService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
@@ -51,6 +53,8 @@ public class EsTaskService {
     TongHuaShunIndustryService tongHuaShunIndustryService;
     @Autowired
     RiverServerFeign riverServerFeign;
+    @Autowired
+    RiverRemoteService riverRemoteService;
     @Autowired
     EsIndustryDataService esIndustryDataService;
 
@@ -109,7 +113,12 @@ public class EsTaskService {
         }
         List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_DAY.getSign());
         for (int i = 0; i < esTemplateConfigs.size(); i++) {
-            auctionSync(dateStr, esTemplateConfigs.get(i));
+            if(esTemplateConfigs.get(i).getTemplateId().equals(StockTemplateEnum.INDUSTRY.getSign())){
+                String lastDateStr = riverRemoteService.getSpecialDay(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD), -1);
+                auctionSync(lastDateStr, esTemplateConfigs.get(i));
+            }else {
+                auctionSync(dateStr, esTemplateConfigs.get(i));
+            }
             Thread.sleep(EsTemplateConfigEnum.getTimeInterval(esTemplateConfigs.get(i).getEsDataLevel()));
         }
     }

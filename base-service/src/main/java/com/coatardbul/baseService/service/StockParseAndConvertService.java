@@ -24,6 +24,13 @@ public class StockParseAndConvertService {
         return jo.getString("股票简称");
     }
 
+    public String getStockIndustry(JSONObject jo) {
+        return jo.getString("所属同花顺行业");
+    }
+    public String getStockTheme(JSONObject jo) {
+        return jo.getString("所属概念");
+    }
+
     public String getStockCode(JSONObject jo) {
         return jo.getString("code");
     }

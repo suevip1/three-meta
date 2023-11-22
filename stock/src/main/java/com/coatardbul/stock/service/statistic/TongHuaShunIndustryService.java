@@ -257,7 +257,7 @@ public class TongHuaShunIndustryService {
             }
             esIndustryDataBo.setIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getCloseValue(), lastCloseValue));
             esIndustryDataBo.setMaxIncreaseRate(getDivideIncreaseRate(esIndustryDataBo.getMaxValue(), lastCloseValue));
-            esIndustryDataBo.setId(esIndustryDataBo.getBkCode() + "_" + esIndustryDataBo.getDateStr());
+            esIndustryDataBo.setId(esIndustryDataBo.getDateStr() + "_" + esIndustryDataBo.getBkCode());
         }
         return esIndustryDataBo;
 

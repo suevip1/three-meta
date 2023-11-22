@@ -1,5 +1,6 @@
 package com.coatardbul.stock.model.bo;
 
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import lombok.Data;
 
 import java.util.List;
@@ -15,15 +16,20 @@ public class StockUpLimitNameBO {
      */
     private String upLimitNum;
 
+
+
+
     /**
      * 名称List
      */
-    private List<String> nameList;
+    private List<StockBase> uplimitArr;
 
     /**
-     * codeList
+     * 名称List
      */
-    private List<String> codeList;
+    private List<StockBase> noUplimitArr;
+
+
 
 
 }

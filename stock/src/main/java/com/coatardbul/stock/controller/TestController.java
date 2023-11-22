@@ -60,6 +60,10 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -104,7 +108,7 @@ public class TestController {
     SnowFlakeService snowFlakeService;
     @Autowired
     StockStrategyService stockStrategyService;
-@Autowired
+    @Autowired
     ElasticSearchConfig elasticSearchConfig;
     @Autowired
     StockTemplatePredictMapper stockTemplatePredictMapper;
@@ -132,7 +136,7 @@ public class TestController {
 
     @Autowired
     StockTradeService stockTradeService;
-@Autowired
+    @Autowired
     StockBaseService stockBaseService;
     @Autowired
     HttpPoolService httpService;
@@ -356,8 +360,47 @@ public class TestController {
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
 
-        esTaskService.industryDataSyncEsJobHandle();
+//        SearchRequest searchRequest = new SearchRequest("industry_data");
+//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+//        searchSourceBuilder.sort(SortBuilders.fieldSort("_doc")).size(0);
+//        TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("distinct_bkCode").field("bkCode");
+//        searchSourceBuilder.aggregation(termsAggregationBuilder);
+//        searchRequest.source(searchSourceBuilder);
+//
+//        try {
+//            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+//            Terms terms = searchResponse.getAggregations().get("distinct_bkCode");
+//            for (Terms.Bucket bucket : terms.getBuckets()) {
+//                System.out.println(bucket.getKeyAsString());
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
+
+
+        SearchRequest searchRequest = new SearchRequest("industry_data");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        TermsAggregationBuilder aggregation = AggregationBuilders.terms("distinct_bkCode")
+                .field("bkCode")
+                .size(10)  // 限制结果的数量
+                .subAggregation(AggregationBuilders.topHits("top_hit_agg"));
+        searchSourceBuilder.aggregation(aggregation);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        Terms uniqueFieldAgg = searchResponse.getAggregations().get("distinct_bkCode");
+        for(Terms.Bucket bucket : uniqueFieldAgg.getBuckets()) {
+            TopHits topHitsAgg = bucket.getAggregations().get("top_hit_agg");
+            int i=0;
+            // 执行您的代码
+        }
+
+
+
+
+        https:
+//blog.51cto.com/u_16175455/7859598
 //        SearchRequest searchRequest = new SearchRequest();
 //        String indexName="template_data";
 //        String dateStr="2023-05-08";
@@ -381,21 +424,22 @@ public class TestController {
 //                log.info(templateId.toString());
 //            }
 //        }
+
         return null;
     }
 
-    public void query(String indexName,QueryBuilder queryBuilder )throws IOException {
-        SearchRequest searchRequest=new SearchRequest();
+    public void query(String indexName, QueryBuilder queryBuilder) throws IOException {
+        SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(indexName);
         searchRequest.source(new SearchSourceBuilder().query(queryBuilder));
-        System.out.println("查询DSL为:"+searchRequest.source().toString());
+        System.out.println("查询DSL为:" + searchRequest.source().toString());
         SearchResponse searchRes = elasticSearchConfig.getR().search(searchRequest, RequestOptions.DEFAULT);
-        System.out.println("返回结果为:"+searchRes.toString());
-        System.out.println("总条数为:"+searchRes.getHits().getTotalHits().value);
-        System.out.println("最大分数为:"+searchRes.getHits().getMaxScore());
+        System.out.println("返回结果为:" + searchRes.toString());
+        System.out.println("总条数为:" + searchRes.getHits().getTotalHits().value);
+        System.out.println("最大分数为:" + searchRes.getHits().getMaxScore());
         SearchHit[] hits = searchRes.getHits().getHits();
-        for (SearchHit hit: hits) {
-            System.out.println("id:为"+hit.getId()+",数据为:"+hit.getSourceAsString());
+        for (SearchHit hit : hits) {
+            System.out.println("id:为" + hit.getId() + ",数据为:" + hit.getSourceAsString());
         }
     }
 
