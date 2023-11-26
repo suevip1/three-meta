@@ -121,6 +121,16 @@ public class RedisKeyUtils {
         return "es_template_config_"+templateId+"_"+esDataType;
     }
 
+    public static String getMsgAckConfig(String id){
+        return "msg_ack_config"+id;
+    }
+    public static String getMsgAckSendTime(String id,String dateTimeFormatStr){
+        return "msg_ack_send_Time_"+id+"_"+dateTimeFormatStr;
+    }
+    public static String getMsgAckSendTimePattern(String id) {
+        String key = "msg_ack_send_Time_"+id+"*" ;
+        return key;
+    }
 
     /**
      * cron 是否代理，超时时间，

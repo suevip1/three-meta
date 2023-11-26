@@ -175,7 +175,7 @@ AccountBaseMapper accountBaseMapper;
             duration= Integer.valueOf(dto.getDuration());
         }
         //更新交易参数
-        Date expireDate = DateTimeUtil.getBeforeDate(-duration.intValue(), Calendar.MINUTE);
+        Date expireDate = DateTimeUtil.getBeforeAfterDate(1, Calendar.MINUTE);
         accountBase.setExpireTime(expireDate);
         accountBase.setCookie(tradeClient.getCurrentCookie());
         accountBaseMapper.updateByPrimaryKeySelective(accountBase);
@@ -188,7 +188,7 @@ AccountBaseMapper accountBaseMapper;
     public void updateCookie(StockUserCookieDTO dto) {
         AccountBase accountBase=new AccountBase();
         accountBase.setUserId(dto.getUserId());
-        Date expireDate = DateTimeUtil.getBeforeDate(-dto.getDuration(), Calendar.MINUTE);
+        Date expireDate = DateTimeUtil.getBeforeAfterDate(dto.getDuration(), Calendar.MINUTE);
         accountBase.setExpireTime(expireDate);
         accountBase.setParam1(dto.getValidatekey());
         accountBase.setCookie(dto.getCookie());

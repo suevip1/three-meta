@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coatardbul.stock.mapper.MsgAckConfigMapper">
+  <resultMap id="BaseResultMap" type="com.coatardbul.baseCommon.model.entity.MsgAckConfig">
+    <!--@mbg.generated-->
+    <!--@Table msg_ack_config-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="msg_name" jdbcType="VARCHAR" property="msgName" />
+    <result column="msg_type" jdbcType="VARCHAR" property="msgType" />
+    <result column="param1" jdbcType="VARCHAR" property="param1" />
+    <result column="param2" jdbcType="VARCHAR" property="param2" />
+    <result column="param3" jdbcType="VARCHAR" property="param3" />
+    <result column="param4" jdbcType="VARCHAR" property="param4" />
+    <result column="param5" jdbcType="VARCHAR" property="param5" />
+    <result column="param6" jdbcType="VARCHAR" property="param6" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, `name`, msg_name, msg_type, param1, param2, param3, param4, param5, 
+    param6, remark
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from msg_ack_config
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from msg_ack_config
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.coatardbul.baseCommon.model.entity.MsgAckConfig">
+    <!--@mbg.generated-->
+    insert into msg_ack_config (id, user_id, `name`, 
+      msg_name, msg_type, param1, 
+      param2, param3, param4, 
+      param5, param6, remark
+      )
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{msgName,jdbcType=VARCHAR}, #{msgType,jdbcType=VARCHAR}, #{param1,jdbcType=VARCHAR}, 
+      #{param2,jdbcType=VARCHAR}, #{param3,jdbcType=VARCHAR}, #{param4,jdbcType=VARCHAR}, 
+      #{param5,jdbcType=VARCHAR}, #{param6,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.coatardbul.baseCommon.model.entity.MsgAckConfig">
+    <!--@mbg.generated-->
+    insert into msg_ack_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        id,
+      </if>
+      <if test="userId != null and userId != ''">
+        user_id,
+      </if>
+      <if test="name != null and name != ''">
+        `name`,
+      </if>
+      <if test="msgName != null and msgName != ''">
+        msg_name,
+      </if>
+      <if test="msgType != null and msgType != ''">
+        msg_type,
+      </if>
+      <if test="param1 != null and param1 != ''">
+        param1,
+      </if>
+      <if test="param2 != null and param2 != ''">
+        param2,
+      </if>
+      <if test="param3 != null and param3 != ''">
+        param3,
+      </if>
+      <if test="param4 != null and param4 != ''">
+        param4,
+      </if>
+      <if test="param5 != null and param5 != ''">
+        param5,
+      </if>
+      <if test="param6 != null and param6 != ''">
+        param6,
+      </if>
+      <if test="remark != null and remark != ''">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null and userId != ''">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="msgName != null and msgName != ''">
+        #{msgName,jdbcType=VARCHAR},
+      </if>
+      <if test="msgType != null and msgType != ''">
+        #{msgType,jdbcType=VARCHAR},
+      </if>
+      <if test="param1 != null and param1 != ''">
+        #{param1,jdbcType=VARCHAR},
+      </if>
+      <if test="param2 != null and param2 != ''">
+        #{param2,jdbcType=VARCHAR},
+      </if>
+      <if test="param3 != null and param3 != ''">
+        #{param3,jdbcType=VARCHAR},
+      </if>
+      <if test="param4 != null and param4 != ''">
+        #{param4,jdbcType=VARCHAR},
+      </if>
+      <if test="param5 != null and param5 != ''">
+        #{param5,jdbcType=VARCHAR},
+      </if>
+      <if test="param6 != null and param6 != ''">
+        #{param6,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null and remark != ''">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.coatardbul.baseCommon.model.entity.MsgAckConfig">
+    <!--@mbg.generated-->
+    update msg_ack_config
+    <set>
+      <if test="userId != null and userId != ''">
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="msgName != null and msgName != ''">
+        msg_name = #{msgName,jdbcType=VARCHAR},
+      </if>
+      <if test="msgType != null and msgType != ''">
+        msg_type = #{msgType,jdbcType=VARCHAR},
+      </if>
+      <if test="param1 != null and param1 != ''">
+        param1 = #{param1,jdbcType=VARCHAR},
+      </if>
+      <if test="param2 != null and param2 != ''">
+        param2 = #{param2,jdbcType=VARCHAR},
+      </if>
+      <if test="param3 != null and param3 != ''">
+        param3 = #{param3,jdbcType=VARCHAR},
+      </if>
+      <if test="param4 != null and param4 != ''">
+        param4 = #{param4,jdbcType=VARCHAR},
+      </if>
+      <if test="param5 != null and param5 != ''">
+        param5 = #{param5,jdbcType=VARCHAR},
+      </if>
+      <if test="param6 != null and param6 != ''">
+        param6 = #{param6,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null and remark != ''">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.coatardbul.baseCommon.model.entity.MsgAckConfig">
+    <!--@mbg.generated-->
+    update msg_ack_config
+    set user_id = #{userId,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      msg_name = #{msgName,jdbcType=VARCHAR},
+      msg_type = #{msgType,jdbcType=VARCHAR},
+      param1 = #{param1,jdbcType=VARCHAR},
+      param2 = #{param2,jdbcType=VARCHAR},
+      param3 = #{param3,jdbcType=VARCHAR},
+      param4 = #{param4,jdbcType=VARCHAR},
+      param5 = #{param5,jdbcType=VARCHAR},
+      param6 = #{param6,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2023-11-25-->
+  <select id="selectAllByNameLikeAndMsgType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from msg_ack_config
+    <where>
+      <if test="likeName != null and likeName != ''">
+        and `name` like concat('%',#{likeName,jdbcType=VARCHAR},'%')
+      </if>
+      <if test="msgType != null and msgType != ''">
+        and msg_type=#{msgType,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+
+<!--auto generated by MybatisCodeHelper on 2023-11-25-->
+  <select id="selectAllByNameLikeAndMsgTypeAndUserId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from msg_ack_config
+    <where>
+      <if test="likeName != null and likeName != ''">
+        and `name` like concat('%',#{likeName,jdbcType=VARCHAR},'%')
+      </if>
+      <if test="msgType != null and msgType != ''">
+        and msg_type=#{msgType,jdbcType=VARCHAR}
+      </if>
+      and user_id=#{userId,jdbcType=VARCHAR}
+    </where>
+  </select>
+</mapper>

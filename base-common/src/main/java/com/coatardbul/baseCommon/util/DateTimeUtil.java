@@ -65,9 +65,9 @@ public class DateTimeUtil {
     }
 
     /**
-     *
-     * @param dateStr  字符串
-     * @param formatSource  匹配样式
+     *将特定的字符串横向转换
+     * @param dateStr  输入字符串
+     * @param formatSource  输入字符串匹配样式
      * @param formatTarget  目标样式
      * @return
      * @throws ParseException
@@ -76,32 +76,28 @@ public class DateTimeUtil {
         Date date = parseDateStr(dateStr, formatSource);
         return getDateFormat(date,formatTarget);
     }
-    public static Date getBeforeDate(int num,int field) {
-        num = 0 - num;
+
+    /**
+     * 获取前后的日期
+     * @param num  可以为正负，正往后，负往前
+     * @param field  Calendar.MINUTE
+     * @return
+     */
+    public static Date getBeforeAfterDate(int num,int field) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(field, num);
         return calendar.getTime();
     }
+
+
     public static Calendar getCalendar(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return  calendar;
     }
 
-    /**
-     * 获取前几天的日期 yyyyMMdd
-     *
-     * @param day
-     * @return
-     */
-    public static String getBeforeDayDateFormat(int day) {
-        day = 0 - day;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DATE, day);
-        return new SimpleDateFormat("yyyyMMdd").format(calendar.getTime());
-    }
+
 
     /**
      * 获取从开始至结束的月分

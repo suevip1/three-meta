@@ -34,6 +34,10 @@ import com.coatardbul.stock.service.statistic.StockSpecialStrategyService;
 import com.coatardbul.stock.service.statistic.dayStatic.StockDayStaticService;
 import com.coatardbul.stock.service.statistic.trade.StockTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.AiSellTradeService;
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiRobotSendRequest;
+import com.dingtalk.api.response.OapiRobotSendResponse;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
@@ -60,10 +64,6 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.TopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -360,71 +360,34 @@ public class TestController {
     @RequestMapping(path = "/test2", method = RequestMethod.POST)
     public String cosUpload() throws Exception {
 
-//        SearchRequest searchRequest = new SearchRequest("industry_data");
-//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-//        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-//        searchSourceBuilder.sort(SortBuilders.fieldSort("_doc")).size(0);
-//        TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("distinct_bkCode").field("bkCode");
-//        searchSourceBuilder.aggregation(termsAggregationBuilder);
-//        searchRequest.source(searchSourceBuilder);
-//
-//        try {
-//            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-//            Terms terms = searchResponse.getAggregations().get("distinct_bkCode");
-//            for (Terms.Bucket bucket : terms.getBuckets()) {
-//                System.out.println(bucket.getKeyAsString());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        DingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/robot/send?access_token=4664d66383eb10a1de2a67a2aa2c5df6864cee0cc5021b4ae58c69f0f41e2336");
+        OapiRobotSendRequest request = new OapiRobotSendRequest();
+        request.setMsgtype("text");
+        OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
+        text.setContent("stock服务通知:测试文本消息");
+        request.setText(text);
+
+// isAtAll类型如果不为Boolean，请升级至最新SDK
 
 
+//        request.setMsgtype("link");
+//        OapiRobotSendRequest.Link link = new OapiRobotSendRequest.Link();
+//        link.setMessageUrl("https://www.dingtalk.com/");
+//        link.setPicUrl("");
+//        link.setTitle("时代的火车向前开");
+//        link.setText("stock服务通知:这个即将发布的新版本，创始人xx称它为红树林。而在此之前，每当面临重大升级，产品经理们都会取一个应景的代号，这一次，为什么是红树林");
+//        request.setLink(link);
 
-        SearchRequest searchRequest = new SearchRequest("industry_data");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        TermsAggregationBuilder aggregation = AggregationBuilders.terms("distinct_bkCode")
-                .field("bkCode")
-                .size(10)  // 限制结果的数量
-                .subAggregation(AggregationBuilders.topHits("top_hit_agg"));
-        searchSourceBuilder.aggregation(aggregation);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        Terms uniqueFieldAgg = searchResponse.getAggregations().get("distinct_bkCode");
-        for(Terms.Bucket bucket : uniqueFieldAgg.getBuckets()) {
-            TopHits topHitsAgg = bucket.getAggregations().get("top_hit_agg");
-            int i=0;
-            // 执行您的代码
-        }
-
-
-
-
-        https:
-//blog.51cto.com/u_16175455/7859598
-//        SearchRequest searchRequest = new SearchRequest();
-//        String indexName="template_data";
-//        String dateStr="2023-05-08";
-//        searchRequest.indices(indexName);
-//        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-//                .must(QueryBuilders.termQuery("dateStr",dateStr));
-//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-////        searchSourceBuilder.query(queryBuilder);
-//        CardinalityAggregationBuilder cardinalityAggregationBuilder = AggregationBuilders.cardinality("dinstinct_templateId").field("templateId");
-//        searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
-//        searchRequest.source(searchSourceBuilder);
-//
-//        SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-//        SearchHits hits = response.getHits();
-//
-//        if (hits.getTotalHits().value > 0) {
-//            SearchHit[] searchHitsArr = hits.getHits();
-//            for (int i = 0; i < searchHitsArr.length; i++) {
-//                //在Fields属性中可以获取对应字段的值,这里我增加了一个参数key对应distinct的字段名
-//                Object templateId = searchHitsArr[i].getFields().get("templateId").getValue();
-//                log.info(templateId.toString());
-//            }
-//        }
-
+//        request.setMsgtype("markdown");
+//        OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
+//        markdown.setTitle("杭州天气");
+//        markdown.setText("#### 杭州天气 @156xxxx8827\n" +
+//                "> 9度，西北风1级，空气良89，相对温度73%\n\n" +
+//                "> ![screenshot](https://gw.alicdn.com/tfs/TB1ut3xxbsrBKNjSZFpXXcXhFXa-846-786.png)\n"  +
+//                "> ###### 10点20分发布 [天气](http://www.thinkpage.cn/) \n");
+//        request.setMarkdown(markdown);
+        OapiRobotSendResponse response = client.execute(request);
+    log.info(response.getMsg());
         return null;
     }
 
