@@ -9,6 +9,7 @@ import com.coatardbul.stock.mapper.EsTemplateConfigMapper;
 import com.coatardbul.stock.model.bo.UpLimitScanStrategyBo;
 import com.coatardbul.stock.model.dto.StockEmotionDayDTO;
 import com.coatardbul.stock.model.dto.StockPredictDto;
+import com.coatardbul.stock.service.es.EsDayKLineService;
 import com.coatardbul.stock.service.es.EsTaskService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
 import com.coatardbul.stock.service.statistic.StockPredictService;
@@ -232,4 +233,13 @@ public class MinuterEmotionXxlJob {
         log.info("分钟涨幅同步es结束");
     }
 
+
+    @Autowired
+    EsDayKLineService esDayKLineService;
+    @XxlJob("syncDayKLineEsJobHandle")
+    public void syncDayKLineEsJobHandle() throws ScriptException, IOException, ParseException, InterruptedException, NoSuchMethodException {
+        log.info("日K线数据同步es开始");
+        esDayKLineService.syncTodayData();
+        log.info("日K线数据同步es结束");
+    }
 }

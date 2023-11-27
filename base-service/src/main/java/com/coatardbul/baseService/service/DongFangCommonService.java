@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.coatardbul.baseCommon.model.bo.ChipPosition;
 import com.coatardbul.baseCommon.model.bo.CronRefreshConfigBo;
+import com.coatardbul.baseCommon.model.entity.StockPrice;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.constants.UpDwonEnum;
@@ -146,6 +147,47 @@ public class DongFangCommonService extends CommonService implements DataServiceB
             log.error(e.getMessage(), e);
         }
         return response;
+    }
+
+    public List<StockPrice> getAllDayKline(String code){
+        String response = getDayKlineChip(code);
+        int beginIndex = response.indexOf("(");
+        int endIndex = response.lastIndexOf(")");
+        response = response.substring(beginIndex + 1, endIndex);
+        JSONObject jsonObject = JSONObject.parseObject(response);
+        JSONObject data = jsonObject.getJSONObject("data");
+        JSONArray klines = data.getJSONArray("klines");
+        String  name = data.getString("name");
+
+
+        List<StockPrice> result = new ArrayList<StockPrice>();
+
+        for (int i = 0; i < klines.size(); i++) {
+            Object o = klines.get(i);
+            if (o instanceof String) {
+                List<String> item = new ArrayList<String>();
+                String o1 = (String) o;
+                String[] split = o1.split(",");
+                StockPrice stockPrice=new StockPrice();
+                stockPrice.setCode(code);
+                stockPrice.setDateStr(split[0]);
+                stockPrice.setName(name);
+                stockPrice.setOpenPrice(new BigDecimal(split[1]));
+                stockPrice.setCurrIncreaseRate(new BigDecimal(split[8]));
+                stockPrice.setClosePrice(new BigDecimal(split[2]));
+                stockPrice.setMinPrice(new BigDecimal(split[4]));
+                stockPrice.setMaxPrice(new BigDecimal(split[3]));
+//                stockPrice.setLastClosePrice();
+                stockPrice.setTurnOverRate(new BigDecimal(split[10]));
+//                stockPrice.setQuantityRelativeRatio();
+                stockPrice.setVolume(Integer.valueOf(split[5]));
+                stockPrice.setTradeAmount(new BigDecimal(split[6]));
+                stockPrice.setMaxSubRate(new BigDecimal(split[7]));
+                stockPrice.setId(stockPrice.getDateStr()+"_"+stockPrice.getCode());
+                result.add(stockPrice);
+            }
+        }
+        return result;
 
     }
 

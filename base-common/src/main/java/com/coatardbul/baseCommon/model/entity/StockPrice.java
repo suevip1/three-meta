@@ -1,4 +1,4 @@
-package com.coatardbul.stock.model.entity;
+package com.coatardbul.baseCommon.model.entity;
 
 import lombok.Data;
 
@@ -6,25 +6,38 @@ import java.math.BigDecimal;
 
 @Data
 public class StockPrice {
+
+
+    private String id;
+
     /**
-     * 板块编码
+     * 编码
      */
     private String code;
 
     /**
      * 日期
      */
-    private String date;
+    private String dateStr;
 
     /**
-     * 板块名称
+     * 名称
      */
     private String name;
+
+
+
 
     /**
      * 开盘价
      */
     private BigDecimal openPrice;
+
+
+    /**
+     * 当前涨幅
+     */
+    private BigDecimal currIncreaseRate;
 
     /**
      * 收盘价
@@ -59,5 +72,15 @@ public class StockPrice {
     /**
      * 量
      */
-    private Integer volumn;
+    private Integer volume;
+
+
+    private BigDecimal tradeAmount;
+
+    /**
+     * 振幅
+     */
+    private BigDecimal maxSubRate;
+
+
 }

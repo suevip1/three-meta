@@ -6,12 +6,15 @@ import com.coatardbul.baseCommon.constants.CookieTypeEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.model.entity.StockBase;
+import com.coatardbul.baseCommon.model.entity.StockPrice;
+import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseService.service.HttpPoolService;
 import com.coatardbul.stock.mapper.AccountBaseMapper;
 import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.model.entity.AccountBase;
-import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.service.StockUserBaseService;
+import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
@@ -23,8 +26,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,6 +45,8 @@ import java.util.List;
 @Slf4j
 public class DongFangSortService {
 
+    @Autowired
+    StockVerifyService stockVerifyService;
     @Autowired
     HttpPoolService httpService;
     @Autowired
@@ -98,6 +107,24 @@ public class DongFangSortService {
     }
 
     public Object getIncrease() {
+        JSONArray jsonArray = getIncreaseResponse(1);
+        List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+            String code = jsonObject1.getString("f12");
+            List<StockBase> collect = stockBases.stream().filter(o1 -> code.equals(o1.getCode())).collect(Collectors.toList());
+            if(collect!=null &&collect.size()>0){
+                StockBase stockBase=collect.get(0);
+                if (stockBase != null) {
+                    jsonObject1.put("概念", stockBase.getTheme());
+                    jsonObject1.put("行业", stockBase.getIndustry());
+                }
+            }
+        }
+        return jsonArray;
+    }
+
+    public JSONArray getIncreaseResponse(Integer starPage) {
         List<Header> headerList = new ArrayList<>();
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         String userName = stockUserBaseService.getCurrUserName(request);
@@ -110,9 +137,9 @@ public class DongFangSortService {
         String response = null;
         String url = "http://52.push2.eastmoney.com/api/qt/clist/get?" +
                 "cb=jQuery11240024725486433821997_" + (l - 33) +
-                "&pn=1&pz=200&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2" +
+                "&pn=" + starPage + "&pz=200&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2" +
                 "&wbp2u=6751315946175528|0|1|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048" +
-                "&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152" +
+                "&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f128,f136,f115,f152" +
                 "&" +
                 "_=" + l;
         url = url.replaceAll("\\|", "%124");
@@ -122,25 +149,76 @@ public class DongFangSortService {
             throw new BusinessException("链接异常");
         }
         if (response == null) {
-            return new ArrayList<>();
+            return new JSONArray();
         }
-
         int beginIndex = response.indexOf("(");
         int endIndex = response.lastIndexOf(")");
         response = response.substring(beginIndex + 1, endIndex);
         JSONObject jsonObject = JSONObject.parseObject(response);
         JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("diff");
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-            String code = jsonObject1.getString("f12");
-            StockBase stockBase = stockBaseMapper.selectByPrimaryKey(code);
-            if (stockBase != null) {
-                jsonObject1.put("概念", stockBase.getTheme());
-                jsonObject1.put("行业", stockBase.getIndustry());
+        return jsonArray;
+    }
+
+    /**
+     * 获取所有涨幅
+     * @param
+     * @return
+     */
+    public JSONArray getIncreaseAll() throws InterruptedException {
+        List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
+        int count = stockBases.size() / 200+1;
+        JSONArray ja=new JSONArray();
+        for(int i=1;i<=count;i++){
+            try {
+                JSONArray jsonArray = getIncreaseResponse(i);
+                Thread.sleep(new Random().nextInt(2*1000));
+                ja.addAll(jsonArray);
+            }catch (Exception e){
+                log.error("获取涨幅排序异常");
             }
         }
+        for (int i = 0; i < ja.size(); i++) {
+            JSONObject jsonObject1 = ja.getJSONObject(i);
+            String code = jsonObject1.getString("f12");
+            List<StockBase> collect = stockBases.stream().filter(o1 -> code.equals(o1.getCode())).collect(Collectors.toList());
+            if(collect!=null &&collect.size()>0){
+                StockBase stockBase=collect.get(0);
+                if (stockBase != null) {
+                    jsonObject1.put("概念", stockBase.getTheme());
+                    jsonObject1.put("行业", stockBase.getIndustry());
+                }
+            }
+        }
+        return ja;
+    }
+    public List<StockPrice> getIncreaseObjAll() throws InterruptedException, ParseException {
+        List<StockPrice> result = new ArrayList();
+        JSONArray increaseAll = getIncreaseAll();
+        String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
+        if (stockVerifyService.isIllegalDate(dateFormat)) {
+            return result;
+        }
+        for (int i = 0; i < increaseAll.size(); i++) {
+            JSONObject jsonObject = increaseAll.getJSONObject(i);
+            StockPrice stockPrice=new StockPrice();
+            stockPrice.setDateStr(dateFormat);
+            stockPrice.setTurnOverRate(getDongFangPrice(jsonObject, "f8"));
+            stockPrice.setVolume(Integer.valueOf(jsonObject.getString("f5")));
+            stockPrice.setMaxSubRate(getDongFangPrice(jsonObject, "f7"));
+            stockPrice.setName(jsonObject.getString("f14"));
+            stockPrice.setCode(jsonObject.getString("f12"));
+            stockPrice.setTradeAmount(getDongFangPrice(jsonObject, "f6"));
+            stockPrice.setLastClosePrice(getDongFangPrice(jsonObject, "f18"));
+            stockPrice.setOpenPrice(getDongFangPrice(jsonObject, "f17"));
+            stockPrice.setMaxPrice(getDongFangPrice(jsonObject, "f15"));
+            stockPrice.setMinPrice(getDongFangPrice(jsonObject, "f16"));
+            stockPrice.setClosePrice(getDongFangPrice(jsonObject, "f2"));
+            stockPrice.setCurrIncreaseRate(new BigDecimal(jsonObject.getString("f3")));
 
-        return jsonArray;
+            stockPrice.setId(stockPrice.getDateStr()+"_"+stockPrice.getCode());
+
+        }
+        return result;
     }
 
     public List<StockBaseDetail> getConvertBondLimit(StockStrategyQueryDTO dto) {

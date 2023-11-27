@@ -8,6 +8,7 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
+import com.coatardbul.baseCommon.model.entity.StockPrice;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.config.ElasticSearchConfig;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
@@ -26,6 +27,7 @@ import com.coatardbul.stock.service.base.EmailService;
 import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.es.EsTaskService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
+import com.coatardbul.stock.service.statistic.DongFangSortService;
 import com.coatardbul.stock.service.statistic.RedisService;
 import com.coatardbul.stock.service.statistic.StockBaseService;
 import com.coatardbul.stock.service.statistic.StockCronRefreshService;
@@ -148,6 +150,8 @@ public class TestController {
     StockCronRefreshService stockCronRefreshService;
 
     @Autowired
+    DongFangSortService dongFangSortService;
+    @Autowired
     DongFangCommonService dongFangCommonService;
 
     @Autowired
@@ -159,7 +163,7 @@ public class TestController {
         String response = null;
         int retryNum = 10;
         while (retryNum > 0) {
-            response = dongFangCommonService.getDayKlineChip("002579");
+            response = dongFangCommonService.getDayKlineChip("600519");
             if (StringUtils.isNotBlank(response)) {
                 break;
             } else {
@@ -450,10 +454,7 @@ public class TestController {
     @RequestMapping(path = "/test3", method = RequestMethod.POST)
     public String cosUpload111() throws Exception {
 
-        String userName = null;
-        Boolean aBoolean = aiSellTradeService.tradeProcess(convertAmount(10000), convertAmount(11), "002795", userName);
-        log.info("sdfas");
-
+        List<StockPrice> increaseObjAll = dongFangSortService.getIncreaseObjAll();
         return null;
 
     }
