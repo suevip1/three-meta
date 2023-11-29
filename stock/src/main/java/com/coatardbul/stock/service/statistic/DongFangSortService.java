@@ -126,12 +126,7 @@ public class DongFangSortService {
 
     public JSONArray getIncreaseResponse(Integer starPage) {
         List<Header> headerList = new ArrayList<>();
-        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
-        String userName = stockUserBaseService.getCurrUserName(request);
-        AccountBase accountBase = accountBaseMapper.selectByUserIdAndTradeType(userName, CookieTypeEnum.DONG_FANG_CAI_FU_NORMAL.getType());
-        Header cookie = httpService.getHead("Cookie", accountBase.getCookie());
         Header referer = httpService.getHead("Referer", "http://quote.eastmoney.com/");
-        headerList.add(cookie);
         headerList.add(referer);
         long l = System.currentTimeMillis();
         String response = null;

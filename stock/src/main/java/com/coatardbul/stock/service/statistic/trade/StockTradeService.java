@@ -7,6 +7,7 @@ import com.coatardbul.baseCommon.constants.StockWatchTypeEnum;
 import com.coatardbul.baseCommon.constants.TradeSignEnum;
 import com.coatardbul.baseCommon.exception.BusinessException;
 import com.coatardbul.baseCommon.model.bo.trade.StockBaseDetail;
+import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.baseCommon.util.DateTimeUtil;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.entity.bo.StockTradeBuyTask;
@@ -23,7 +24,6 @@ import com.coatardbul.stock.mapper.StockTradeUrlMapper;
 import com.coatardbul.stock.model.bo.QuartzBean;
 import com.coatardbul.stock.model.bo.trade.StockTradeBO;
 import com.coatardbul.stock.model.entity.AccountBase;
-import com.coatardbul.baseCommon.model.entity.StockBase;
 import com.coatardbul.stock.model.entity.StockStrategyWatch;
 import com.coatardbul.stock.model.entity.StockTradeBuyConfig;
 import com.coatardbul.stock.model.entity.StockTradeSellJob;
@@ -35,7 +35,9 @@ import com.coatardbul.stock.service.base.StockStrategyService;
 import com.coatardbul.stock.service.statistic.business.StockVerifyService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TimeBuyTradeService;
 import com.coatardbul.stock.service.statistic.tradeQuartz.TradeBaseService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.quartz.JobDataMap;
@@ -48,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -188,7 +192,7 @@ public class StockTradeService {
             JSONObject jsonObject1 = data.getJSONObject(i);
             String zqdm = jsonObject1.getString("Zqdm");
             StockBase stockBase = stockBaseMapper.selectByPrimaryKey(zqdm);
-            if(stockBase!=null){
+            if (stockBase != null) {
                 jsonObject1.put("theme", stockBase.getTheme());
                 jsonObject1.put("industry", stockBase.getIndustry());
             }
@@ -398,13 +402,38 @@ public class StockTradeService {
         StockBaseDetail upLimitPrice = tradeBaseService.getImmediateStockBaseInfoNoProxy(code, date);
         stockTradeBO.setPrice(upLimitPrice.getSugSellPrice().toString());
 
-        if(sellNum.compareTo(BigDecimal.ZERO)==0){
-            stockTradeBO.setAmount(BigDecimal.ONE.toString());
-        }else {
+        if (sellNum.compareTo(BigDecimal.ZERO) == 0) {
+            stockTradeBO.setAmount(BigDecimal.ONE.multiply(new BigDecimal(100)).toString());
+        } else {
             stockTradeBO.setAmount(sellNum.toString());
         }
         stockTradeBO.setZqmc(name);
-        sell(stockTradeBO, userName);
+        try {
+            sell(stockTradeBO, userName);
+        }catch (Exception e) {
+            //可用份额不足
+            if (StringUtils.isNotBlank(e.getMessage()) && e.getMessage().indexOf("可用股份数不足") > -1) {
+                //清仓
+                String assetAndPositionStr = queryAssetAndPosition();
+                List<Map> maps = JsonUtil.readToValue(assetAndPositionStr, new TypeReference<List<Map>>() {
+                });
+                if(maps!=null&&maps.size()>0){
+                    List<Map> stockInfos = (List)maps.get(0).get("positions");
+                    if(stockInfos!=null&&stockInfos.size()>0) {
+                        List<Map> stockCodes = stockInfos.stream().filter(o1 -> o1.get("Zqdm").equals(stockTradeBO.getStockCode())).collect(Collectors.toList());
+                        if(stockCodes!=null&&stockCodes.size()>0){
+                            BigDecimal bigDecimal = new BigDecimal(stockCodes.get(0).get("Kysl").toString());
+                            if(bigDecimal.compareTo(BigDecimal.ZERO)>0){
+                                stockTradeBO.setAmount(bigDecimal.toString());
+                                sell(stockTradeBO, userName);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
     }
 
 
