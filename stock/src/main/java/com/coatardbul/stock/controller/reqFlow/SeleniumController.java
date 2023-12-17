@@ -1,4 +1,4 @@
-package com.coatardbul.stock.controller;
+package com.coatardbul.stock.controller.reqFlow;
 
 import com.coatardbul.baseCommon.api.CommonResult;
 import com.coatardbul.baseService.entity.feign.CalendarDateDTO;

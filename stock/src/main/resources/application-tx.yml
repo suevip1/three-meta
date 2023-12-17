@@ -33,6 +33,12 @@ spring:
       org.quartz.jobStore.acquireTriggersWithinLock: true
 
 
+minIo:
+  endpoint: http://43.142.151.181:9000
+  access-key: 2CAAjWaWe7SKI44b1yqt
+  secret-key: VptfuAdqjXm24eLhtG9dUogPwlj8GWP0Z4aIeEtm
+
+
 powerjob:
   worker:
     enabled: true

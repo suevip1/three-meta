@@ -245,7 +245,9 @@ public abstract class HttpCommonService {
                 httpRequestBase.addHeader(headerTemp);
             }
         }
-        httpRequestBase.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+        if(httpRequestBase.getHeaders("user-Agent").length==0){
+            httpRequestBase.addHeader("user-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+        }
 //        httpRequestBase.addHeader(HttpHeaders.CONNECTION, "close");
     }
 

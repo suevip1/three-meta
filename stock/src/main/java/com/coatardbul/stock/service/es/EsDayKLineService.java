@@ -92,11 +92,15 @@ public class EsDayKLineService {
         }else {
             List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
             for(StockBase stockBase:stockBases){
-                EsDayKlineDto esDayKlineDto=new EsDayKlineDto();
-                BeanUtils.copyProperties(dto, esDayKlineDto);
-                esDayKlineDto.setCode(stockBase.getCode());
-                defaultBatchInsertData(esDayKlineDto);
-                Thread.sleep(new Random().nextInt(5*1000));
+                try {
+                    EsDayKlineDto esDayKlineDto=new EsDayKlineDto();
+                    BeanUtils.copyProperties(dto, esDayKlineDto);
+                    esDayKlineDto.setCode(stockBase.getCode());
+                    defaultBatchInsertData(esDayKlineDto);
+                    Thread.sleep(new Random().nextInt(5*1000));
+                }catch (Exception e){
+                    log.error("同步数据异常",e);
+                }
             }
         }
     }

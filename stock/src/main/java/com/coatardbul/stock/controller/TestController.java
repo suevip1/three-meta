@@ -8,7 +8,6 @@ import com.coatardbul.baseCommon.constants.StockTemplateEnum;
 import com.coatardbul.baseCommon.model.bo.Chip;
 import com.coatardbul.baseCommon.model.bo.StrategyBO;
 import com.coatardbul.baseCommon.model.dto.StockStrategyQueryDTO;
-import com.coatardbul.baseCommon.model.entity.StockPrice;
 import com.coatardbul.baseCommon.util.JsonUtil;
 import com.coatardbul.baseService.config.ElasticSearchConfig;
 import com.coatardbul.baseService.entity.bo.StockTemplatePredict;
@@ -24,7 +23,9 @@ import com.coatardbul.stock.mapper.StockBaseMapper;
 import com.coatardbul.stock.mapper.StockTemplatePredictMapper;
 import com.coatardbul.stock.service.base.CosService;
 import com.coatardbul.stock.service.base.EmailService;
+import com.coatardbul.stock.service.base.MinioService;
 import com.coatardbul.stock.service.base.StockStrategyService;
+import com.coatardbul.stock.service.es.EsDayKLineService;
 import com.coatardbul.stock.service.es.EsTaskService;
 import com.coatardbul.stock.service.statistic.DongFangPlateService;
 import com.coatardbul.stock.service.statistic.DongFangSortService;
@@ -64,10 +65,19 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -391,7 +401,7 @@ public class TestController {
 //                "> ###### 10点20分发布 [天气](http://www.thinkpage.cn/) \n");
 //        request.setMarkdown(markdown);
         OapiRobotSendResponse response = client.execute(request);
-    log.info(response.getMsg());
+        log.info(response.getMsg());
         return null;
     }
 
@@ -451,10 +461,93 @@ public class TestController {
         return "";
     }
 
-    @RequestMapping(path = "/test3", method = RequestMethod.POST)
-    public String cosUpload111() throws Exception {
+    @Autowired
+    EsDayKLineService esDayKLineService;
 
-        List<StockPrice> increaseObjAll = dongFangSortService.getIncreaseObjAll();
+
+    @Autowired
+    MinioService minioService;
+
+    @RequestMapping(path = "/test3", method = RequestMethod.POST)
+    public Map cosUpload111(@Validated @RequestBody Map map) throws Exception {
+
+
+
+//        SearchRequest request = new SearchRequest("industry_data");
+//        request.indicesOptions(IndicesOptions.lenientExpandOpen());
+//
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(new ExistsQueryBuilder("dateStr"));
+//
+//        request.source(sourceBuilder);
+//
+//        SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+//
+//        long count = response.getHits().getTotalHits().value;
+//        System.out.println("去重后的记录数：" + count);
+
+        BoolQueryBuilder queryBuilder1 = QueryBuilders.boolQuery();
+
+        queryBuilder1.must(QueryBuilders.rangeQuery("dateStr").gte("2023-09-01"));
+        queryBuilder1.must(QueryBuilders.rangeQuery("dateStr").lte("2023-12-07"));
+
+
+
+        SearchRequest searchRequest = new SearchRequest("day_k_line");
+
+        // 2、用SearchSourceBuilder来构造查询请求体 ,请仔细查看它的方法，构造各种查询的方法都在这。
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        sourceBuilder.size(0);
+//
+//        //加入聚合
+        //字段值项分组聚合
+        TermsAggregationBuilder aggregation = AggregationBuilders.terms("terms")
+                .field("dateStr");
+        aggregation.size(200);
+//        order(BucketOrder.aggregation("average_balance", true));
+//        //计算每组的平均balance指标
+//        aggregation.subAggregation(AggregationBuilders.count("average_balance")
+//                .field("openValue"));
+        sourceBuilder.aggregation(aggregation);
+//        sourceBuilder.from(1);
+//        //每页显示的记录数
+//        sourceBuilder.size(200);
+        sourceBuilder.query(queryBuilder1);
+        searchRequest.source(sourceBuilder);
+        //3、发送请求
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+        //4、处理响应
+        //搜索结果状态信息
+        if(RestStatus.OK.equals(searchResponse.status())) {
+            // 获取聚合结果
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedLongTerms terms =(ParsedLongTerms) aggregations.get("terms");
+            log.info("aggregation by_age 结果");
+//            log.info("docCountError: " + byAgeAggregation.getDocCountError());
+//            log.info("sumOfOtherDocCounts: " + byAgeAggregation.getSumOfOtherDocCounts());
+//            log.info("------------------------------------");
+//            for(Bucket buck : aggregations.getBuckets()) {
+//                log.info("key: " + buck.getKeyAsNumber());
+//                log.info("docCount: " + buck.getDocCount());
+//                log.info("docCountError: " + buck.getDocCountError());
+//                //取子聚合
+//                Avg averageBalance = buck.getAggregations().get("average_balance");
+//
+//                log.info("average_balance: " + averageBalance.getValue());
+//                log.info("------------------------------------");
+//            }
+            //直接用key 来去分组
+                /*Bucket elasticBucket = byCompanyAggregation.getBucketByKey("24"); 
+                Avg averageAge = elasticBucket.getAggregations().get("average_age"); 
+                double avg = averageAge.getValue();*/
+
+        }
+
+
+
+
         return null;
 
     }

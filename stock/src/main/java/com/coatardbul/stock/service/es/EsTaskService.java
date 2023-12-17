@@ -113,7 +113,7 @@ public class EsTaskService {
         }
         List<EsTemplateConfig> esTemplateConfigs = esTemplateConfigMapper.selectAllByEsDataType(EsTemplateConfigEnum.TYPE_DAY.getSign());
         for (int i = 0; i < esTemplateConfigs.size(); i++) {
-            if(esTemplateConfigs.get(i).getTemplateId().equals(StockTemplateEnum.INDUSTRY.getSign())){
+            if(esTemplateConfigs.get(i).getTemplateId().equals(StockTemplateEnum.INDUSTRY.getId())){
                 String lastDateStr = riverRemoteService.getSpecialDay(DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD), -1);
                 auctionSync(lastDateStr, esTemplateConfigs.get(i));
             }else {

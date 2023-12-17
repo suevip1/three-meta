@@ -30,7 +30,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -113,8 +115,8 @@ public class DongFangSortService {
             JSONObject jsonObject1 = jsonArray.getJSONObject(i);
             String code = jsonObject1.getString("f12");
             List<StockBase> collect = stockBases.stream().filter(o1 -> code.equals(o1.getCode())).collect(Collectors.toList());
-            if(collect!=null &&collect.size()>0){
-                StockBase stockBase=collect.get(0);
+            if (collect != null && collect.size() > 0) {
+                StockBase stockBase = collect.get(0);
                 if (stockBase != null) {
                     jsonObject1.put("概念", stockBase.getTheme());
                     jsonObject1.put("行业", stockBase.getIndustry());
@@ -156,49 +158,62 @@ public class DongFangSortService {
 
     /**
      * 获取所有涨幅
+     *
      * @param
      * @return
      */
     public JSONArray getIncreaseAll() throws InterruptedException {
         List<StockBase> stockBases = stockBaseMapper.selectByAll(new StockBase());
-        int count = stockBases.size() / 200+1;
-        JSONArray ja=new JSONArray();
-        for(int i=1;i<=count;i++){
+        Map<String, StockBase> stockBaseMap = stockBases.stream().collect(Collectors.toMap(StockBase::getCode, Function.identity()));
+
+        int count = stockBases.size() / 200 + 1;
+        JSONArray ja = new JSONArray();
+        for (int i = 1; i <= count; i++) {
             try {
                 JSONArray jsonArray = getIncreaseResponse(i);
-                Thread.sleep(new Random().nextInt(2*1000));
+                Thread.sleep(new Random().nextInt(2 * 1000));
                 ja.addAll(jsonArray);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("获取涨幅排序异常");
             }
         }
         for (int i = 0; i < ja.size(); i++) {
             JSONObject jsonObject1 = ja.getJSONObject(i);
             String code = jsonObject1.getString("f12");
-            List<StockBase> collect = stockBases.stream().filter(o1 -> code.equals(o1.getCode())).collect(Collectors.toList());
-            if(collect!=null &&collect.size()>0){
-                StockBase stockBase=collect.get(0);
-                if (stockBase != null) {
-                    jsonObject1.put("概念", stockBase.getTheme());
-                    jsonObject1.put("行业", stockBase.getIndustry());
-                }
+            if (stockBaseMap.get(code) != null) {
+                StockBase stockBase = stockBaseMap.get(code);
+                jsonObject1.put("概念", stockBase.getTheme());
+                jsonObject1.put("行业", stockBase.getIndustry());
+
             }
         }
         return ja;
     }
+
     public List<StockPrice> getIncreaseObjAll() throws InterruptedException, ParseException {
         List<StockPrice> result = new ArrayList();
-        JSONArray increaseAll = getIncreaseAll();
         String dateFormat = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.YYYY_MM_DD);
         if (stockVerifyService.isIllegalDate(dateFormat)) {
             return result;
         }
+        String timeStr = DateTimeUtil.getDateFormat(new Date(), DateTimeUtil.HH_MM);
+//        Boolean illegalDateTimeStr = null;
+//        try {
+//            illegalDateTimeStr = stockVerifyService.isIllegalDateTimeStr(dateFormat, timeStr);
+//        } catch (ParseException e) {
+//            log.error(e.getMessage(), e);
+//        }
+//        if (illegalDateTimeStr) {
+//            return result;
+//        }
+
+        JSONArray increaseAll = getIncreaseAll();
         for (int i = 0; i < increaseAll.size(); i++) {
             JSONObject jsonObject = increaseAll.getJSONObject(i);
-            StockPrice stockPrice=new StockPrice();
+            StockPrice stockPrice = new StockPrice();
             stockPrice.setDateStr(dateFormat);
             stockPrice.setTurnOverRate(getDongFangPrice(jsonObject, "f8"));
-            stockPrice.setVolume(Integer.valueOf(jsonObject.getString("f5")));
+            stockPrice.setVolume(getDongFangInteger(jsonObject, ("f5")));
             stockPrice.setMaxSubRate(getDongFangPrice(jsonObject, "f7"));
             stockPrice.setName(jsonObject.getString("f14"));
             stockPrice.setCode(jsonObject.getString("f12"));
@@ -208,10 +223,9 @@ public class DongFangSortService {
             stockPrice.setMaxPrice(getDongFangPrice(jsonObject, "f15"));
             stockPrice.setMinPrice(getDongFangPrice(jsonObject, "f16"));
             stockPrice.setClosePrice(getDongFangPrice(jsonObject, "f2"));
-            stockPrice.setCurrIncreaseRate(new BigDecimal(jsonObject.getString("f3")));
-
-            stockPrice.setId(stockPrice.getDateStr()+"_"+stockPrice.getCode());
-
+            stockPrice.setCurrIncreaseRate(getDongFangPrice(jsonObject,"f3"));
+            stockPrice.setId(stockPrice.getDateStr() + "_" + stockPrice.getCode());
+            result.add(stockPrice);
         }
         return result;
     }
@@ -298,8 +312,21 @@ public class DongFangSortService {
             return null;
         } else {
             return new BigDecimal(data.get(key).toString());
-
         }
+    }
+
+    private Integer getDongFangInteger(JSONObject data, String key) {
+        if (data.get(key) == null || "-".equals(data.get(key).toString())) {
+            return null;
+        } else {
+            try {
+               return Integer.valueOf(data.get(key).toString());
+            }catch (Exception e) {
+                log.error(data.get(key).toString());
+                log.error(e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     public JSONArray getConvertBondCommon(Integer page, Integer pageSize) {
